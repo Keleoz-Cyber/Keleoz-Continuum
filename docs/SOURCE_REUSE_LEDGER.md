@@ -148,3 +148,15 @@ Contract evidence: `tests/unit/music.test.ts`; 3 tests cover filename normalizat
 Reuse classification: Adapter reuse for the Desktop playlist/mode/seek contract and Mobile fullscreen vinyl/tonearm/lyrics/queue visual contract; local-only browser media is intentional for V1.
 
 Intentional differences: no IndexedDB library or Listen Together synchronization is enabled yet; object URLs are released on removal/unmount, and audio never crosses the server boundary.
+
+## Implemented evidence: Blog and Letters visual parity pass
+
+Feature: Restore reference module shells without changing the public server contracts
+
+Implemented paths and symbols: `src/modules/content/blog-list-client.tsx`, `src/app/blog/page.tsx`, `src/modules/letters/letters-client.tsx`, `src/app/globals.css`
+
+Preserved behavior: Blog title/subtitle/category/summary search, category filtering, date-led journal cards, module intro, side actions, and Owner Studio entry; Letters module intro, postal search, public export, request/composition card, envelope flap, postal boxes, stamp, wax seal, open/close paper, and Owner reply display.
+
+Reuse classification: Adapter reuse. Existing PostgreSQL projections, stable URLs, Letters moderation, and privacy boundaries remain unchanged; the simplified visual shells were replaced with source-derived structure and styling.
+
+Intentional differences: Password Diary and AI-request-from-selected-provider remain outside the current public surface until their respective security/AI gateway boundaries are available; the brand and source-identifying marks use Keleoz Continuum wording.

@@ -237,3 +237,10 @@
 - Fresh lint and typecheck passed after replacing the direct state-reset effect with event-driven resets; no cascading setState effect remains.
 - Music screenshots: `output/playwright/music-desktop.png` and `output/playwright/music-mobile.png`.
 - Fresh Music checkpoint verification: `pnpm test` passed 14 files / 44 tests; `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `git diff --check` passed. Build exposes `/music` in addition to `/letters` and the existing routes.
+
+### Phase 9 corrective visual parity pass (2026-08-27)
+- Re-read the reuse rules and original Desktop Blog/Letters markup and CSS before changing the pages.
+- Replaced the generic Blog list shell with the reference module intro, dual-wing sidebar/main layout, category rail, editor entry, search bar, date cards, and empty state.
+- Replaced the simplified Letters shell with the reference module intro, toolbar, postal search/export, composition card, envelope flap, stamp/seal SVGs, and opened-paper treatment while retaining the server submission/review logic.
+- Browser screenshot evidence: `output/playwright/blog-reference.png` and `output/playwright/letters-reference.png`.
+- Fresh verification passed: 14 test files / 44 tests, lint, typecheck, build, and `git diff --check`.

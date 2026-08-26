@@ -113,6 +113,7 @@ Checkpoint 3 complete
 | A composed Playwright command was malformed in the orchestration wrapper | 1 | Split the interaction into a simpler command and re-snapshot before using refs |
 | PowerShell `git add` parsed `src/app/studio/(protected)/page.tsx` as an expression | 1 | Quote the parenthesized path and stage the intended files explicitly |
 | Phase 9 Music RED test could not import the contracts module | 1 | Add a typed no-op scaffold, rerun to obtain playback-rule failures, then implement the contracts |
+| Dev server briefly reported a missing Letters client during the delete/re-add replacement window | 1 | Complete the file replacement before browsing; final HMR compilation and `/letters` response succeeded |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
