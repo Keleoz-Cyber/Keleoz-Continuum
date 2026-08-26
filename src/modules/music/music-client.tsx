@@ -41,6 +41,11 @@ export function MusicClient() {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const tracksRef = useRef<Track[]>([])
+  const visualizerRef = useRef<HTMLCanvasElement | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
+  const visualizerFrameRef = useRef<number | null>(null)
 
   const current = currentIndex >= 0 ? tracks[currentIndex] : undefined
   const lyricIndex = current ? currentLyricIndex(current.lyrics, time) : -1
@@ -92,6 +97,13 @@ export function MusicClient() {
     return () => tracksRef.current.forEach((track) => URL.revokeObjectURL(track.url))
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (visualizerFrameRef.current) window.cancelAnimationFrame(visualizerFrameRef.current)
+      void audioContextRef.current?.close()
+    }
+  }, [])
+
   const visibleLyrics = useMemo(() => current?.lyrics.slice(Math.max(0, lyricIndex - 3), lyricIndex + 5) ?? [], [current, lyricIndex])
 
   async function addFiles(event: React.ChangeEvent<HTMLInputElement>) {
@@ -124,10 +136,66 @@ export function MusicClient() {
     const audio = audioRef.current
     if (!audio || !current) return
     if (audio.paused) {
-      try { await audio.play() } catch { setPlaying(false) }
+      try {
+        await ensureVisualizer(audio)
+        await audio.play()
+      } catch { setPlaying(false) }
     } else {
       audio.pause()
     }
+  }
+
+  async function ensureVisualizer(audio: HTMLAudioElement) {
+    const AudioContextConstructor = window.AudioContext
+    if (!AudioContextConstructor) return
+    if (!audioContextRef.current) {
+      const context = new AudioContextConstructor()
+      const analyser = context.createAnalyser()
+      analyser.fftSize = 256
+      const source = context.createMediaElementSource(audio)
+      source.connect(analyser)
+      analyser.connect(context.destination)
+      audioContextRef.current = context
+      analyserRef.current = analyser
+      sourceRef.current = source
+    }
+    if (audioContextRef.current.state === 'suspended') await audioContextRef.current.resume()
+    drawVisualizer()
+  }
+
+  function drawVisualizer() {
+    const canvas = visualizerRef.current
+    const analyser = analyserRef.current
+    if (!canvas || !analyser) return
+    const context = canvas.getContext('2d')
+    if (!context) return
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const width = canvas.clientWidth
+    const height = canvas.clientHeight
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+    }
+    context.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const values = new Uint8Array(analyser.frequencyBinCount)
+    const render = () => {
+      analyser.getByteFrequencyData(values)
+      context.clearRect(0, 0, width, height)
+      const barCount = 48
+      const barWidth = width / barCount
+      for (let index = 0; index < barCount; index += 1) {
+        const value = values[Math.floor(index * values.length / barCount)]! / 255
+        const barHeight = Math.max(1, value * height * 0.86)
+        const gradient = context.createLinearGradient(0, height, 0, height - barHeight)
+        gradient.addColorStop(0, 'rgba(108,151,205,0.18)')
+        gradient.addColorStop(1, 'rgba(216,235,255,0.82)')
+        context.fillStyle = gradient
+        context.fillRect(index * barWidth + 1, height - barHeight, Math.max(1, barWidth - 2), barHeight)
+      }
+      visualizerFrameRef.current = window.requestAnimationFrame(render)
+    }
+    if (visualizerFrameRef.current) window.cancelAnimationFrame(visualizerFrameRef.current)
+    visualizerFrameRef.current = window.requestAnimationFrame(render)
   }
 
   function chooseTrack(index: number) {
@@ -197,6 +265,7 @@ export function MusicClient() {
           <div className="music-vinyl" aria-label={current?.name ?? '未选择音乐'}><div className="music-vinyl-label">{current ? '♪' : 'C'}</div></div>
         </div>
         <div className="music-track-info"><h1>{current?.name ?? 'Music'}</h1><p>{current ? 'Local listening · 本地播放' : 'Add a track to begin · 添加一首音乐开始'}</p></div>
+        <div className="music-visualizer" aria-label="48 band visualizer"><canvas ref={visualizerRef} /></div>
         <div className="music-lyrics" aria-live="polite">
           {current?.lyrics.length ? visibleLyrics.map((line) => <p className={current.lyrics.indexOf(line) === lyricIndex ? 'is-current' : ''} key={`${line.start}-${line.text}`}>{line.text}</p>) : <p className="music-lyrics-empty">歌词会在选择 .lrc / .srt / .vtt 文件后显示。<br />Lyrics stay in this browser.</p>}
         </div>

@@ -124,6 +124,7 @@ Contract tests: Home renders brand and scene layers; Blog/Studio links remain re
 Intentional differences and approved reason: upstream `IB`/`Sui` identity, local lock/auth, local API keys, and monolithic global startup are not public Continuum behavior; public content remains server-authoritative while the scene and shell preserve the reference atmosphere
 
 Asset extraction evidence: copied `upstream/InternalBeyond-Desktop/bg-canvas.png` to `public/reference/internal-beyond/bg-canvas.png` without editing the immutable snapshot; copied asset SHA-256 is `2203F12F67313AA54AB2BC79BD7A108DEC5A25115680637C67001A4A353AA4AD`. A light-scene companion was copied to `public/reference/internal-beyond/bg-internal.jpg` for the later theme adapter; its copied SHA-256 is `3309416DBDC1CFA185A66E9A9305339E125153D343BF119303B52266BE1F2BB3`.
+Home theme extraction evidence: copied `upstream/InternalBeyond-Desktop/bg-infernal.jpg` to `public/reference/internal-beyond/bg-infernal.jpg`; source and copied SHA-256 both equal `240315E3E74593D6B2C9163C7498BEE985F0AFABD6380AF074C3AD5CC0141F17`.
 
 ## Implemented evidence: Letters submission and review slice
 
@@ -148,6 +149,18 @@ Contract evidence: `tests/unit/music.test.ts`; 3 tests cover filename normalizat
 Reuse classification: Adapter reuse for the Desktop playlist/mode/seek contract and Mobile fullscreen vinyl/tonearm/lyrics/queue visual contract; local-only browser media is intentional for V1.
 
 Intentional differences: no IndexedDB library or Listen Together synchronization is enabled yet; object URLs are released on removal/unmount, and audio never crosses the server boundary.
+
+## Implemented evidence: Home interaction parity pass
+
+Feature: Welcome/main-scene transition, Internal/Infernal theme backgrounds, rain, fog brush, white pen, and clear controls
+
+Implemented paths and symbols: `src/modules/home/home-scene.tsx`; `src/app/globals.css`; `public/reference/internal-beyond/bg-infernal.jpg`
+
+Preserved behavior: welcome `bg-canvas` scene remains separate from the entered main scene; entered state crossfades to `bg-internal` or `bg-infernal`; rain is animated in a lightweight Canvas; the scene tool exposes pointer-enabled finger haze wipe, white pen strokes, clear, MIST opacity and BRUSH size controls.
+
+Reuse classification: Adapter reuse; original Canvas behavior was ported at interaction level without bringing the monolithic upstream startup script into the Next.js bundle.
+
+Contract evidence: Browser smoke at `/` covered initial welcome scene without visible navigation, Enter space transition, theme toggle, and pointer interaction on the enabled finger brush.
 
 ## Implemented evidence: Blog and Letters visual parity pass
 

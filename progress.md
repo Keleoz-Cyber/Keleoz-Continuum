@@ -244,3 +244,9 @@
 - Replaced the simplified Letters shell with the reference module intro, toolbar, postal search/export, composition card, envelope flap, stamp/seal SVGs, and opened-paper treatment while retaining the server submission/review logic.
 - Browser screenshot evidence: `output/playwright/blog-reference.png` and `output/playwright/letters-reference.png`.
 - Fresh verification passed: 14 test files / 44 tests, lint, typecheck, build, and `git diff --check`.
+
+### Phase 9 corrective parity pass: Home and Music (2026-08-27)
+- Re-read the original Desktop Home Canvas code (`gw-draw`, `gw-fogwipe`, `gwToggle`, `enterSite`) before changing the current shell.
+- Added separate welcome/main scene state, crossfade layers for `bg-internal.jpg` and `bg-infernal.jpg`, actual rain Canvas, finger haze wipe, white pen, clear control, and MIST/BRUSH sizing.
+- Added a real 48-band Web Audio visualizer to the Music page; the existing local queue/mode/seek/LRC behavior remains in place.
+- Browser evidence: `home-welcome-final.png`, `home-entered-parity.png`, `home-infernal-parity.png`, and `home-brush-final-2.png`.

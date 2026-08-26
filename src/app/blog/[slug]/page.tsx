@@ -37,12 +37,9 @@ export default async function BlogArticlePage({
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null
 
   return (
-    <main className="reader-page">
+    <main className="reader-page reader-reference-page">
       <ReadingProgress />
-      <nav className="reader-nav">
-        <Link href="/blog">Blog</Link>
-        <Link href="/">Continuum</Link>
-      </nav>
+      <nav className="reader-context-nav"><Link href="/">Continuum</Link><span> / </span><Link href="/blog">Blog</Link></nav>
       <header className="reader-header">
         <p className="eyebrow">{article.categoryLabel ?? 'Writing'}</p>
         <h1>{article.title}</h1>
