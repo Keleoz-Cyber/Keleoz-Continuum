@@ -105,3 +105,10 @@
 ## Visual/Browser Findings
 - The approved visual direction is scene-first: fogged window, butterflies, blue light, negative space, and content below the first viewport.
 - Mobile should preserve its independent Desk/App Grid/Fullscreen App language rather than shrinking the Desktop Room.
+
+## Phase 9 visual reuse findings (2026-08-27)
+- Desktop Home is not a generic gradient: `upstream/InternalBeyond-Desktop/InternalBeyond.html:60-190` defines the preloader, two crossfading background layers, `#bg-overlay`, splash blur/dissolve, mist/fog canvas layers, and the `MIST` / `BRUSH` controls.
+- The authoritative blue first-screen image is `upstream/InternalBeyond-Desktop/bg-canvas.png`; it contains the fogged window, butterflies, droplets, blue light and negative space visible in the reference screenshot. `bg-internal.jpg` is a separate light flower scene and should not be used as the Continuum first-screen default.
+- Desktop splash markup is concentrated at `InternalBeyond.html:5359-5490`; the useful reusable contract is the left-aligned signature/title/definition hierarchy, splash dissolve, optional mist controls, and a fixed Music mini surface at `:7289`.
+- Desktop navigation is a glass bar at `InternalBeyond.html:193-240` with brand, context links, actions and theme controls; Continuum must replace the `IB` / upstream identity while preserving the window-like visual language.
+- Mobile Home is a Desk-first shell. `upstream/InternalBeyond-Mobile/index.html:2030-2130` contains the glass topbar/drawer language and `:2453-2570` contains the Desk hero, app matrix, calendar and Music widget; `:3224` begins the bottom dock. The reusable contract is safe-area-aware fullscreen layout, app tiles, page-specific dock, and a drawer—not the local-only lock screen or IndexedDB storage.

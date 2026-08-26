@@ -199,8 +199,25 @@
 ## 5-Question Reboot Check
 | Question | Answer |
 |----------|--------|
-| Where am I? | Checkpoint 3 complete |
+| Where am I? | Phase 9: Home scene and responsive shells in progress |
 | Where am I going? | Phase 9: final shells and adapted Continuum experience modules |
 | What's the goal? | Build the Continuum foundation and Owner-to-Guest publishing slice |
 | What have I learned? | See `findings.md` |
 | What have I done? | Added Owner Studio, dynamic Tiptap editing, autosave, Guest Preview, public Blog reading, and real browser-smoke evidence |
+
+### Phase 9 start: Home scene and responsive shells (2026-08-27)
+- Re-read the design baseline, provenance, reuse ledger, and both immutable upstream snapshots.
+- Confirmed the current `/` page is still a placeholder and the next implementation target is the real scene-first Home plus responsive shell.
+- Searched and recorded upstream evidence for Desktop background/splash/navbar/Music and Mobile topbar/drawer/Desk/Dock.
+- Copied no upstream code into the snapshot; visual extraction will use a documented asset copy and small React adapters.
+
+### Phase 9 implementation checkpoint: Home scene shell (2026-08-27)
+- Added `src/modules/home/home-scene.tsx` with scene-first hero, Desktop glass nav, Mobile Topbar/Drawer/Desk app grid, Music mini/panel, and keyboard/clickable scene controls.
+- Replaced the placeholder `/` page with the Home scene while leaving Studio and public Blog routes intact.
+- Copied and hash-recorded the upstream blue fog-window asset under `public/reference/internal-beyond/`.
+- Fresh `pnpm lint` and `pnpm typecheck` both passed after the visual migration.
+- Desktop screenshot evidence: `output/playwright/home-desktop.png` shows the copied blue fog-window/butterfly scene, left editorial hero, glass nav, MIST/BRUSH controls, and Music mini surface.
+- Mobile screenshot evidence: `output/playwright/home-mobile.png` at 390×844 shows the Topbar, responsive hero, Desk app grid for Blog/Letters/Room/Tea/Story/Tarot/Wardrobe/Sleep, and compact Music surface; opening the menu exposed the responsive Drawer links in a fresh snapshot.
+- One screenshot command initially failed because `output/playwright/` did not exist; the directory was created and the screenshot was captured on the next command.
+- Final local verification after the shell polish: `pnpm lint`, `pnpm typecheck`, `pnpm test` (11 files / 35 tests), `pnpm build`, and `git diff --check` all passed.
+- Created local checkpoint commit `28b5a9f` (`feat: restore Continuum scene-first home shell`) directly on `main`; no branch or remote CI was added. Browser screenshots remain available under `output/playwright/` and are ignored from Git.

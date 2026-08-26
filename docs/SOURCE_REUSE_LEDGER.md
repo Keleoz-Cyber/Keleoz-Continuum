@@ -106,3 +106,21 @@ Implemented paths and symbols: `src/modules/content/document.ts` (`parseAndRende
 Contract evidence: `tests/unit/content-document.test.ts`, `content-projection.test.ts`, `tests/integration/draft-repository.test.ts`, and `publish-repository.test.ts`; 14 tests verify sanitization, stable block IDs/slugs, Full/Summary/Hidden projection, optimistic revision conflicts, immutable versions, atomic pointer preservation, and lightweight public lists
 
 Intentional difference: Next.js cache wrappers remain with the public Blog route implementation so cache keys and invalidation are tested with their actual consumers rather than as unused infrastructure
+
+## Planned evidence: Home scene and responsive shells
+
+Feature: Continuum Home scene, Desktop navigation language, Mobile Desk shell
+
+Upstream paths and symbols: Desktop `InternalBeyond.html:60-190` (preloader, backgrounds, splash, mist controls), `:193-240` (glass navbar), `:5359-5490` (scene markup), `:7289-7292` (Music mini); Mobile `index.html:78` (safe-area variables), `:2030-2140` (topbar/drawer), `:2453-2570` (Desk hero/app matrix/widgets), `:3224` (bottom dock)
+
+Exact behavior to preserve: fogged blue scene with butterfly/droplet atmosphere; staged splash fade/blur dissolve; left-aligned title and bilingual intro hierarchy; compact Music entry surface; glass navigation/window language; Mobile safe-area layout, topbar/drawer, Desk app tiles, widget-first home and bottom dock
+
+Reuse classification: Adapter reuse
+
+Required adapters: Continuum brand/link mapping; React client controls for mist/brush affordances and Music panel entry; responsive Desktop/Mobile shell components; server-backed routes for public content; no upstream local lock or browser-only persistence
+
+Contract tests: Home renders brand and scene layers; Blog/Studio links remain reachable; Music control is keyboard accessible; Mobile shell hides desktop nav at narrow widths and preserves safe-area padding; reduced-motion mode disables decorative animation
+
+Intentional differences and approved reason: upstream `IB`/`Sui` identity, local lock/auth, local API keys, and monolithic global startup are not public Continuum behavior; public content remains server-authoritative while the scene and shell preserve the reference atmosphere
+
+Asset extraction evidence: copied `upstream/InternalBeyond-Desktop/bg-canvas.png` to `public/reference/internal-beyond/bg-canvas.png` without editing the immutable snapshot; copied asset SHA-256 is `2203F12F67313AA54AB2BC79BD7A108DEC5A25115680637C67001A4A353AA4AD`. A light-scene companion was copied to `public/reference/internal-beyond/bg-internal.jpg` for the later theme adapter; its copied SHA-256 is `3309416DBDC1CFA185A66E9A9305339E125153D343BF119303B52266BE1F2BB3`.

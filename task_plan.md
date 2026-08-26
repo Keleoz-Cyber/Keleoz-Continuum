@@ -59,7 +59,7 @@ Checkpoint 3 complete
 - [ ] Build final Home/Desktop/Mobile shells while preserving the current public content core
 - [ ] Adapt Letters, Music, Room, Tea, Story, Tarot, Wardrobe, Sleep, and Moments in focused slices
 - [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
-- **Status:** pending
+- **Status:** in_progress
 
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
