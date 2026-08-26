@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { cleanTrackName, nextTrackIndex, type PlaybackMode } from '@/modules/music/contracts'
 import { MusicIcon } from '@/modules/music/music-icons'
+import { GlassWaterCanvas } from '@/modules/home/glass-water-canvas'
 
 type Track = {
   name: string
@@ -482,6 +483,7 @@ export function HomeScene() {
       <div className={`home-scene-theme home-scene-theme-${theme}`} aria-hidden="true" />
       <div className="home-scene-overlay" aria-hidden="true" />
       <div className="home-scene-fog" aria-hidden="true" />
+      <GlassWaterCanvas active={!entered} />
       <canvas ref={rainCanvasRef} className="home-rain-canvas" aria-hidden="true" />
       <canvas ref={fogCanvasRef} className="home-fog-canvas" aria-hidden="true" />
       <canvas ref={inkCanvasRef} className="home-ink-canvas" aria-hidden="true" />

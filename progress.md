@@ -255,3 +255,8 @@
 - Restored the Home Music floating surface to a local multi-track player with queue, list/single/random controls, previous/next, seek, remove, and draggable panel header.
 - Added source-style Blog reader controls for in-article search/count/navigation, reading progress, font sizes, and context navigation while retaining the server projection and adjacent-post links.
 - Fresh browser smoke reloaded `/` without runtime errors after the queue refactor and opened the Home Music panel with its full control row.
+
+### Phase 9 source water simulation pass (2026-08-27)
+- Added `src/modules/home/glass-water-canvas.tsx` based on the upstream `gw-ripple` algorithm: height-field waves, refractive background sampling, ambient/rain drops, plips, and tap/stir pointer input.
+- Kept the existing Canvas fog/ink controls and switched the welcome scene to the source water layer; the water layer stops after entering the main scene.
+- Fresh browser console check at `/` reported 0 errors and 0 warnings after enabling `willReadFrequently` on the readback canvas.
