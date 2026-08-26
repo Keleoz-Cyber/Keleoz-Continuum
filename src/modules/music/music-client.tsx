@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { cleanTrackName, nextTrackIndex, parseLrc, type PlaybackMode } from '@/modules/music/contracts'
+import { MusicIcon } from '@/modules/music/music-icons'
 
 type LyricSegment = { start: number; text: string }
 
@@ -256,7 +257,7 @@ export function MusicClient() {
       <header className="music-page-head">
         <Link className="music-back" href="/" aria-label="返回 Continuum">‹ <span>Continuum</span></Link>
         <div className="music-page-title">Music <small>音乐</small></div>
-        <div className="music-page-actions"><button type="button" onClick={() => inputRef.current?.click()} aria-label="添加音乐或歌词">＋</button><button type="button" onClick={() => setQueueOpen((open) => !open)} aria-expanded={queueOpen} aria-label="播放队列">☷</button></div>
+        <div className="music-page-actions"><button type="button" onClick={() => inputRef.current?.click()} aria-label="添加音乐或歌词"><MusicIcon name="plus" /></button><button type="button" onClick={() => setQueueOpen((open) => !open)} aria-expanded={queueOpen} aria-label="播放队列"><MusicIcon name="queue" /></button></div>
       </header>
 
       <section className="music-page-body" aria-label="Music player">
@@ -273,7 +274,7 @@ export function MusicClient() {
 
       <footer className="music-page-foot">
         <div className="music-progress-row"><span>{formatTime(time)}</span><input type="range" min="0" max="100" value={progress} onChange={seek} aria-label="播放进度" /><span>{formatTime(duration)}</span></div>
-        <div className="music-controls"><button type="button" onClick={cycleMode} title={`播放模式：${mode}`}>{mode === 'list' ? '↻' : mode === 'single' ? '↺¹' : '⤨'}</button><button type="button" onClick={goPrevious} aria-label="上一首">|‹</button><button className="music-play" type="button" onClick={() => void togglePlayback()} aria-label={playing ? '暂停' : '播放'} disabled={!current}>{playing ? 'Ⅱ' : '▶'}</button><button type="button" onClick={goNext} aria-label="下一首">›|</button><button type="button" onClick={() => setQueueOpen((open) => !open)} aria-label="显示队列">☷</button></div>
+        <div className="music-controls"><button type="button" onClick={cycleMode} title={`播放模式：${mode}`}><MusicIcon name={mode === 'list' ? 'mode' : mode === 'single' ? 'mode-single' : 'mode-random'} /></button><button type="button" onClick={goPrevious} aria-label="上一首"><MusicIcon name="prev" /></button><button className="music-play" type="button" onClick={() => void togglePlayback()} aria-label={playing ? '暂停' : '播放'} disabled={!current}><MusicIcon name={playing ? 'pause' : 'play'} /></button><button type="button" onClick={goNext} aria-label="下一首"><MusicIcon name="next" /></button><button type="button" onClick={() => setQueueOpen((open) => !open)} aria-label="显示队列"><MusicIcon name="queue" /></button></div>
         <p className="music-local-note">Music files are kept in this browser only · 音乐只保存在当前浏览器</p>
       </footer>
 
