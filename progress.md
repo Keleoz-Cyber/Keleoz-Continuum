@@ -127,6 +127,19 @@
   - `src/modules/content/`
   - Task 4-6 unit and integration tests
 
+### Phase 8: Owner Studio and Public Blog
+- **Status:** complete
+- Actions taken:
+  - Continued directly after Checkpoint 2 with no extra branch or remote CI.
+  - Loaded the Vercel Server Action authentication, RSC serialization, and dynamic-bundle rules.
+  - Implemented protected Studio login/overview, content creation, Tiptap dynamic editor, revisioned autosave route, Guest Preview, tagged public Blog list/detail pages, reading progress, font controls, and a custom Continuum icon.
+  - Real-browser smoke passed on desktop-sized Chromium: login, Studio, draft creation, edit, autosave, preview, publish, and public article reading. Temporary smoke data was deleted from the development database.
+  - Full local verification passed after the UI work: 11 test files / 35 tests, lint, typecheck, and Next production build.
+  - The long Playwright matrix and formal draft-route integration spec remain deferred to the launch checkpoint to honor the user's short-feedback preference.
+- Files created/modified:
+  - `task_plan.md`
+  - `progress.md`
+
 ## Test Results
 | Test | Input | Expected | Actual | Status |
 |------|-------|----------|--------|--------|
@@ -148,6 +161,7 @@
 | Task 6 publishing RED/GREEN | `publish-repository.test.ts` | 4 failures then 4 pass; lightweight list adds 1 RED/GREEN cycle | 5 passed | pass |
 | Checkpoint 2 attempt 1 | lint + typecheck + full tests | all pass | 29 passed, 2 failed from cross-file DB cleanup races | fix test isolation |
 | Checkpoint 2 attempt 2 | lint + typecheck + full tests + build + DB health + upstream hashes | all pass | 31/31 tests and all checks passed | pass |
+| Checkpoint 3 browser smoke | Playwright CLI desktop flow | login -> create -> edit -> autosave -> preview -> publish -> public read | All route transitions and visible content confirmed | pass |
 
 ## Error Log
 | Timestamp | Error | Attempt | Resolution |
@@ -164,6 +178,8 @@
 | 2026-08-27 | Docker Desktop processes existed but engine/status probes stayed silent three times | 3 | Stop polling, continue database-independent work, retry once later |
 | 2026-08-27 | Typecheck rejected ambient `Algorithm` const enum and matcher generic syntax | 1 | Kept Argon2id value under `Options` checking and replaced the invalid matcher generic with `satisfies` |
 | 2026-08-27 | Parallel integration files deleted each other's shared test rows | 1 | Disabled Vitest file parallelism for the current small shared-database suite |
+| 2026-08-27 | Browser smoke saw 403 for Next dev chunks due to host `127.0.0.1` not in `allowedDevOrigins` | 1 | Add localhost/127.0.0.1 development origins and restart dev server |
+| 2026-08-27 | Two exact-path attempts to remove temporary `.playwright-cli/` artifacts were blocked by local destructive-command policy | 1 | Keep the directory ignored and untracked; do not bypass the safety boundary |
 | 2026-08-26 | Second multi-section plan patch failed on a heading mismatch | 2 | Switch permanently to one-section patches for this review |
 | 2026-08-26 | pnpm dev-dependency install failed with `ERR_PNPM_EPERM` while linking `uri-js` to `punycode` | 1 | Inspect partial install, then configure project-local `node-linker=hoisted` and reinstall through a different linking strategy |
 | 2026-08-26 | Forced hoisted install fetched unnecessary cross-platform optional binaries | 2 | Interrupted it, pinned the manifest manually, restricted supported architectures, and switched to a normal install |
@@ -176,12 +192,15 @@
 | 2026-08-26 | Docker engine pipe was absent while starting Task 2 PostgreSQL | 1 | Start local Docker Desktop and poll readiness before creating the database container |
 | 2026-08-26 | Test-database existence check returned null through the Compose command wrapper | 1 | Query with direct `docker exec`, inspect output, then create only if absent |
 | 2026-08-26 | Checkpoint typecheck failed because invalid environment fixtures could not satisfy Next's narrowed `ProcessEnv` | 1 | Changed only the parser input boundary to `Record<string, string | undefined>` |
+| 2026-08-27 | Public-page patch attempted Delete and Add operations on the same path | 1 | Split file replacement into separate operations |
+| 2026-08-27 | Playwright Bash wrapper unavailable on Windows | 1 | Used the same official CLI through `npx --package @playwright/cli` |
+| 2026-08-27 | Editor mounted with an unnecessary initial autosave | 1 | Track the last saved snapshot and skip unchanged initial state |
 
 ## 5-Question Reboot Check
 | Question | Answer |
 |----------|--------|
-| Where am I? | Checkpoint 2 complete |
-| Where am I going? | Tasks 7-9: Owner Studio, autosave, Guest Preview, and public Blog |
+| Where am I? | Checkpoint 3 complete |
+| Where am I going? | Phase 9: final shells and adapted Continuum experience modules |
 | What's the goal? | Build the Continuum foundation and Owner-to-Guest publishing slice |
 | What have I learned? | See `findings.md` |
-| What have I done? | Added secure auth primitives/sessions, structured content projection, conflict-safe drafts, and atomic publication |
+| What have I done? | Added Owner Studio, dynamic Tiptap editing, autosave, Guest Preview, public Blog reading, and real browser-smoke evidence |

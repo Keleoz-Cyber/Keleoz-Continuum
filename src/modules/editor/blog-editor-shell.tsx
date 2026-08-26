@@ -1,0 +1,19 @@
+'use client'
+
+import dynamic from 'next/dynamic'
+
+import type { DraftSnapshot } from '@/modules/content/schemas'
+
+const BlogEditorClient = dynamic(
+  () => import('@/modules/editor/blog-editor-client').then((module) => module.BlogEditorClient),
+  { ssr: false, loading: () => <p className="editor-loading">Preparing the writing space…</p> },
+)
+
+export function BlogEditorShell(props: {
+  entryId: string
+  slug: string
+  revision: number
+  initialSnapshot: DraftSnapshot
+}) {
+  return <BlogEditorClient {...props} />
+}

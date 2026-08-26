@@ -5,6 +5,7 @@ import { contentEntries, contentPublications, contentVersions } from '@/db/schem
 import type * as schema from '@/db/schema'
 import { parseAndRenderDocument } from '@/modules/content/document'
 import { projectPublishedVersion } from '@/modules/content/projection'
+import type { PublicContentListItem } from '@/modules/content/dto'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
 import { normalizeSlug, resolveStableSlug } from '@/modules/content/slug'
 
@@ -126,6 +127,31 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
 
       return rows
     },
+    async getDraftById(entryId: string) {
+      const [entry] = await database
+        .select({
+          id: contentEntries.id,
+          type: contentEntries.type,
+          slug: contentEntries.slug,
+          title: contentEntries.title,
+          subtitle: contentEntries.subtitle,
+          categoryLabel: contentEntries.categoryLabel,
+          summary: contentEntries.summary,
+          exposure: contentEntries.exposure,
+          status: contentEntries.status,
+          document: contentEntries.draftDocument,
+          html: contentEntries.draftHtml,
+          plainText: contentEntries.draftPlainText,
+          revision: contentEntries.draftRevision,
+          createdAt: contentEntries.createdAt,
+          updatedAt: contentEntries.updatedAt,
+        })
+        .from(contentEntries)
+        .where(eq(contentEntries.id, entryId))
+        .limit(1)
+
+      return entry ?? null
+    },
     async publishDraft(input: { entryId: string; now?: Date }) {
       const publishedAt = input.now ?? new Date()
 
@@ -228,7 +254,7 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
 
       return version ? projectPublishedVersion(version) : null
     },
-    async listPublic(type: 'blog' | 'project' | 'moment' | 'page') {
+    async listPublic(type: 'blog' | 'project' | 'moment' | 'page'): Promise<PublicContentListItem[]> {
       const rows = await database
         .select({
           type: contentVersions.type,
@@ -245,10 +271,16 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         .where(and(eq(contentVersions.type, type), ne(contentVersions.exposure, 'hidden')))
         .orderBy(desc(contentPublications.publishedAt))
 
-      return rows.map((row) => ({
-        ...row,
-        publishedAt: row.publishedAt.toISOString(),
-      }))
+      const items: PublicContentListItem[] = []
+      for (const row of rows) {
+        if (row.exposure === 'hidden') continue
+        items.push({
+          ...row,
+          exposure: row.exposure,
+          publishedAt: row.publishedAt.toISOString(),
+        })
+      }
+      return items
     },
     async updateDraftSlug(input: { entryId: string; requestedSlug: string }) {
       return database.transaction(async (transaction) => {

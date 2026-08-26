@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Keleoz Continuum">
+  <defs>
+    <linearGradient id="continuum" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8eb8ea" />
+      <stop offset="1" stop-color="#1b2f51" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#101a2d" />
+  <path d="M16 32c5-13 27-19 34-8 5 8-3 19-13 21-11 2-20-4-21-13Z" fill="none" stroke="url(#continuum)" stroke-width="3" />
+  <circle cx="32" cy="32" r="4" fill="#eff6ff" />
+</svg>

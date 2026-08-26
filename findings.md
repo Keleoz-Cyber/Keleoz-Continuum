@@ -50,7 +50,10 @@
 - Installed `@node-rs/argon2` exposes `Algorithm.Argon2id` and the planned `memoryCost`, `timeCost`, `outputLen`, and `parallelism` option names; no compatibility adapter is needed.
 - Tiptap 3.30.3 provides `renderToHTMLString` from `@tiptap/static-renderer/pm/html-string`, accepting JSON content plus extensions; StarterKit includes the Link extension.
 - Public list queries select only lightweight publication metadata and exclude Hidden at SQL level; detail projection separately strips bodies for Summary and returns null for Hidden.
-- Cache wrappers remain coupled to the later public route consumers, so Task 6 stops at tested repository boundaries instead of adding an unused `unstable_cache` module with no route-level verification.
+- Cache wrappers were intentionally deferred until public route consumers existed; they are now implemented and exercised by the `/blog` pages.
+- The live browser flow verified `/studio/login` -> authenticated `/studio` -> draft creation -> Tiptap edit -> autosave -> Guest Preview -> publish -> public `/blog/<slug>` on `127.0.0.1:3000`; temporary smoke data was removed afterward.
+- The first public Blog shell uses a modest Continuum reader/list treatment, not the final scene-first Home; final visual shell work is intentionally separated into Phase 9.
+- Cache wrappers now have real `/blog` and `/blog/[slug]` consumers; public routes are dynamic at build time while tagged repository calls cache only public DTOs.
 - Integration tests share one dedicated `continuum_test` database; Vitest file parallelism must remain disabled unless tests move to isolated schemas/databases.
 
 ## Technical Decisions

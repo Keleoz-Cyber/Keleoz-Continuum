@@ -52,4 +52,18 @@ describe('owner sessions', () => {
       repository.createOwner({ username: 'another-owner', passwordHash: 'hash-two' }),
     ).rejects.toBeInstanceOf(OwnerAlreadyExistsError)
   })
+
+  it('deletes a session using the raw cookie token', async () => {
+    const owner = await repository.createOwner({ username: 'keleoz', passwordHash: 'hash-one' })
+    const material = createSessionMaterial()
+    await repository.createSession({
+      ownerId: owner.id,
+      tokenHash: material.tokenHash,
+      expiresAt: new Date('2099-01-01T00:00:00.000Z'),
+    })
+
+    await repository.deleteSessionByToken(material.token)
+
+    await expect(repository.resolveOwnerByToken(material.token)).resolves.toBeNull()
+  })
 })

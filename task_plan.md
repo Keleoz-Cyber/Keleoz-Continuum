@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Checkpoint 2 complete
+Checkpoint 3 complete
 
 ## Phases
 
@@ -50,9 +50,15 @@ Checkpoint 2 complete
 - **Status:** complete
 
 ### Phase 8: Implement Owner Studio and Public Blog
-- [ ] Execute Tasks 7-9 in the current checkout
-- [ ] Add Owner login, autosaving Tiptap Studio, Guest Preview, and public Blog reader
-- [ ] Run one proportional browser-visible checkpoint verification
+- [x] Execute Tasks 7-9 in the current checkout
+- [x] Add Owner login, autosaving Tiptap Studio, Guest Preview, and public Blog reader
+- [x] Run one proportional browser-visible checkpoint verification
+- **Status:** complete
+
+### Phase 9: Continue Continuum Experience Modules
+- [ ] Build final Home/Desktop/Mobile shells while preserving the current public content core
+- [ ] Adapt Letters, Music, Room, Tea, Story, Tarot, Wardrobe, Sleep, and Moments in focused slices
+- [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
 - **Status:** pending
 
 ## Key Questions
@@ -91,6 +97,7 @@ Checkpoint 2 complete
 | Zod `z.url()` ignored two attempted custom error overrides | 2 | Replace the URL primitive with explicit safe URL/protocol predicates and stable field-specific messages |
 | Task 2 config patch again included a stale progress-log context | 1 | Apply only product/config files in code patches; append progress separately after verification |
 | Docker CLI could not reach the Docker Desktop Linux engine | 1 | Start the installed Docker Desktop background service, then use a bounded readiness check |
+| Cleanup of ignored `.playwright-cli/` was blocked by the local destructive-command policy | 1 | Keep the exact temporary directory ignored and leave it untracked; do not bypass the safety policy |
 | PowerShell did not capture the composed `psql` existence query and `.Trim()` hit null | 1 | Separate the read-only database existence query from the conditional create command |
 | First checkpoint typecheck rejected invalid-environment fixtures against Next-augmented `ProcessEnv` | 1 | Accept a generic string/undefined environment record at the parser boundary; keep strict validated return type |
 | Initial Task 4 findings patch targeted a nonexistent sentence | 1 | Locate exact persistent-file sections before applying small log-only patches |
@@ -98,6 +105,7 @@ Checkpoint 2 complete
 | Docker Desktop processes started but three engine/status probes did not respond | 3 | Stop polling; continue Task 5 unit work and retry the database once after useful progress |
 | Phase 7 typecheck rejected an ambient Argon2 const enum and a generic Vitest matcher | 1 | Use the Argon2id numeric literal under `Options` type checking and a `satisfies` assertion object |
 | Checkpoint 2 full test run exposed cross-file database cleanup races | 1 | Serialize the small Vitest file set so integration files can safely share the dedicated test database |
+| Playwright CLI opened the dev server through `127.0.0.1` and Next blocked dev chunks as cross-origin | 1 | Add explicit local `allowedDevOrigins` and restart the dev server |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

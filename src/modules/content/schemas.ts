@@ -44,4 +44,13 @@ export const tiptapDocumentSchema: z.ZodType<TiptapDocument> = z.object({
   attrs: z.record(z.string(), z.unknown()).optional(),
   content: z.array(nodeSchema).optional(),
 })
+
+export const draftSnapshotSchema = z.object({
+  title: z.string().trim().min(1).max(240),
+  subtitle: z.string().trim().max(320).nullable(),
+  categoryLabel: z.string().trim().max(120).nullable(),
+  summary: z.string().trim().max(2_000),
+  exposure: z.enum(['full', 'summary', 'hidden']),
+  document: tiptapDocumentSchema,
+})
 import { z } from 'zod'

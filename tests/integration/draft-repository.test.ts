@@ -102,4 +102,30 @@ describe('draft repository', () => {
     expect(item).not.toHaveProperty('draftHtml')
     expect(item).not.toHaveProperty('draftPlainText')
   })
+
+  it('loads a complete draft only through the Studio repository method', async () => {
+    const created = await repository.createDraft({
+      type: 'blog',
+      slug: 'studio-draft',
+      title: 'Studio Draft',
+      subtitle: null,
+      categoryLabel: null,
+      summary: '',
+      exposure: 'full',
+      document: firstDocument,
+    })
+
+    await expect(repository.getDraftById(created.id)).resolves.toEqual(
+      expect.objectContaining({
+        id: created.id,
+        slug: 'studio-draft',
+        title: 'Studio Draft',
+        revision: 1,
+        document: firstDocument,
+      }),
+    )
+    await expect(
+      repository.getDraftById('00000000-0000-0000-0000-000000000000'),
+    ).resolves.toBeNull()
+  })
 })
