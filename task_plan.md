@@ -114,6 +114,7 @@ Checkpoint 3 complete
 | PowerShell `git add` parsed `src/app/studio/(protected)/page.tsx` as an expression | 1 | Quote the parenthesized path and stage the intended files explicitly |
 | Phase 9 Music RED test could not import the contracts module | 1 | Add a typed no-op scaffold, rerun to obtain playback-rule failures, then implement the contracts |
 | Dev server briefly reported a missing Letters client during the delete/re-add replacement window | 1 | Complete the file replacement before browsing; final HMR compilation and `/letters` response succeeded |
+| Home queue refactor left an old `track` JSX reference during HMR | 1 | Replace all old single-track references with `currentTrack`; fresh `/` reload returned 200 and rendered the welcome scene |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

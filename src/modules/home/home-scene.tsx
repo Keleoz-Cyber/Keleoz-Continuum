@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
+import { cleanTrackName, nextTrackIndex, type PlaybackMode } from '@/modules/music/contracts'
+
 type Track = {
   name: string
   url: string
@@ -57,8 +59,12 @@ function LineIcon({ name }: { name: string }) {
 export function HomeScene() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [musicOpen, setMusicOpen] = useState(false)
-  const [track, setTrack] = useState<Track | null>(null)
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(-1)
   const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [playMode, setPlayMode] = useState<PlaybackMode>('list')
   const [mist, setMist] = useState(58)
   const [brush, setBrush] = useState(38)
   const [entered, setEntered] = useState(false)
@@ -70,23 +76,77 @@ export function HomeScene() {
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const rainCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const tracksRef = useRef<Track[]>([])
+  const musicDragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number } | null>(null)
+  const [musicPanelPosition, setMusicPanelPosition] = useState<{ left: number; top: number } | null>(null)
+  const currentTrack = currentTrackIndex >= 0 ? tracks[currentTrackIndex] : undefined
   const fogStrokesRef = useRef<Array<{ points: Array<{ x: number; y: number }>; width: number }>>([])
   const inkStrokesRef = useRef<Array<{ points: Array<{ x: number; y: number }>; width: number }>>([])
   const activeStrokeRef = useRef<{ tool: 'finger' | 'pen'; points: Array<{ x: number; y: number }>; width: number } | null>(null)
 
   useEffect(() => {
-    return () => {
-      if (track) URL.revokeObjectURL(track.url)
-    }
-  }, [track])
+    tracksRef.current = tracks
+  }, [tracks])
+
+  useEffect(() => () => tracksRef.current.forEach((item) => URL.revokeObjectURL(item.url)), [])
 
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-    const onEnded = () => setPlaying(false)
+    const onTime = () => {
+      setProgress(audio.duration > 0 ? (audio.currentTime / audio.duration) * 100 : 0)
+      if (Number.isFinite(audio.duration)) setDuration(audio.duration)
+    }
+    const onLoaded = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
+    const onPlay = () => setPlaying(true)
+    const onPause = () => setPlaying(false)
+    const onEnded = () => {
+      setProgress(0)
+      setPlaying(false)
+      setCurrentTrackIndex((index) => nextTrackIndex(index, tracks.length, playMode))
+    }
+    audio.addEventListener('timeupdate', onTime)
+    audio.addEventListener('loadedmetadata', onLoaded)
+    audio.addEventListener('play', onPlay)
+    audio.addEventListener('pause', onPause)
     audio.addEventListener('ended', onEnded)
-    return () => audio.removeEventListener('ended', onEnded)
-  }, [track])
+    return () => {
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('loadedmetadata', onLoaded)
+      audio.removeEventListener('play', onPlay)
+      audio.removeEventListener('pause', onPause)
+      audio.removeEventListener('ended', onEnded)
+    }
+  }, [playMode, tracks.length])
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      audioRef.current.load()
+    }
+  }, [currentTrackIndex])
+
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      const drag = musicDragRef.current
+      if (!drag || event.pointerId !== drag.pointerId) return
+      const panelWidth = 330
+      const panelHeight = 260
+      const left = Math.min(Math.max(8, drag.left + event.clientX - drag.startX), Math.max(8, window.innerWidth - panelWidth - 8))
+      const top = Math.min(Math.max(8, drag.top + event.clientY - drag.startY), Math.max(8, window.innerHeight - panelHeight - 8))
+      setMusicPanelPosition({ left, top })
+    }
+    const onUp = (event: PointerEvent) => {
+      if (musicDragRef.current?.pointerId === event.pointerId) musicDragRef.current = null
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+  }, [])
 
   useEffect(() => {
     const canvas = rainCanvasRef.current
@@ -265,16 +325,77 @@ export function HomeScene() {
   }
 
   function chooseTrack(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    if (track) URL.revokeObjectURL(track.url)
-    setTrack({ name: file.name.replace(/\.[^.]+$/, ''), url: URL.createObjectURL(file) })
-    setPlaying(false)
+    const files = Array.from(event.target.files ?? []).filter((file) => file.type.startsWith('audio/') || /\.(mp3|m4a|wav|flac|ogg|opus|aac|webm)$/i.test(file.name))
+    if (!files.length) return
+    const added = files.map((file) => ({ name: cleanTrackName(file.name), url: URL.createObjectURL(file) }))
+    setTracks((existing) => [...existing, ...added])
+    if (currentTrackIndex < 0) {
+      setProgress(0)
+      setDuration(0)
+      setCurrentTrackIndex(0)
+    }
     setMusicOpen(true)
+    event.target.value = ''
+  }
+
+  function chooseHomeTrack(index: number) {
+    if (index < 0 || index >= tracks.length) return
+    setProgress(0)
+    setDuration(0)
+    setPlaying(false)
+    setCurrentTrackIndex(index)
+  }
+
+  function removeHomeTrack(index: number) {
+    const removed = tracks[index]
+    if (!removed) return
+    URL.revokeObjectURL(removed.url)
+    setTracks((existing) => existing.filter((_, itemIndex) => itemIndex !== index))
+    setCurrentTrackIndex((current) => index === current ? -1 : index < current ? current - 1 : current)
+    setProgress(0)
+    setDuration(0)
+    setPlaying(false)
+  }
+
+  function goHomePrevious() {
+    if (!tracks.length) return
+    setProgress(0)
+    setDuration(0)
+    setPlaying(false)
+    setCurrentTrackIndex((index) => index <= 0 ? tracks.length - 1 : index - 1)
+  }
+
+  function goHomeNext() {
+    if (!tracks.length) return
+    setProgress(0)
+    setDuration(0)
+    setPlaying(false)
+    setCurrentTrackIndex((index) => nextTrackIndex(index, tracks.length, playMode))
+  }
+
+  function seekHome(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextTime = (Number(event.target.value) / 100) * duration
+    if (audioRef.current && Number.isFinite(nextTime)) {
+      audioRef.current.currentTime = nextTime
+      setProgress(Number(event.target.value))
+    }
+  }
+
+  function cycleHomeMode() {
+    setPlayMode((mode) => mode === 'list' ? 'single' : mode === 'single' ? 'random' : 'list')
+  }
+
+  function startMusicDrag(event: React.PointerEvent<HTMLDivElement>) {
+    if ((event.target as HTMLElement).closest('button, input, label')) return
+    const panel = event.currentTarget.parentElement
+    if (!panel) return
+    const rect = panel.getBoundingClientRect()
+    musicDragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top }
+    event.currentTarget.setPointerCapture(event.pointerId)
   }
 
   async function togglePlayback() {
-    if (!track || !audioRef.current) {
+    if (!currentTrack || !audioRef.current) {
       setMusicOpen(true)
       return
     }
@@ -322,8 +443,8 @@ export function HomeScene() {
 
       {entered && <section className="continuum-home-content" aria-label="Continuum content"><div className="home-content-intro"><p className="section-overline">The space continues below</p><p>这里不是一个目录，而是一条可以慢慢走下去的线。</p></div><section className="home-content-section" id="focus"><div className="section-heading"><span>01</span><h2>Current Focus</h2><small>当前正在发生的事</small></div><div className="focus-entry"><p className="entry-label">Featured project</p><h3>Keleoz Continuum</h3><p>一套把书写、作品、时刻与互动体验放在同一空间里的个人网站。</p><Link href="/blog">Read the latest writing →</Link></div></section><section className="home-content-section" id="moments"><div className="section-heading"><span>02</span><h2>Writing &amp; Moments</h2><small>书写与时刻</small></div><div className="writing-strip"><div><span>Blog</span><strong>记录正在形成的想法</strong></div><Link href="/blog">Open the archive <span>打开归档</span> →</Link></div></section><section className="home-content-section" id="experiences"><div className="section-heading"><span>03</span><h2>Small Rooms</h2><small>一些可以停留的房间</small></div><div className="experience-grid"><Link href="/letters" className="experience-item"><span className="experience-index">A</span><strong>Letters</strong><small>留下匿名或署名的信</small></Link><Link href="/music" className="experience-item"><span className="experience-index">B</span><strong>Music</strong><small>让一首歌留在房间里</small></Link><a href="#about" className="experience-item"><span className="experience-index">C</span><strong>Room</strong><small>一个可以慢慢探索的空间</small></a></div></section><section className="home-content-section home-about" id="about"><div className="section-heading"><span>04</span><h2>About</h2><small>关于这个空间</small></div><p>Continuum 会逐渐长出更多入口，但首要任务仍是让内容被清楚地写下、阅读和保存。</p></section></section>}
 
-      <button className="home-music-mini" type="button" aria-expanded={musicOpen} onClick={() => setMusicOpen((open) => !open)}><span className="home-music-note">♪</span><span>{track?.name ?? 'Music'}</span><small>{track ? (playing ? 'Playing' : 'Ready') : '未添加音乐'}</small></button>
-      {musicOpen && <section className="home-music-panel" aria-label="Music player"><div className="music-panel-head"><div><span>Music</span><strong>{track?.name ?? '未选择音乐'}</strong></div><button type="button" aria-label="关闭音乐" onClick={() => setMusicOpen(false)}>×</button></div><div className="music-panel-wave" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><div className="music-panel-actions"><button type="button" onClick={() => void togglePlayback()} disabled={!track}>{playing ? 'Pause' : 'Play'}</button><label className="music-add-button">Add music<input type="file" accept="audio/*" onChange={chooseTrack} /></label></div>{track && <audio ref={audioRef} src={track.url} preload="metadata" />}</section>}
+      <button className="home-music-mini" type="button" aria-expanded={musicOpen} onClick={() => setMusicOpen((open) => !open)}><span className="home-music-note">♪</span><span>{currentTrack?.name ?? 'Music'}</span><small>{currentTrack ? (playing ? 'Playing' : 'Ready') : '未添加音乐'}</small></button>
+      {musicOpen && <section className="home-music-panel" style={musicPanelPosition ? { left: musicPanelPosition.left, top: musicPanelPosition.top, bottom: 'auto' } : undefined} aria-label="Music player"><div className="music-panel-head" onPointerDown={startMusicDrag}><div><span>Music</span><strong>{currentTrack?.name ?? '未选择音乐'}</strong></div><button type="button" aria-label="关闭音乐" onClick={() => { setMusicOpen(false); setMusicPanelPosition(null) }}>×</button></div><div className="music-panel-wave" aria-hidden="true">{Array.from({ length: 24 }, (_, index) => <i key={index} />)}</div><div className="home-music-progress"><span>0:00</span><input type="range" min="0" max="100" value={progress} onChange={seekHome} aria-label="音乐进度" /><span>{duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}` : '--:--'}</span></div><div className="music-panel-actions"><button type="button" onClick={cycleHomeMode} disabled={!tracks.length}>{playMode === 'list' ? '↻' : playMode === 'single' ? '↺¹' : '⤨'}</button><button type="button" onClick={goHomePrevious} disabled={!tracks.length}>|‹</button><button type="button" onClick={() => void togglePlayback()} disabled={!currentTrack}>{playing ? 'Pause' : 'Play'}</button><button type="button" onClick={goHomeNext} disabled={!tracks.length}>›|</button><label className="music-add-button">Add music<input type="file" accept="audio/*" multiple onChange={chooseTrack} /></label></div>{tracks.length > 0 && <div className="home-music-playlist">{tracks.map((item, index) => <div className={index === currentTrackIndex ? 'is-active' : ''} key={`${item.url}-${index}`}><button type="button" onClick={() => chooseHomeTrack(index)}>{item.name}</button><button type="button" onClick={() => removeHomeTrack(index)} aria-label={`移除 ${item.name}`}>×</button></div>)}</div>}{currentTrack && <audio ref={audioRef} src={currentTrack.url} preload="metadata" />}</section>}
     </main>
   )
 }

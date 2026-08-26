@@ -162,6 +162,8 @@ Reuse classification: Adapter reuse; original Canvas behavior was ported at inte
 
 Contract evidence: Browser smoke at `/` covered initial welcome scene without visible navigation, Enter space transition, theme toggle, and pointer interaction on the enabled finger brush.
 
+Follow-up parity evidence: Home's desktop Music mini now preserves multi-track add/remove, playback mode, previous/next, progress seek, playlist, and draggable header behavior; Blog reader now includes the source toolbar contract (Back, in-article search/count/navigation, reading progress, and three font sizes). These remain adapters over the current server-backed routes.
+
 ## Implemented evidence: Blog and Letters visual parity pass
 
 Feature: Restore reference module shells without changing the public server contracts

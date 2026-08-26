@@ -250,3 +250,8 @@
 - Added separate welcome/main scene state, crossfade layers for `bg-internal.jpg` and `bg-infernal.jpg`, actual rain Canvas, finger haze wipe, white pen, clear control, and MIST/BRUSH sizing.
 - Added a real 48-band Web Audio visualizer to the Music page; the existing local queue/mode/seek/LRC behavior remains in place.
 - Browser evidence: `home-welcome-final.png`, `home-entered-parity.png`, `home-infernal-parity.png`, and `home-brush-final-2.png`.
+
+### Phase 9 corrective parity pass: Home mini-player and Blog reader (2026-08-27)
+- Restored the Home Music floating surface to a local multi-track player with queue, list/single/random controls, previous/next, seek, remove, and draggable panel header.
+- Added source-style Blog reader controls for in-article search/count/navigation, reading progress, font sizes, and context navigation while retaining the server projection and adjacent-post links.
+- Fresh browser smoke reloaded `/` without runtime errors after the queue refactor and opened the Home Music panel with its full control row.
