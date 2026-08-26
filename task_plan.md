@@ -112,6 +112,7 @@ Checkpoint 3 complete
 | Playwright `goto` was invoked after the prior browser session had closed | 1 | Start a fresh CLI browser with `open`, then navigate and snapshot |
 | A composed Playwright command was malformed in the orchestration wrapper | 1 | Split the interaction into a simpler command and re-snapshot before using refs |
 | PowerShell `git add` parsed `src/app/studio/(protected)/page.tsx` as an expression | 1 | Quote the parenthesized path and stage the intended files explicitly |
+| Phase 9 Music RED test could not import the contracts module | 1 | Add a typed no-op scaffold, rerun to obtain playback-rule failures, then implement the contracts |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

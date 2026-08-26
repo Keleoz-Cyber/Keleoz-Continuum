@@ -229,3 +229,11 @@
 - Added Owner Studio inbox actions for approve/reject and optional public reply.
 - Browser smoke passed on the real dev server: submit public letter -> receive postal code -> Owner login -> review/reply -> approve -> public wall -> open letter and see reply. Smoke owner and letter were deleted afterward.
 - Fresh Letters checkpoint verification: `pnpm test` passed 13 files / 41 tests; `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `git diff --check` passed. Build now exposes `/letters` and `/api/letters` alongside the existing public and Studio routes.
+
+### Phase 9 implementation checkpoint: Music slice (2026-08-27)
+- Added `/music` with fullscreen vinyl/tonearm presentation, local queue, list/single/random modes, previous/next, seeking, and LRC/SRT/VTT-compatible timestamp parsing for local files.
+- Kept Home Music as a compact entry surface and added direct Music links to the responsive Desk and Experience section.
+- Browser smoke passed at desktop and 390×844 mobile sizes; queue drawer opened with an empty-state message.
+- Fresh lint and typecheck passed after replacing the direct state-reset effect with event-driven resets; no cascading setState effect remains.
+- Music screenshots: `output/playwright/music-desktop.png` and `output/playwright/music-mobile.png`.
+- Fresh Music checkpoint verification: `pnpm test` passed 14 files / 44 tests; `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `git diff --check` passed. Build exposes `/music` in addition to `/letters` and the existing routes.

@@ -136,3 +136,15 @@ Contract evidence: `tests/unit/letters.test.ts` and `tests/integration/letters-r
 Reuse classification: Adapter reuse for the envelope/postal/seal/opened-paper interaction and Desktop/Mobile visual vocabulary; reimplementation required for server persistence, approval, privacy, rate limiting, and Owner authorization.
 
 Intentional differences: no raw IP/contact data is stored or serialized; the public wall contains only approved public letters; private letters remain Owner-only; the upstream AI-request button is deferred until the server AI gateway and quota policy exist.
+
+## Implemented evidence: Music local listening surface
+
+Feature: Music fullscreen player with local queue, vinyl/tonearm, playback modes, seeking, and LRC display
+
+Implemented paths and symbols: `src/modules/music/contracts.ts`; `src/modules/music/music-client.tsx`; `src/app/music/page.tsx`; Home Music links in `src/modules/home/home-scene.tsx`
+
+Contract evidence: `tests/unit/music.test.ts`; 3 tests cover filename normalization, list/single/random transitions, and ordered LRC parsing. Browser smoke covered `/music` rendering at desktop and 390×844 mobile sizes plus queue open/close affordance.
+
+Reuse classification: Adapter reuse for the Desktop playlist/mode/seek contract and Mobile fullscreen vinyl/tonearm/lyrics/queue visual contract; local-only browser media is intentional for V1.
+
+Intentional differences: no IndexedDB library or Listen Together synchronization is enabled yet; object URLs are released on removal/unmount, and audio never crosses the server boundary.

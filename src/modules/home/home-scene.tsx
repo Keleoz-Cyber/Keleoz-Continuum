@@ -20,6 +20,7 @@ const navigation = [
 const mobileApps = [
   { href: '/blog', label: 'Blog', cn: '日志', icon: 'book' },
   { href: '/letters', label: 'Letters', cn: '信箱', icon: 'letter' },
+  { href: '/music', label: 'Music', cn: '音乐', icon: 'music' },
   { href: '#experiences', label: 'Room', cn: '房间', icon: 'room' },
   { href: '#experiences', label: 'Tea', cn: '茶室', icon: 'tea' },
   { href: '#experiences', label: 'Story', cn: '故事', icon: 'story' },
@@ -62,6 +63,9 @@ function LineIcon({ name }: { name: string }) {
   }
   if (name === 'sleep') {
     return <svg {...common}><path d="M4 16.5h16M5 16.5V12h14v4.5M7 12V9.5h4A3.5 3.5 0 0 1 14.5 12M4 20v-3.5M20 20v-3.5" /><path d="M16 6h4l-4 4h4" /></svg>
+  }
+  if (name === 'music') {
+    return <svg {...common}><circle cx="8" cy="17" r="2.6" /><circle cx="17.5" cy="15" r="2.6" /><path d="M10.6 17V6.8l9.5-2.2V15" /></svg>
   }
   return <svg {...common}><circle cx="12" cy="12" r="8.5" /><path d="m9 12 2 2 4-4" /></svg>
 }
@@ -230,7 +234,7 @@ export function HomeScene() {
           <div className="section-heading"><span>03</span><h2>Small Rooms</h2><small>一些可以停留的房间</small></div>
           <div className="experience-grid">
             <Link href="/letters" className="experience-item"><span className="experience-index">A</span><strong>Letters</strong><small>留下匿名或署名的信</small></Link>
-            <button type="button" className="experience-item" onClick={() => setMusicOpen(true)}><span className="experience-index">B</span><strong>Music</strong><small>让一首歌留在房间里</small></button>
+            <Link href="/music" className="experience-item"><span className="experience-index">B</span><strong>Music</strong><small>让一首歌留在房间里</small></Link>
             <a href="#about" className="experience-item"><span className="experience-index">C</span><strong>Room</strong><small>一个可以慢慢探索的空间</small></a>
           </div>
         </section>
