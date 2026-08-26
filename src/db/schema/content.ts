@@ -15,6 +15,8 @@ import {
 export const contentType = pgEnum('content_type', ['blog', 'project', 'moment', 'page'])
 export const contentStatus = pgEnum('content_status', ['draft', 'published', 'archived'])
 export const exposure = pgEnum('exposure', ['full', 'summary', 'hidden'])
+export const letterVisibility = pgEnum('letter_visibility', ['public', 'private'])
+export const letterStatus = pgEnum('letter_status', ['pending', 'approved', 'rejected'])
 
 export const contentEntries = pgTable(
   'content_entries',
@@ -80,4 +82,26 @@ export const contentPublications = pgTable(
     publishedAt: timestamp('published_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('content_publications_version_id_idx').on(table.versionId)],
+)
+
+export const letters = pgTable(
+  'letters',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    postalCode: varchar('postal_code', { length: 6 }).notNull().unique(),
+    senderName: varchar('sender_name', { length: 120 }),
+    content: text('content').notNull(),
+    visibility: letterVisibility('visibility').notNull().default('private'),
+    status: letterStatus('status').notNull().default('pending'),
+    ownerReply: text('owner_reply'),
+    sourceHash: varchar('source_hash', { length: 64 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('letters_status_visibility_idx').on(table.status, table.visibility),
+    index('letters_created_at_idx').on(table.createdAt),
+    index('letters_source_hash_idx').on(table.sourceHash),
+  ],
 )

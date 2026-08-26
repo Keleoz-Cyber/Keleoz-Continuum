@@ -13,12 +13,13 @@ const navigation = [
   { href: '/blog', label: 'Blog', cn: '书写' },
   { href: '#moments', label: 'Moments', cn: '时刻' },
   { href: '#experiences', label: 'Experience', cn: '体验' },
+  { href: '/letters', label: 'Letters', cn: '信箱' },
   { href: '#about', label: 'About', cn: '关于' },
 ]
 
 const mobileApps = [
   { href: '/blog', label: 'Blog', cn: '日志', icon: 'book' },
-  { href: '#experiences', label: 'Letters', cn: '信箱', icon: 'letter' },
+  { href: '/letters', label: 'Letters', cn: '信箱', icon: 'letter' },
   { href: '#experiences', label: 'Room', cn: '房间', icon: 'room' },
   { href: '#experiences', label: 'Tea', cn: '茶室', icon: 'tea' },
   { href: '#experiences', label: 'Story', cn: '故事', icon: 'story' },
@@ -228,7 +229,7 @@ export function HomeScene() {
         <section className="home-content-section" id="experiences">
           <div className="section-heading"><span>03</span><h2>Small Rooms</h2><small>一些可以停留的房间</small></div>
           <div className="experience-grid">
-            <a href="#experiences" className="experience-item"><span className="experience-index">A</span><strong>Letters</strong><small>留下匿名或署名的信</small></a>
+            <Link href="/letters" className="experience-item"><span className="experience-index">A</span><strong>Letters</strong><small>留下匿名或署名的信</small></Link>
             <button type="button" className="experience-item" onClick={() => setMusicOpen(true)}><span className="experience-index">B</span><strong>Music</strong><small>让一首歌留在房间里</small></button>
             <a href="#about" className="experience-item"><span className="experience-index">C</span><strong>Room</strong><small>一个可以慢慢探索的空间</small></a>
           </div>

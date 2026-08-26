@@ -57,7 +57,8 @@ Checkpoint 3 complete
 
 ### Phase 9: Continue Continuum Experience Modules
 - [ ] Build final Home/Desktop/Mobile shells while preserving the current public content core
-- [ ] Adapt Letters, Music, Room, Tea, Story, Tarot, Wardrobe, Sleep, and Moments in focused slices
+- [x] Adapt Letters submission, public wall, Owner review, and reply in a focused slice
+- [ ] Adapt Music, Room, Tea, Story, Tarot, Wardrobe, Sleep, and Moments in focused slices
 - [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
 - **Status:** in_progress
 
@@ -106,6 +107,11 @@ Checkpoint 3 complete
 | Phase 7 typecheck rejected an ambient Argon2 const enum and a generic Vitest matcher | 1 | Use the Argon2id numeric literal under `Options` type checking and a `satisfies` assertion object |
 | Checkpoint 2 full test run exposed cross-file database cleanup races | 1 | Serialize the small Vitest file set so integration files can safely share the dedicated test database |
 | Playwright CLI opened the dev server through `127.0.0.1` and Next blocked dev chunks as cross-origin | 1 | Add explicit local `allowedDevOrigins` and restart the dev server |
+| Phase 9 Letters RED test could not import the new contracts module | 1 | Add a typed no-op scaffold, rerun to obtain behavior failures, then implement the contract |
+| Phase 9 Letters repository RED test could not import the repository module | 1 | Add a typed no-op repository scaffold, rerun to obtain persistence behavior failures, then implement the repository |
+| Playwright `goto` was invoked after the prior browser session had closed | 1 | Start a fresh CLI browser with `open`, then navigate and snapshot |
+| A composed Playwright command was malformed in the orchestration wrapper | 1 | Split the interaction into a simpler command and re-snapshot before using refs |
+| PowerShell `git add` parsed `src/app/studio/(protected)/page.tsx` as an expression | 1 | Quote the parenthesized path and stage the intended files explicitly |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

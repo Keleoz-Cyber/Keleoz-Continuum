@@ -124,3 +124,15 @@ Contract tests: Home renders brand and scene layers; Blog/Studio links remain re
 Intentional differences and approved reason: upstream `IB`/`Sui` identity, local lock/auth, local API keys, and monolithic global startup are not public Continuum behavior; public content remains server-authoritative while the scene and shell preserve the reference atmosphere
 
 Asset extraction evidence: copied `upstream/InternalBeyond-Desktop/bg-canvas.png` to `public/reference/internal-beyond/bg-canvas.png` without editing the immutable snapshot; copied asset SHA-256 is `2203F12F67313AA54AB2BC79BD7A108DEC5A25115680637C67001A4A353AA4AD`. A light-scene companion was copied to `public/reference/internal-beyond/bg-internal.jpg` for the later theme adapter; its copied SHA-256 is `3309416DBDC1CFA185A66E9A9305339E125153D343BF119303B52266BE1F2BB3`.
+
+## Implemented evidence: Letters submission and review slice
+
+Feature: Guest Letters submission, public approved wall, and Owner review/reply
+
+Implemented paths and symbols: `src/db/schema/content.ts` (`letters`, `letter_visibility`, `letter_status`); `src/modules/letters/contracts.ts`; `src/modules/letters/repository.ts`; `src/app/api/letters/route.ts`; `src/modules/letters/letters-client.tsx`; `src/modules/letters/owner-actions.ts`; `src/app/letters/page.tsx`; Studio inbox in `src/app/studio/(protected)/page.tsx`
+
+Contract evidence: `tests/unit/letters.test.ts` and `tests/integration/letters-repository.test.ts`; 6 tests cover normalized submission input, six-digit postal derivation, pending/public boundaries, source-hash omission from public DTOs, approval with Owner reply, and the three-per-hour source limit. Browser smoke covered submit -> postal code -> Owner review/reply -> approve -> public envelope -> open letter.
+
+Reuse classification: Adapter reuse for the envelope/postal/seal/opened-paper interaction and Desktop/Mobile visual vocabulary; reimplementation required for server persistence, approval, privacy, rate limiting, and Owner authorization.
+
+Intentional differences: no raw IP/contact data is stored or serialized; the public wall contains only approved public letters; private letters remain Owner-only; the upstream AI-request button is deferred until the server AI gateway and quota policy exist.

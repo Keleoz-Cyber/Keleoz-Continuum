@@ -221,3 +221,11 @@
 - One screenshot command initially failed because `output/playwright/` did not exist; the directory was created and the screenshot was captured on the next command.
 - Final local verification after the shell polish: `pnpm lint`, `pnpm typecheck`, `pnpm test` (11 files / 35 tests), `pnpm build`, and `git diff --check` all passed.
 - Created local checkpoint commit `28b5a9f` (`feat: restore Continuum scene-first home shell`) directly on `main`; no branch or remote CI was added. Browser screenshots remain available under `output/playwright/` and are ignored from Git.
+
+### Phase 9 implementation checkpoint: Letters slice (2026-08-27)
+- Added the `letters` schema/migration with pending/approved/rejected status, public/private visibility, postal code, Owner reply, and HMAC source hash.
+- Added Guest `/letters` submission UI and `/api/letters` route with same-origin validation, input limits, HMAC source privacy, and three-per-hour rate limiting.
+- Added the public approved envelope wall with postal-code display and open/close paper interaction.
+- Added Owner Studio inbox actions for approve/reject and optional public reply.
+- Browser smoke passed on the real dev server: submit public letter -> receive postal code -> Owner login -> review/reply -> approve -> public wall -> open letter and see reply. Smoke owner and letter were deleted afterward.
+- Fresh Letters checkpoint verification: `pnpm test` passed 13 files / 41 tests; `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `git diff --check` passed. Build now exposes `/letters` and `/api/letters` alongside the existing public and Studio routes.
