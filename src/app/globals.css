@@ -2087,6 +2087,8 @@ h1 {
 .home-music-playlist > div > button:last-child { color: rgba(194, 220, 249, 0.45); text-align: center; }
 .home-music-panel .music-panel-head { cursor: grab; user-select: none; }
 .home-music-panel .music-panel-head:active { cursor: grabbing; }
+.home-music-visualizer { display: block; width: 100%; height: 2.75rem; margin-bottom: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.08); }
+.home-music-now-playing { margin-bottom: 0.6rem; overflow: hidden; color: rgba(226, 239, 255, 0.84); font-size: 0.75rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Layered scene transition and real glass-canvas tools. */
 .continuum-home .home-scene-bg { z-index: -5; background-image: url('/reference/internal-beyond/bg-canvas.png') !important; }

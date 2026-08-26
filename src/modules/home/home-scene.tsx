@@ -79,6 +79,11 @@ export function HomeScene() {
   const tracksRef = useRef<Track[]>([])
   const musicDragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number } | null>(null)
   const [musicPanelPosition, setMusicPanelPosition] = useState<{ left: number; top: number } | null>(null)
+  const homeVisualizerRef = useRef<HTMLCanvasElement | null>(null)
+  const homeAudioContextRef = useRef<AudioContext | null>(null)
+  const homeAnalyserRef = useRef<AnalyserNode | null>(null)
+  const homeSourceRef = useRef<MediaElementAudioSourceNode | null>(null)
+  const homeVisualizerFrameRef = useRef<number | null>(null)
   const currentTrack = currentTrackIndex >= 0 ? tracks[currentTrackIndex] : undefined
   const fogStrokesRef = useRef<Array<{ points: Array<{ x: number; y: number }>; width: number }>>([])
   const inkStrokesRef = useRef<Array<{ points: Array<{ x: number; y: number }>; width: number }>>([])
@@ -89,6 +94,11 @@ export function HomeScene() {
   }, [tracks])
 
   useEffect(() => () => tracksRef.current.forEach((item) => URL.revokeObjectURL(item.url)), [])
+
+  useEffect(() => () => {
+    if (homeVisualizerFrameRef.current) window.cancelAnimationFrame(homeVisualizerFrameRef.current)
+    void homeAudioContextRef.current?.close()
+  }, [])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -405,11 +415,64 @@ export function HomeScene() {
       return
     }
     try {
+      await ensureHomeVisualizer(audioRef.current)
       await audioRef.current.play()
       setPlaying(true)
     } catch {
       setPlaying(false)
     }
+  }
+
+  async function ensureHomeVisualizer(audio: HTMLAudioElement) {
+    if (!window.AudioContext) return
+    if (!homeAudioContextRef.current) {
+      const context = new window.AudioContext()
+      const analyser = context.createAnalyser()
+      analyser.fftSize = 256
+      const source = context.createMediaElementSource(audio)
+      source.connect(analyser)
+      analyser.connect(context.destination)
+      homeAudioContextRef.current = context
+      homeAnalyserRef.current = analyser
+      homeSourceRef.current = source
+    }
+    if (homeAudioContextRef.current.state === 'suspended') await homeAudioContextRef.current.resume()
+    drawHomeVisualizer()
+  }
+
+  function drawHomeVisualizer() {
+    const canvas = homeVisualizerRef.current
+    const analyser = homeAnalyserRef.current
+    if (!canvas || !analyser) return
+    const context = canvas.getContext('2d')
+    if (!context) return
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const width = canvas.clientWidth
+    const height = canvas.clientHeight
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+    }
+    context.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const values = new Uint8Array(analyser.frequencyBinCount)
+    const render = () => {
+      analyser.getByteFrequencyData(values)
+      context.clearRect(0, 0, width, height)
+      const bars = 48
+      const barWidth = width / bars
+      for (let index = 0; index < bars; index += 1) {
+        const value = values[Math.floor(index * values.length / bars)]! / 255
+        const barHeight = Math.max(1, value * height * 0.86)
+        const gradient = context.createLinearGradient(0, height, 0, height - barHeight)
+        gradient.addColorStop(0, 'rgba(80,128,176,0.2)')
+        gradient.addColorStop(1, 'rgba(114,168,216,0.6)')
+        context.fillStyle = gradient
+        context.fillRect(index * barWidth + 1, height - barHeight, Math.max(1, barWidth - 2), barHeight)
+      }
+      homeVisualizerFrameRef.current = window.requestAnimationFrame(render)
+    }
+    if (homeVisualizerFrameRef.current) window.cancelAnimationFrame(homeVisualizerFrameRef.current)
+    homeVisualizerFrameRef.current = window.requestAnimationFrame(render)
   }
 
   return (
@@ -444,7 +507,7 @@ export function HomeScene() {
       {entered && <section className="continuum-home-content" aria-label="Continuum content"><div className="home-content-intro"><p className="section-overline">The space continues below</p><p>这里不是一个目录，而是一条可以慢慢走下去的线。</p></div><section className="home-content-section" id="focus"><div className="section-heading"><span>01</span><h2>Current Focus</h2><small>当前正在发生的事</small></div><div className="focus-entry"><p className="entry-label">Featured project</p><h3>Keleoz Continuum</h3><p>一套把书写、作品、时刻与互动体验放在同一空间里的个人网站。</p><Link href="/blog">Read the latest writing →</Link></div></section><section className="home-content-section" id="moments"><div className="section-heading"><span>02</span><h2>Writing &amp; Moments</h2><small>书写与时刻</small></div><div className="writing-strip"><div><span>Blog</span><strong>记录正在形成的想法</strong></div><Link href="/blog">Open the archive <span>打开归档</span> →</Link></div></section><section className="home-content-section" id="experiences"><div className="section-heading"><span>03</span><h2>Small Rooms</h2><small>一些可以停留的房间</small></div><div className="experience-grid"><Link href="/letters" className="experience-item"><span className="experience-index">A</span><strong>Letters</strong><small>留下匿名或署名的信</small></Link><Link href="/music" className="experience-item"><span className="experience-index">B</span><strong>Music</strong><small>让一首歌留在房间里</small></Link><a href="#about" className="experience-item"><span className="experience-index">C</span><strong>Room</strong><small>一个可以慢慢探索的空间</small></a></div></section><section className="home-content-section home-about" id="about"><div className="section-heading"><span>04</span><h2>About</h2><small>关于这个空间</small></div><p>Continuum 会逐渐长出更多入口，但首要任务仍是让内容被清楚地写下、阅读和保存。</p></section></section>}
 
       <button className="home-music-mini" type="button" aria-expanded={musicOpen} onClick={() => setMusicOpen((open) => !open)}><span className="home-music-note">♪</span><span>{currentTrack?.name ?? 'Music'}</span><small>{currentTrack ? (playing ? 'Playing' : 'Ready') : '未添加音乐'}</small></button>
-      {musicOpen && <section className="home-music-panel" style={musicPanelPosition ? { left: musicPanelPosition.left, top: musicPanelPosition.top, bottom: 'auto' } : undefined} aria-label="Music player"><div className="music-panel-head" onPointerDown={startMusicDrag}><div><span>Music</span><strong>{currentTrack?.name ?? '未选择音乐'}</strong></div><button type="button" aria-label="关闭音乐" onClick={() => { setMusicOpen(false); setMusicPanelPosition(null) }}>×</button></div><div className="music-panel-wave" aria-hidden="true">{Array.from({ length: 24 }, (_, index) => <i key={index} />)}</div><div className="home-music-progress"><span>0:00</span><input type="range" min="0" max="100" value={progress} onChange={seekHome} aria-label="音乐进度" /><span>{duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}` : '--:--'}</span></div><div className="music-panel-actions"><button type="button" onClick={cycleHomeMode} disabled={!tracks.length}>{playMode === 'list' ? '↻' : playMode === 'single' ? '↺¹' : '⤨'}</button><button type="button" onClick={goHomePrevious} disabled={!tracks.length}>|‹</button><button type="button" onClick={() => void togglePlayback()} disabled={!currentTrack}>{playing ? 'Pause' : 'Play'}</button><button type="button" onClick={goHomeNext} disabled={!tracks.length}>›|</button><label className="music-add-button">Add music<input type="file" accept="audio/*" multiple onChange={chooseTrack} /></label></div>{tracks.length > 0 && <div className="home-music-playlist">{tracks.map((item, index) => <div className={index === currentTrackIndex ? 'is-active' : ''} key={`${item.url}-${index}`}><button type="button" onClick={() => chooseHomeTrack(index)}>{item.name}</button><button type="button" onClick={() => removeHomeTrack(index)} aria-label={`移除 ${item.name}`}>×</button></div>)}</div>}{currentTrack && <audio ref={audioRef} src={currentTrack.url} preload="metadata" />}</section>}
+      {musicOpen && <section className="home-music-panel" style={musicPanelPosition ? { left: musicPanelPosition.left, top: musicPanelPosition.top, bottom: 'auto' } : undefined} aria-label="Music player"><div className="music-panel-head" onPointerDown={startMusicDrag}><div><span>Music</span><strong>{currentTrack?.name ?? '未选择音乐'}</strong></div><button type="button" aria-label="关闭音乐" onClick={() => { setMusicOpen(false); setMusicPanelPosition(null) }}>×</button></div><canvas ref={homeVisualizerRef} className="home-music-visualizer" aria-label="48 band visualizer" /><div className="home-music-now-playing">{currentTrack?.name ?? '未选择音乐'}</div><div className="home-music-progress"><span>0:00</span><input type="range" min="0" max="100" value={progress} onChange={seekHome} aria-label="音乐进度" /><span>{duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}` : '--:--'}</span></div><div className="music-panel-actions"><button type="button" onClick={cycleHomeMode} disabled={!tracks.length}>{playMode === 'list' ? '↻' : playMode === 'single' ? '↺¹' : '⤨'}</button><button type="button" onClick={goHomePrevious} disabled={!tracks.length}>|‹</button><button type="button" onClick={() => void togglePlayback()} disabled={!currentTrack}>{playing ? 'Pause' : 'Play'}</button><button type="button" onClick={goHomeNext} disabled={!tracks.length}>›|</button><label className="music-add-button">Add music<input type="file" accept="audio/*" multiple onChange={chooseTrack} /></label></div>{tracks.length > 0 && <div className="home-music-playlist">{tracks.map((item, index) => <div className={index === currentTrackIndex ? 'is-active' : ''} key={`${item.url}-${index}`}><button type="button" onClick={() => chooseHomeTrack(index)}>{item.name}</button><button type="button" onClick={() => removeHomeTrack(index)} aria-label={`移除 ${item.name}`}>×</button></div>)}</div>}{currentTrack && <audio ref={audioRef} src={currentTrack.url} preload="metadata" />}</section>}
     </main>
   )
 }
