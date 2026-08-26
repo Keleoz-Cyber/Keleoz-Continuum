@@ -1,0 +1,21 @@
+services:
+  continuum-db:
+    image: postgres:17-alpine
+    container_name: continuum-db
+    environment:
+      POSTGRES_DB: continuum
+      POSTGRES_USER: continuum
+      POSTGRES_PASSWORD: continuum
+    ports:
+      - "55432:5432"
+    volumes:
+      - continuum-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U continuum -d continuum"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  continuum-pg-data:

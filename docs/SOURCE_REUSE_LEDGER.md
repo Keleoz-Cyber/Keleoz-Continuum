@@ -46,3 +46,47 @@ Required adapters:
 Contract tests:
 Intentional differences and approved reason:
 ```
+
+## Planned evidence: Foundation and Blog publishing slice
+
+Feature: Blog list, reader, editor metadata, and publication boundary
+
+Upstream paths and symbols: Desktop `InternalBeyond.html:5490`, `:5520`, `:8208-8209`, `:8377`, `:8390-8705`; Mobile `index.html:3174-3180`, `:3792-3820`, `:12125-12320`, `:12587-12620`
+
+Exact behavior to preserve: title/subtitle/category metadata; clean list summaries; dirty-exit protection; debounced input work; reading progress; previous/next navigation; adjustable font size; paragraph/block anchors; Desktop/Mobile-specific presentation
+
+Reuse classification: Adapter reuse for list/reader interaction contracts; reimplementation required for the Tiptap editor, public persistence, stable URLs, publication versions, caching, and server enforcement
+
+Required adapters: Tiptap document renderer; PostgreSQL content repository; Guest projection DTO; Next.js cache tags; future legacy-post import mapper
+
+Contract tests: long bodies absent from list DTOs; block IDs survive JSON-to-HTML; Full/Summary/Hidden projection; immutable versions; slug stability; Desktop/Mobile browser flows
+
+Intentional differences and approved reason: Owner controls are removed from Guest pages; local AI comments and annotations are deferred; public security and SEO require server authority
+
+Feature: Owner authentication
+
+Upstream paths and symbols: Desktop `InternalBeyond.html:8214-8320`; Mobile `index.html:1725-1805`, `:12650` onward for local lock/diary behavior
+
+Exact behavior to preserve: clear locked/unlocked state, explicit failure feedback, and separation between private and public surfaces
+
+Reuse classification: Reimplementation required
+
+Required adapters: Argon2id password verifier; opaque PostgreSQL sessions; HttpOnly cookie; DB-backed login throttle; secure DAL
+
+Contract tests: wrong password rejected; raw token not stored; expired session rejected; sixth failed attempt blocked; direct action/handler calls require Owner
+
+Intentional differences and approved reason: default six-digit passwords, security questions, local SHA-256 checks, and IndexedDB authorization are not valid public-web security
+
+Feature: Shared legacy data contract
+
+Upstream paths and symbols: Desktop `InternalBeyond.html:7886-7889`, `:9281-9485`; Mobile `index.html:3868-3875`, `:11274-11275`
+
+Exact behavior to preserve: known post metadata fields and cross-device export meaning
+
+Reuse classification: Deferred adapter reuse
+
+Required adapters: future explicit mapper from IndexedDB v15 post records to Tiptap/Continuum entities
+
+Contract tests: future fixtures must map `title`, `subtitle`, `category`, `content`, `created`, and `updated` without treating `locked` as server authorization
+
+Intentional differences and approved reason: user confirmed there is no old data, so import execution is outside the first slice; the mapping is retained to avoid losing compatibility knowledge

@@ -1,0 +1,149 @@
+# Progress Log
+
+## Session: 2026-08-26
+
+### Phase 1: Requirements & Discovery
+- **Status:** complete
+- Actions taken:
+  - Verified `main` tracks `origin/main` and the worktree was clean before this planning session.
+  - Read repository rules, the V1 design baseline, and planning/test/Next.js skill instructions.
+  - Limited the durable implementation plan to the first independently testable sub-project.
+- Files created/modified:
+  - `task_plan.md` (created)
+  - `findings.md` (created)
+  - `progress.md` (created)
+
+### Phase 2: Upstream Evidence & Architecture
+- **Status:** complete
+- Actions taken:
+  - Identified auth, exposure, publishing, editor, media, and data contracts as the relevant evidence areas.
+  - Read the complete provenance record and existing reuse ledger.
+  - Confirmed the pinned Desktop/Mobile commits and immutable snapshot rule.
+  - Re-read design-baseline sections covering product scope, content entities, editor representation, exposure, interface shells, runtime architecture, and publishing flow.
+  - Inventoried both upstream snapshots and performed the first cross-snapshot keyword search.
+  - Narrowed the next evidence pass because the broad search output was truncated.
+  - Inspected Desktop Blog list, editor, Markdown blocks, reader, navigation, reading-progress, and in-article-search behavior.
+  - Inspected Mobile Blog list, reader, editor, and native subpage behavior.
+  - Confirmed the shared IndexedDB v15 store list and common post record fields across Desktop and Mobile.
+  - Verified local Node, pnpm, and Docker tooling; confirmed host `psql` is absent.
+  - Sampled current package registry versions for the planned Next.js, persistence, password hashing, and editor stack.
+  - Verified the remaining editor, validation, unit-test, and browser-test package versions.
+  - Checked current primary documentation for Next.js authentication/Proxy, Drizzle PostgreSQL transactions, Tiptap SSR/static rendering, and Node LTS status.
+  - Applied Vercel's relevant auth, bundle-splitting, serialization, and async rules to the planned boundaries.
+  - Confirmed tag-based Next.js 16 cache invalidation for the publish flow.
+  - Locked the root single-app, Drizzle/PostgreSQL, custom single-Owner session, immutable-version, dynamic-editor, and adapter boundaries.
+- Files created/modified:
+  - `docs/SOURCE_REUSE_LEDGER.md` (planned evidence appended)
+
+### Phase 3: Detailed Implementation Plan
+- **Status:** complete
+- Actions taken:
+  - Created an eleven-task TDD plan covering scaffold, environment, schema, auth, structured content, publication, Studio, editor/autosave, public reader, media boundary, E2E, and production build.
+  - Added exact source pointers and intentional differences to the reuse ledger.
+- Files created/modified:
+  - `docs/superpowers/plans/2026-08-26-continuum-foundation-content-slice.md` (created)
+  - `docs/SOURCE_REUSE_LEDGER.md` (modified)
+
+### Phase 4: Self-Review & Verification
+- **Status:** complete
+- Actions taken:
+  - Placeholder scan found no prohibited placeholder language.
+  - Verified all four immutable upstream hashes still match the provenance record.
+  - Replaced a meaningless snapshot self-diff with exact four-file SHA-256 checks.
+  - Added missing `categoryLabel`, route-test, schema-test, environment-test, Docker, public-root, and responsive Blog-list files to the plan map/contracts.
+  - Simplified caching to tagged `unstable_cache` plus precise tag/path invalidation without enabling Cache Components in the first slice.
+  - Reformatted reuse-ledger evidence to remove trailing whitespace.
+  - Defined all previously implicit domain types and aligned `categoryLabel` across schema, draft SQL, DTOs, and list filtering.
+  - Added an explicit local media serving route and made public Blog routes build-safe without a live database.
+- Verification evidence:
+  - Plan contains Tasks 1 through 11 in order and 102 balanced Markdown code fences.
+  - Prohibited placeholder/red-flag scan returned no matches.
+  - `git diff --check` returned clean.
+  - All four pinned upstream SHA-256 hashes matched and `git status -- upstream` was empty.
+- Files created/modified:
+  - `docs/superpowers/plans/2026-08-26-continuum-foundation-content-slice.md`
+  - `docs/SOURCE_REUSE_LEDGER.md`
+  - `task_plan.md`
+  - `findings.md`
+  - `progress.md`
+
+### Phase 5: Delivery
+- **Status:** complete
+- Actions taken:
+  - Prepared the plan handoff with inline execution as the non-delegated option for this task.
+- Files created/modified:
+  - `progress.md`
+
+### Phase 6: Foundation Checkpoint Implementation
+- **Status:** complete
+- Actions taken:
+  - User chose direct work in the current checkout with no branch/worktree proliferation.
+  - Verification policy changed to targeted local tests during development and one proportional suite at the checkpoint.
+  - Created the root Next.js configuration and minimal Continuum brand shell.
+  - Installed production dependencies successfully; development dependency linking failed on a Windows symlink permission boundary.
+  - Aborted a forced reinstall when it began fetching many unrelated platform binaries.
+  - Pinned development dependency versions and limited pnpm to Windows/Linux x64 targets.
+  - Dependency audit found peer incompatibilities in registry-latest ESLint/TypeScript and a narrow build-script allowlist requirement.
+  - Reinstalled with peer-compatible ESLint 9 and TypeScript 5.9; pnpm still requires its current build-approval syntax.
+  - Approved only `esbuild` and `unrs-resolver`; the final peer dependency check reported no issues.
+  - Task 1 passed ESLint, TypeScript, and Next.js production build; `/` was statically generated.
+  - Task 2 completed the environment RED/GREEN cycle with 7 passing tests.
+  - Started PostgreSQL 17, created a separate `continuum_test` database, and verified the container is healthy.
+  - Task 3 observed 2 expected schema-contract failures on the empty test database, generated the migration, applied it to development and test databases, then passed both schema tests.
+  - Added a real `/blog` empty state so the foundation Home link does not lead to a dead route.
+  - Checkpoint verification passed: no peer issues, lint clean, typecheck clean, 9/9 tests passed, Next build passed, PostgreSQL was healthy, all 7 foundation tables existed, and all 4 upstream hashes matched.
+- Files created/modified:
+  - `task_plan.md`
+  - `findings.md`
+  - `progress.md`
+  - Root Next.js/pnpm/configuration files and `src/app/`
+  - `src/shared/env-schema.ts`, `src/shared/env.ts`
+  - `compose.dev.yml`, `.env.example`, `drizzle.config.ts`
+  - `src/db/`, `src/test/db.ts`, `drizzle/`
+  - `tests/unit/env.test.ts`, `tests/integration/schema.test.ts`
+
+## Test Results
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| Initial repository state | `git status --short --branch` | `main` tracks `origin/main`, no changes | Matched before planning files were added | pass |
+| Task 1 scaffold | `pnpm lint; pnpm typecheck; pnpm build` | All exit 0 | All exit 0; `/` prerendered | pass |
+| Task 2 environment RED attempt 1 | `pnpm vitest run tests/unit/env.test.ts` | Assertion fails because short secret is accepted | Suite errored because module did not exist | adjust test scaffold |
+| Task 2 environment RED attempt 2 | `pnpm vitest run tests/unit/env.test.ts` | Fails because short secret is accepted | 1 expected assertion failure | red confirmed |
+| Task 2 environment GREEN attempt 1 | `pnpm vitest run tests/unit/env.test.ts` | 7 tests pass | 5 pass; URL errors lacked field names | improve implementation errors |
+| Task 2 environment GREEN attempt 2 | `pnpm vitest run tests/unit/env.test.ts` | 7 tests pass | Same 2 URL-message failures | replace Zod URL primitive |
+| Task 2 environment GREEN attempt 3 | `pnpm vitest run tests/unit/env.test.ts` | 7 tests pass | 7 passed | pass |
+| Task 3 schema RED | `pnpm vitest run tests/integration/schema.test.ts` on empty test DB | 2 contract failures | 2 expected failures | red confirmed |
+| Task 3 schema GREEN | same command after migrations | 2 tests pass | 2 passed | pass |
+| Checkpoint 1 | peers + lint + typecheck + focused tests + build + DB health/schema + hashes | all pass | all pass; 9 tests, 7 tables, 4 hashes | pass |
+
+## Error Log
+| Timestamp | Error | Attempt | Resolution |
+|-----------|-------|---------|------------|
+| 2026-08-26 | Combined required-reading output was truncated | 1 | Split subsequent reads by document |
+| 2026-08-26 | Broad upstream keyword search was truncated | 1 | Switch to exact symbols and bounded source ranges |
+| 2026-08-26 | Multi-package npm version query reached the command time limit after partial output | 1 | Keep the successful observations and reduce any follow-up query scope |
+| 2026-08-26 | Docker daemon probe returned no visible result | 1 | Defer a bounded daemon verification to the first execution task |
+| 2026-08-26 | Follow-up registry query returned partial output at the time boundary | 1 | Use captured required versions and let the lockfile resolve helper type packages |
+| 2026-08-26 | Large self-review patch failed to match a Unicode tree line | 1 | Apply smaller patches against exact file sections |
+| 2026-08-26 | `git diff --check` found trailing whitespace in reuse-ledger evidence | 1 | Reformatted the evidence block with blank lines instead of Markdown trailing spaces |
+| 2026-08-26 | Second multi-section plan patch failed on a heading mismatch | 2 | Switch permanently to one-section patches for this review |
+| 2026-08-26 | pnpm dev-dependency install failed with `ERR_PNPM_EPERM` while linking `uri-js` to `punycode` | 1 | Inspect partial install, then configure project-local `node-linker=hoisted` and reinstall through a different linking strategy |
+| 2026-08-26 | Forced hoisted install fetched unnecessary cross-platform optional binaries | 2 | Interrupted it, pinned the manifest manually, restricted supported architectures, and switched to a normal install |
+| 2026-08-26 | Peer check rejected ESLint 10 and TypeScript 7; pnpm blocked required esbuild/unrs scripts | 1 | Pin compatible majors and allow only the two required build dependencies |
+| 2026-08-26 | pnpm 11.19 did not honor the legacy `onlyBuiltDependencies` block | 1 | Inspect installed pnpm help/config before changing the approval mechanism |
+| 2026-08-26 | Combined scaffold-log and RED-test patch missed a plan heading | 1 | Split test creation from progress updates; detailed plan remains an immutable execution reference |
+| 2026-08-26 | First environment RED run errored before executing the assertion | 1 | Added a behavior-free typed function shell so the next RED run fails for the intended validation reason |
+| 2026-08-26 | Zod URL primitive ignored two custom-message attempts | 2 | Switched to explicit safe URL/protocol predicates rather than retrying configuration |
+| 2026-08-26 | Task 2 config patch included a progress line that was never written | 1 | Keep all subsequent code/config patches separate from progress-log patches |
+| 2026-08-26 | Docker engine pipe was absent while starting Task 2 PostgreSQL | 1 | Start local Docker Desktop and poll readiness before creating the database container |
+| 2026-08-26 | Test-database existence check returned null through the Compose command wrapper | 1 | Query with direct `docker exec`, inspect output, then create only if absent |
+| 2026-08-26 | Checkpoint typecheck failed because invalid environment fixtures could not satisfy Next's narrowed `ProcessEnv` | 1 | Changed only the parser input boundary to `Record<string, string | undefined>` |
+
+## 5-Question Reboot Check
+| Question | Answer |
+|----------|--------|
+| Where am I? | Checkpoint 1 complete |
+| Where am I going? | Tasks 4-6: Owner security, content projections, drafts, and publication |
+| What's the goal? | Build the Continuum foundation and Owner-to-Guest publishing slice |
+| What have I learned? | See `findings.md` |
+| What have I done? | Implemented scaffold, environment validation, PostgreSQL schema, migrations, and focused tests |
