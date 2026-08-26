@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Checkpoint 1 complete
+Checkpoint 2 complete
 
 ## Phases
 
@@ -44,9 +44,15 @@ Checkpoint 1 complete
 - **Status:** complete
 
 ### Phase 7: Implement Security and Publishing Domain
-- [ ] Execute Tasks 4-6 without adding branches or remote CI
-- [ ] Use focused RED/GREEN tests for auth, projections, drafts, and publishing
-- [ ] Run one proportional checkpoint verification
+- [x] Execute Tasks 4-6 without adding branches or remote CI
+- [x] Use focused RED/GREEN tests for auth, projections, drafts, and publishing
+- [x] Run one proportional checkpoint verification
+- **Status:** complete
+
+### Phase 8: Implement Owner Studio and Public Blog
+- [ ] Execute Tasks 7-9 in the current checkout
+- [ ] Add Owner login, autosaving Tiptap Studio, Guest Preview, and public Blog reader
+- [ ] Run one proportional browser-visible checkpoint verification
 - **Status:** pending
 
 ## Key Questions
@@ -87,6 +93,11 @@ Checkpoint 1 complete
 | Docker CLI could not reach the Docker Desktop Linux engine | 1 | Start the installed Docker Desktop background service, then use a bounded readiness check |
 | PowerShell did not capture the composed `psql` existence query and `.Trim()` hit null | 1 | Separate the read-only database existence query from the conditional create command |
 | First checkpoint typecheck rejected invalid-environment fixtures against Next-augmented `ProcessEnv` | 1 | Accept a generic string/undefined environment record at the parser boundary; keep strict validated return type |
+| Initial Task 4 findings patch targeted a nonexistent sentence | 1 | Locate exact persistent-file sections before applying small log-only patches |
+| Task 4 aggregate run could not reach PostgreSQL after the host crossed sessions | 1 | Restore the existing Docker Desktop/container runtime, then rerun unchanged integration tests |
+| Docker Desktop processes started but three engine/status probes did not respond | 3 | Stop polling; continue Task 5 unit work and retry the database once after useful progress |
+| Phase 7 typecheck rejected an ambient Argon2 const enum and a generic Vitest matcher | 1 | Use the Argon2id numeric literal under `Options` type checking and a `satisfies` assertion object |
+| Checkpoint 2 full test run exposed cross-file database cleanup races | 1 | Serialize the small Vitest file set so integration files can safely share the dedicated test database |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

@@ -102,6 +102,31 @@
   - `src/db/`, `src/test/db.ts`, `drizzle/`
   - `tests/unit/env.test.ts`, `tests/integration/schema.test.ts`
 
+### Phase 7: Security and Publishing Domain
+- **Status:** complete
+- Actions taken:
+  - Resumed Tasks 4-6 on `main` under the user's no-extra-branches and no-routine-CI constraint.
+  - Re-read the execution, persistent-planning, and TDD rules plus the exact Task 4-6 plan sections.
+  - Task 4 pure-auth tests first errored on missing modules, then produced 3 intended behavior failures with typed no-op scaffolds.
+  - Verified the installed Argon2 library's exact option and algorithm names from local type definitions.
+  - Completed Owner bootstrap input RED/GREEN cycles: username normalization, minimum password length, and blank username rejection pass 3 tests.
+  - Docker Desktop processes started after the session transition, but three engine/status probes did not respond; database-dependent tests are deferred unchanged while Task 5 unit work continues.
+  - Task 5 typed scaffolds produced 6 intended failures and 1 passing Hidden-projection case.
+  - Verified the installed Tiptap static-renderer API and StarterKit Link availability from local package types.
+  - Task 5 document, sanitizer, slug, and Full/Summary/Hidden projection tests passed 7/7.
+  - Task 6 draft revision/conflict tests passed 2/2; publication/pointer/exposure/slug/list tests passed 5/5.
+  - Added lightweight public list selection that excludes Hidden and never selects body/document columns.
+  - Deferred the unused Next.js cache wrapper to Task 9, where its public-route consumer and invalidation behavior can be verified together.
+  - Checkpoint 2 verification passed: lint clean, typecheck clean, 31/31 tests passed, Next build passed, PostgreSQL healthy, and all four upstream hashes matched.
+- Files created/modified:
+  - `task_plan.md`
+  - `progress.md`
+  - `findings.md`
+  - `scripts/create-owner.ts`
+  - `src/modules/auth/`
+  - `src/modules/content/`
+  - Task 4-6 unit and integration tests
+
 ## Test Results
 | Test | Input | Expected | Actual | Status |
 |------|-------|----------|--------|--------|
@@ -115,6 +140,14 @@
 | Task 3 schema RED | `pnpm vitest run tests/integration/schema.test.ts` on empty test DB | 2 contract failures | 2 expected failures | red confirmed |
 | Task 3 schema GREEN | same command after migrations | 2 tests pass | 2 passed | pass |
 | Checkpoint 1 | peers + lint + typecheck + focused tests + build + DB health/schema + hashes | all pass | all pass; 9 tests, 7 tables, 4 hashes | pass |
+| Task 4 auth RED | `pnpm vitest run tests/unit/auth-crypto.test.ts tests/unit/login-throttle.test.ts` | Password, token, and throttle behaviors fail | 3 expected failures | red confirmed |
+| Task 4 auth pure GREEN | auth crypto + throttle + bootstrap unit tests | 6 tests pass | 6 passed | pass |
+| Task 5 content RED | document/slug/projection unit tests | Public behavior fails while Hidden remains null | 6 expected failures, 1 pass | red confirmed |
+| Task 5 content GREEN | same unit tests after implementation | 7 tests pass | 7 passed | pass |
+| Task 6 drafts RED/GREEN | `draft-repository.test.ts` | 2 failures before implementation, then 2 pass | matched | pass |
+| Task 6 publishing RED/GREEN | `publish-repository.test.ts` | 4 failures then 4 pass; lightweight list adds 1 RED/GREEN cycle | 5 passed | pass |
+| Checkpoint 2 attempt 1 | lint + typecheck + full tests | all pass | 29 passed, 2 failed from cross-file DB cleanup races | fix test isolation |
+| Checkpoint 2 attempt 2 | lint + typecheck + full tests + build + DB health + upstream hashes | all pass | 31/31 tests and all checks passed | pass |
 
 ## Error Log
 | Timestamp | Error | Attempt | Resolution |
@@ -126,6 +159,11 @@
 | 2026-08-26 | Follow-up registry query returned partial output at the time boundary | 1 | Use captured required versions and let the lockfile resolve helper type packages |
 | 2026-08-26 | Large self-review patch failed to match a Unicode tree line | 1 | Apply smaller patches against exact file sections |
 | 2026-08-26 | `git diff --check` found trailing whitespace in reuse-ledger evidence | 1 | Reformatted the evidence block with blank lines instead of Markdown trailing spaces |
+| 2026-08-26 | Initial Task 4 findings patch targeted a sentence absent from `findings.md` | 1 | Located exact sections before applying small logging patches |
+| 2026-08-27 | Task 4 aggregate run hit `ECONNREFUSED 127.0.0.1:55432` | 1 | Restart the existing Docker runtime and rerun the unchanged integration tests |
+| 2026-08-27 | Docker Desktop processes existed but engine/status probes stayed silent three times | 3 | Stop polling, continue database-independent work, retry once later |
+| 2026-08-27 | Typecheck rejected ambient `Algorithm` const enum and matcher generic syntax | 1 | Kept Argon2id value under `Options` checking and replaced the invalid matcher generic with `satisfies` |
+| 2026-08-27 | Parallel integration files deleted each other's shared test rows | 1 | Disabled Vitest file parallelism for the current small shared-database suite |
 | 2026-08-26 | Second multi-section plan patch failed on a heading mismatch | 2 | Switch permanently to one-section patches for this review |
 | 2026-08-26 | pnpm dev-dependency install failed with `ERR_PNPM_EPERM` while linking `uri-js` to `punycode` | 1 | Inspect partial install, then configure project-local `node-linker=hoisted` and reinstall through a different linking strategy |
 | 2026-08-26 | Forced hoisted install fetched unnecessary cross-platform optional binaries | 2 | Interrupted it, pinned the manifest manually, restricted supported architectures, and switched to a normal install |
@@ -142,8 +180,8 @@
 ## 5-Question Reboot Check
 | Question | Answer |
 |----------|--------|
-| Where am I? | Checkpoint 1 complete |
-| Where am I going? | Tasks 4-6: Owner security, content projections, drafts, and publication |
+| Where am I? | Checkpoint 2 complete |
+| Where am I going? | Tasks 7-9: Owner Studio, autosave, Guest Preview, and public Blog |
 | What's the goal? | Build the Continuum foundation and Owner-to-Guest publishing slice |
 | What have I learned? | See `findings.md` |
-| What have I done? | Implemented scaffold, environment validation, PostgreSQL schema, migrations, and focused tests |
+| What have I done? | Added secure auth primitives/sessions, structured content projection, conflict-safe drafts, and atomic publication |

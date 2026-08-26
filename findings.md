@@ -47,6 +47,11 @@
 - `@tiptap/static-renderer` `3.30.3` and `sanitize-html` `2.17.7` are available for server-side JSON rendering plus an explicit output allowlist.
 - Self-review found several referenced domain types that were named but not defined in the first draft; the plan now defines `ThrottleState`, the Tiptap document tree, `DraftSnapshot`, and `DraftConflictError` before use.
 - Public Blog routes are explicitly dynamic at build time while their repository queries remain tagged and cached; this prevents production image builds from requiring a live PostgreSQL connection.
+- Installed `@node-rs/argon2` exposes `Algorithm.Argon2id` and the planned `memoryCost`, `timeCost`, `outputLen`, and `parallelism` option names; no compatibility adapter is needed.
+- Tiptap 3.30.3 provides `renderToHTMLString` from `@tiptap/static-renderer/pm/html-string`, accepting JSON content plus extensions; StarterKit includes the Link extension.
+- Public list queries select only lightweight publication metadata and exclude Hidden at SQL level; detail projection separately strips bodies for Summary and returns null for Hidden.
+- Cache wrappers remain coupled to the later public route consumers, so Task 6 stops at tested repository boundaries instead of adding an unused `unstable_cache` module with no route-level verification.
+- Integration tests share one dedicated `continuum_test` database; Vitest file parallelism must remain disabled unless tests move to isolated schemas/databases.
 
 ## Technical Decisions
 | Decision | Rationale |
@@ -73,7 +78,9 @@
 | `pnpm --force` with the hoisted linker fetched irrelevant platform binaries | Aborted and replaced it with a manifest-pinned, architecture-limited normal install |
 | Current Next.js 16 lint dependencies require ESLint 9 and TypeScript below 6.1 | Prefer peer-compatible ESLint 9 and TypeScript 5.9 over registry-latest major versions |
 | pnpm blocked `esbuild` and `unrs-resolver` install scripts | Allow only these named build dependencies; keep all other dependency scripts blocked by default |
+| Docker Desktop may take longer than 30 seconds to restore its Linux engine after a host/session transition | Do not block pure-domain work on repeated engine probes; retain unchanged integration tests and retry later |
 | A second multi-package registry query returned only the first four packages before the time boundary | Exact observed versions needed by the plan were captured; remaining type/helper packages are lockfile-resolved during execution |
+| Initial Task 4 findings patch targeted a sentence that was never present | Located exact Phase 7 and research sections, then appended with small context-specific patches |
 
 ## Resources
 - `D:\study\blog\blog_pro\AGENTS.md`

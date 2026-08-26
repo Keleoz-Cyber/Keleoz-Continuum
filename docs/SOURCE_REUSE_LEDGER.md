@@ -90,3 +90,19 @@ Required adapters: future explicit mapper from IndexedDB v15 post records to Tip
 Contract tests: future fixtures must map `title`, `subtitle`, `category`, `content`, `created`, and `updated` without treating `locked` as server authorization
 
 Intentional differences and approved reason: user confirmed there is no old data, so import execution is outside the first slice; the mapping is retained to avoid losing compatibility knowledge
+
+## Implemented evidence: Checkpoint 2
+
+Feature: Owner authentication core
+
+Implemented paths and symbols: `src/modules/auth/crypto.ts` (`hashPassword`, `verifyPassword`); `session.ts` (`createSessionMaterial`, `hashSessionToken`); `throttle.ts` (`applyFailedAttempt`); `repository.ts` (`createAuthRepository`); `bootstrap.ts`; `scripts/create-owner.ts`
+
+Contract evidence: `tests/unit/auth-crypto.test.ts`, `login-throttle.test.ts`, `owner-bootstrap.test.ts`, and `tests/integration/auth-session.test.ts`; 8 tests verify Argon2id credentials, opaque token hashing, sixth-attempt blocking, bootstrap validation, session expiry, and the single-Owner rule
+
+Feature: Blog document, exposure, draft, and publication core
+
+Implemented paths and symbols: `src/modules/content/document.ts` (`parseAndRenderDocument`, stable block-id extension); `slug.ts`; `projection.ts`; `repository.ts` (`createDraft`, `saveDraft`, `publishDraft`, `getPublicBySlug`, `listPublic`, `updateDraftSlug`)
+
+Contract evidence: `tests/unit/content-document.test.ts`, `content-projection.test.ts`, `tests/integration/draft-repository.test.ts`, and `publish-repository.test.ts`; 14 tests verify sanitization, stable block IDs/slugs, Full/Summary/Hidden projection, optimistic revision conflicts, immutable versions, atomic pointer preservation, and lightweight public lists
+
+Intentional difference: Next.js cache wrappers remain with the public Blog route implementation so cache keys and invalidation are tested with their actual consumers rather than as unused infrastructure
