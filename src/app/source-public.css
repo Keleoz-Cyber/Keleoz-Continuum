@@ -56,9 +56,9 @@
   text-decoration: none;
 }
 
-.source-public-brand { display: inline-flex; align-items: center; gap: 6px; font-size: 1.05rem; letter-spacing: .04em; white-space: nowrap; }
-.source-public-mark { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
-.source-public-links { display: flex; gap: 26px; }
+.source-public-brand { display: inline-flex; align-items: center; gap: 6px; flex: none; font-size: 1.1rem; font-weight: 300; letter-spacing: .02em; white-space: nowrap; }
+.source-public-mark { display: block; flex: none; opacity: .85; }
+.source-public-links { display: flex; gap: 26px; margin: 0; padding: 0; list-style: none; }
 .source-public-links a { font-size: .92rem; letter-spacing: .08em; transition: color .3s, text-shadow .3s; }
 .source-public-links a:hover,
 .source-public-links a.active { color: #0a1e42; text-shadow: 0 0 12px rgba(20,50,80,.35), 0 0 24px rgba(20,50,80,.15); }
@@ -260,11 +260,11 @@
 .letter-compose-feedback.success { background: rgba(172,215,200,.25); color: #245b52; }
 .letter-compose-feedback.error { background: rgba(226,170,170,.22); color: #7e3540; }
 
-@media (max-width: 860px) {
-  .source-public-nav { top: 8px; left: 10px; right: 10px; gap: 14px; padding: 0 14px; }
-  .source-public-brand { font-size: .9rem; }
-  .source-public-links { gap: 12px; }
-  .source-public-links a { font-size: .78rem; }
+@media (max-width: 768px) {
+  .source-public-nav { top: 8px; left: 16px; right: 16px; gap: 18px; padding: 0 14px; height: 40px; }
+  .source-public-brand { font-size: .95rem; }
+  .source-public-links { gap: 14px; }
+  .source-public-links a { font-size: .82rem; }
   .source-public-owner { padding: 4px 8px; }
   .source-public-page .source-page { padding: 76px 16px 80px; }
   .source-blog-page #blog-list-view { width: auto; max-width: none; margin-left: 0; transform: none; }
@@ -291,4 +291,11 @@
   .letter-compose-overlay { padding: 10px; }
   .source-public-page .letter-compose-sheet { padding: 20px 16px; }
   .letter-compose-sheet footer { align-items: stretch; flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .source-public-nav { gap: 10px; }
+  .source-public-brand { font-size: .85rem; }
+  .source-public-links { gap: 8px; }
+  .source-public-links a { font-size: .74rem; }
 }

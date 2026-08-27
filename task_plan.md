@@ -148,6 +148,7 @@ Phase 10 in progress: source-exact frontend recovery
 | HTTP same-origin Canvas readback made the source refracted 320-grid layer replace the high-resolution image, unlike the offline file fallback | 1 | Match the source fallback visually in the public in-memory adapter by keeping `gw-img` dominant and using the source ripple layer's `overlay` blend at full opacity |
 | Public ripple was too subtle after the sharp-image adapter set `gw-ripple` to `0.2` | 1 | Test opacity, then use the source fallback's `overlay` blend at opacity `1` after the opacity-only trial blurred the HTTP presentation |
 | Home still loaded the Desktop source at mobile width, so Mobile was only a responsive crop | 1 | Select the immutable Desktop or Mobile source route from the viewport and apply a separate in-memory public adapter for each shell |
+| Home topbar kept large gaps after hiding unused anchors because the source flex gap belongs to their parent `<li>` items | 1 | Hide unused parent list items and make public subpage navigation use the same `ul`/`li` hierarchy, font loading, and responsive breakpoints as the source |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

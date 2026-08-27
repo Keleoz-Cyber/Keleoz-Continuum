@@ -236,7 +236,7 @@ Feature: Shared public navigation and source-responsive Home/Music routing
 
 Implemented paths and symbols: `src/modules/home/source-public-nav.tsx`, `src/app/source-public.css`, `src/modules/home/source-home-frame.tsx`, `src/app/reference/internal-beyond-mobile/[...path]/route.ts`, `src/app/music/page.tsx`; source Desktop `InternalBeyond.html:193-240`, source Mobile `index.html:172-214`, `:2453-2585`, `:3224-3270`, `:17359-17614`
 
-Preserved behavior: the same source glass topbar language across public Desktop Blog/Room/Letters, source Mobile Desk/Drawer/Dock, source Mobile Music fullscreen app, and Desktop Music as the original floating panel rather than a new page.
+Preserved behavior: the same source glass topbar language across public Desktop Home/Blog/Room/Letters, source Mobile Desk/Drawer/Dock, source Mobile Music fullscreen app, and Desktop Music as the original floating panel rather than a new page. Public Desktop navigation uses the source `ul`/`li` hierarchy, butterfly mark, font metrics, gap/height values, and responsive breakpoints; unused Home source list items are hidden at the parent level so they cannot leave phantom flex gaps.
 
 Reuse classification: Exact source shell/runtime reuse with thin route and branding adapters.
 
