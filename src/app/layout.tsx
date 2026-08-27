@@ -4,6 +4,7 @@ import './globals.css'
 import './source-home.css'
 import './source-public.css'
 import './source-music.css'
+import './source-room.css'
 
 export const metadata: Metadata = {
   title: {
