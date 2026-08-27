@@ -230,7 +230,7 @@ Verification: the original local file and immutable snapshot both hash to `92F82
 
 Reuse classification: Exact runtime reuse. The parent only injects an in-memory public adapter for Keleoz wording, reachable public routes, and hiding local-only controls; it never writes to or transforms the upstream files on disk.
 
-Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM; the source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior and are not silently changed.
+Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM. HTTP Canvas readback succeeds where the original offline `file://` run falls back to `REFRACT_OK=false`; the public adapter therefore keeps the source high-resolution `gw-img` dominant and composites the source ripple layer at low opacity, matching the offline visual branch without changing the source file. The source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior.
 
 Feature: Desktop Room runtime
 

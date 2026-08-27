@@ -145,6 +145,7 @@ Phase 10 in progress: source-exact frontend recovery
 | Public Home initially had no source `ibModeToggle` state and mounted its signature above the title | 1 | Restore the source two-layer splash swap, measured signature translation, and independent glass-board toggle |
 | Signature measurement computed correctly but CSS `splashFadeUp` animation overrode the inline transform | 1 | Disable the source entrance animation before applying the measured brand-mode translation, matching `ibModeToggle` |
 | First iframe adapter string contained literal newlines inside an injected single-quoted CSS string | 1 | Remove the unnecessary line breaks so the in-memory adapter script parses as valid JavaScript |
+| HTTP same-origin Canvas readback made the source refracted 320-grid layer replace the high-resolution image, unlike the offline file fallback | 1 | Match the source fallback visually in the public in-memory adapter by keeping `gw-img` dominant and compositing the existing source ripple layer at low opacity |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
