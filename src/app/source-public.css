@@ -56,7 +56,8 @@
   text-decoration: none;
 }
 
-.source-public-brand { font-size: 1.05rem; letter-spacing: .04em; white-space: nowrap; }
+.source-public-brand { display: inline-flex; align-items: center; gap: 6px; font-size: 1.05rem; letter-spacing: .04em; white-space: nowrap; }
+.source-public-mark { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
 .source-public-links { display: flex; gap: 26px; }
 .source-public-links a { font-size: .92rem; letter-spacing: .08em; transition: color .3s, text-shadow .3s; }
 .source-public-links a:hover,
@@ -278,7 +279,6 @@
 }
 
 @media (max-width: 520px) {
-  .source-public-links a:nth-child(3) { display: none; }
   .source-public-page .module-intro { padding: 17px 18px; }
   .source-public-page .module-intro-sub { font-size: .68rem; }
   .source-letters-page .blog-header { align-items: stretch; flex-direction: column; }

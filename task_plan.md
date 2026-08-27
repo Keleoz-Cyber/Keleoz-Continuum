@@ -146,6 +146,7 @@ Phase 10 in progress: source-exact frontend recovery
 | Signature measurement computed correctly but CSS `splashFadeUp` animation overrode the inline transform | 1 | Disable the source entrance animation before applying the measured brand-mode translation, matching `ibModeToggle` |
 | First iframe adapter string contained literal newlines inside an injected single-quoted CSS string | 1 | Remove the unnecessary line breaks so the in-memory adapter script parses as valid JavaScript |
 | HTTP same-origin Canvas readback made the source refracted 320-grid layer replace the high-resolution image, unlike the offline file fallback | 1 | Match the source fallback visually in the public in-memory adapter by keeping `gw-img` dominant and compositing the existing source ripple layer at low opacity |
+| Home still loaded the Desktop source at mobile width, so Mobile was only a responsive crop | 1 | Select the immutable Desktop or Mobile source route from the viewport and apply a separate in-memory public adapter for each shell |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

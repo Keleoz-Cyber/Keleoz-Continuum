@@ -232,6 +232,16 @@ Reuse classification: Exact runtime reuse. The parent only injects an in-memory 
 
 Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM. HTTP Canvas readback succeeds where the original offline `file://` run falls back to `REFRACT_OK=false`; the public adapter therefore keeps the source high-resolution `gw-img` dominant and composites the source ripple layer at low opacity, matching the offline visual branch without changing the source file. The source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior.
 
+Feature: Shared public navigation and source-responsive Home/Music routing
+
+Implemented paths and symbols: `src/modules/home/source-public-nav.tsx`, `src/app/source-public.css`, `src/modules/home/source-home-frame.tsx`, `src/app/reference/internal-beyond-mobile/[...path]/route.ts`, `src/app/music/page.tsx`; source Desktop `InternalBeyond.html:193-240`, source Mobile `index.html:172-214`, `:2453-2585`, `:3224-3270`, `:17359-17614`
+
+Preserved behavior: the same source glass topbar language across public Desktop Blog/Room/Letters, source Mobile Desk/Drawer/Dock, source Mobile Music fullscreen app, and Desktop Music as the original floating panel rather than a new page.
+
+Reuse classification: Exact source shell/runtime reuse with thin route and branding adapters.
+
+Intentional differences: `KC` replaces the upstream `IB` mark; public Home removes the duplicate Skip action and local lock/Owner controls; desktop `/music` redirects to Home and opens the original floating panel, while mobile opens the original `#music-app`.
+
 Feature: Desktop Room runtime
 
 Implemented paths and symbols: `src/modules/room/room-client.tsx`, `src/app/room/page.tsx`, `src/app/game/[...path]/route.ts`, `src/app/source-room.css`; source `upstream/InternalBeyond-Desktop/game/game_module.js` and its `game/` artwork assets.

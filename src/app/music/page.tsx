@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-
-import { SourceMusicClient } from '@/modules/music/source-music-client'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Music',
@@ -8,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function MusicPage() {
-  return <SourceMusicClient />
+  redirect('/?openMusic=1')
 }
