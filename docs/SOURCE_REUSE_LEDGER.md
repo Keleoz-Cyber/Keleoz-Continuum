@@ -219,3 +219,13 @@ Preserved behavior: source reader toolbar, in-article search/count/navigation, t
 Reuse classification: Exact reuse for reader hierarchy and interaction vocabulary; adapter reuse for server-rendered published HTML, stable slugs, and Full/Summary/Hidden exposure.
 
 Intentional differences: Owner edit/delete/export controls and local annotations remain outside the public reader until their server authorization boundaries are implemented.
+
+Feature: Desktop Room runtime
+
+Implemented paths and symbols: `src/modules/room/room-client.tsx`, `src/app/room/page.tsx`, `src/app/game/[...path]/route.ts`, `src/app/source-room.css`; source `upstream/InternalBeyond-Desktop/game/game_module.js` and its `game/` artwork assets.
+
+Preserved behavior: original 1672×941 pixel room, source asset loading, character state machine, walkable area and A* pathfinding, interaction markers, sidebar actions, day/night layers, and the original Tea/Story/Tarot/Wardrobe/Sleep entry points.
+
+Reuse classification: Exact runtime reuse through a thin host/navigation adapter and a traversal-safe immutable-source asset route.
+
+Intentional differences: the public host does not expose the upstream local lock or browser API-key mechanisms; Mobile does not squeeze the Desktop Room into a phone viewport and will receive its own fullscreen App adapters.

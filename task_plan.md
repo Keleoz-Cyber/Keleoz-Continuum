@@ -70,6 +70,13 @@ Phase 10 in progress: source-exact frontend recovery
 - [x] Verify source parity in a real browser at desktop and mobile viewport sizes
 - **Status:** complete
 
+### Phase 11: Room Source Runtime Adapter
+- [x] Serve the immutable Room engine and assets through a traversal-safe Next route
+- [x] Run the source game module inside a host page without rewriting its engine or artwork
+- [x] Preserve the 1672×941 Desktop Room behavior and avoid squeezing it into Mobile
+- [x] Verify Room interactions and production build together with the public shells
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -126,6 +133,7 @@ Phase 10 in progress: source-exact frontend recovery
 | Home queue refactor left an old `track` JSX reference during HMR | 1 | Replace all old single-track references with `currentTrack`; fresh `/` reload returned 200 and rendered the welcome scene |
 | Source-exact Canvas adapters lost DOM null narrowing inside nested animation callbacks | 1 | Keep the guarded DOM acquisition but bind non-null lifecycle-local aliases before declaring callbacks |
 | `SourceMist` reran after the hidden state removed its canvas and accessed a null ref | 1 | Check the ref before acquiring the context, then bind explicit non-null aliases for the animation callbacks |
+| Room engine initialized but its original navigation hook had no-op page activation in the new host | 1 | Provide a minimal host `navTo` adapter that toggles the injected page active before the source engine opens the page |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

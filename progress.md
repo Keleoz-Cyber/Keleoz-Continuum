@@ -278,3 +278,13 @@
 - Replaced the remaining custom Blog reader wrapper with the upstream `#blog-read-view` / `brv-top` / `brv-search` / `read-fontsize-wrap` / `brv-progress` / `post-view` structure and retained the server projection boundary.
 - Fresh Playwright session opened `/`, `/blog`, `/letters`, and `/music` at desktop size and `/` at 390×844; all pages rendered without console errors. Existing source comparison screenshots and envelope/player interaction screenshots remain under `output/playwright/`.
 - No public route is claimed for unimplemented Room/Tea/Story/Tarot logic; mobile Desk keeps their source-style entry positions for the next experience-module slice.
+
+### Phase 11 Room source runtime adapter (2026-08-27)
+- Added `/room` with a safe static route at `/game/[...path]` that serves the immutable upstream `game_module.js` and its original PNG assets without copying or editing the snapshot.
+- Added a minimal host `navTo` adapter so the upstream engine can inject its original page/panel/sidebar and initialize normally; Desktop 1440×900 browser evidence shows the source pixel room, character, light layers, interaction markers, and Menu unchanged.
+- Verified a real Tea interaction marker opens the source dialogue state with no console errors. Mobile explicitly avoids scaling the 1672×941 Room into a phone viewport.
+
+### Phase 11 verification checkpoint (2026-08-27)
+- Room source engine reloaded in a fresh real-browser session at 1440×900 with `G.initialized=true`, `G.running=true`, `#page-game.active`, and a live `.game-viewport`; source artwork and Menu were visible in `output/playwright/source-room-desktop-final.png`.
+- Fresh 390×844 navigation renders the explicit Desktop Room boundary message and does not load `window.G` or inject `#page-game`.
+- Room host lint and typecheck pass; the full test/build checkpoint follows after this slice is staged.

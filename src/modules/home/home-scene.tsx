@@ -14,13 +14,14 @@ const desktopNavigation = [
   { href: '/blog', label: 'Blog' },
   { href: '/letters', label: 'Letters' },
   { href: '/music', label: 'Music' },
+  { href: '/room', label: 'Room' },
 ]
 
 const mobileApps = [
   { href: '/blog', label: '日志', icon: <><path d="M5 4.5h11a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2z" /><path d="M18 19.5H7.5a2.5 2.5 0 0 0 0 5H18" /></> },
   { href: '/letters', label: '信箱', icon: <><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" /><path d="M4.2 7.2 12 13l7.8-5.8" /></> },
   { href: '/music', label: '音乐', icon: <><circle cx="8" cy="17" r="2.6" /><circle cx="17.5" cy="15" r="2.6" /><path d="M10.6 17V6.8l9.5-2.2V15" /></> },
-  { href: '#room', label: '房间', icon: <><path d="M4 20V6.5L12 3l8 3.5V20" /><path d="M8 20v-5h8v5M4 20h16" /></> },
+  { href: '/room', label: '房间', icon: <><path d="M4 20V6.5L12 3l8 3.5V20" /><path d="M8 20v-5h8v5M4 20h16" /></> },
   { href: '#tea', label: '茶室', icon: <><path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" /><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16M8 5c0 1-.8 1.4-.8 2.4M11 4c0 1-.8 1.4-.8 2.4" /></> },
   { href: '#story', label: '故事', icon: <><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15.5H7.5A2.5 2.5 0 0 0 5 21z" /><path d="M5 5.5v15M9 7h6M9 10h7" /></> },
   { href: '#tarot', label: '塔罗', icon: <><rect x="6" y="3" width="12" height="18" rx="1.5" transform="rotate(9 12 12)" /><circle cx="12" cy="11" r="2.3" /></> },

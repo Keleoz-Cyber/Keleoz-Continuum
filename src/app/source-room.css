@@ -1,0 +1,15 @@
+.source-room-page { position: relative; min-height: 100svh; overflow: hidden; background: #dfe9f6; color: #16294f; }
+.source-room-page #app { position: relative; min-height: 100svh; z-index: 2; }
+.source-room-page #page-home { display: none; }
+.source-room-page #navbar { display: none; }
+.source-room-loading { position: fixed; inset: 0; z-index: 1; display: grid; place-items: center; color: #274673; font-family: "Cormorant Garamond", serif; font-size: 1rem; font-style: italic; letter-spacing: .08em; background: linear-gradient(rgba(229,240,252,.15), rgba(210,228,248,.32)), url('/reference/internal-beyond/bg-internal.jpg') center / cover no-repeat; }
+.source-room-page #page-game { position: relative; z-index: 3; }
+@media (max-width: 900px) {
+  .source-room-page { overflow: auto; }
+  .source-room-page #app,
+  .source-room-page .source-room-loading { display: none; }
+  .source-room-mobile-note { display: grid; place-items: center; padding: 28px; background: linear-gradient(rgba(229,240,252,.2), rgba(210,228,248,.38)), url('/reference/internal-beyond/bg-canvas.png') center / cover no-repeat; text-align: center; }
+  .source-room-mobile-note h1 { margin: 0; color: #16325e; font-family: "Cormorant Garamond", serif; font-size: 2.2rem; font-weight: 400; letter-spacing: .08em; }
+  .source-room-mobile-note p { margin: 18px 0 8px; color: #274673; font-size: .9rem; }
+  .source-room-mobile-note small { color: #4a6896; font-size: .72rem; line-height: 1.7; }
+}
