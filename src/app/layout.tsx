@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 
 import './globals.css'
+import './source-home.css'
+import './source-public.css'
+import './source-music.css'
 
 export const metadata: Metadata = {
   title: {

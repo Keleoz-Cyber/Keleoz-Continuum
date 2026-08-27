@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Checkpoint 3 complete
+Phase 10 in progress: source-exact frontend recovery
 
 ## Phases
 
@@ -62,6 +62,14 @@ Checkpoint 3 complete
 - [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
 - **Status:** in_progress
 
+### Phase 10: Source-exact Frontend Recovery
+- [x] Preserve a single rollback tag without creating another branch
+- [x] Replace the custom Home visual/interaction layer with source-extracted Desktop behavior and assets
+- [x] Replace Music, Blog, and Letters presentation with source-extracted structures while retaining public adapters
+- [x] Restore the authoritative Mobile shell from the Mobile source instead of shrinking the Desktop shell
+- [x] Verify source parity in a real browser at desktop and mobile viewport sizes
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -81,6 +89,7 @@ Checkpoint 3 complete
 | Local media adapter first, LightCOS adapter in its own later subproject | Proves the boundary without blocking local development on domain/credential setup |
 | Work directly in the current `main` checkout | User explicitly requested no proliferation of branches or worktrees |
 | Group commits and avoid routine remote CI | User prefers short local feedback loops; full E2E, Docker matrix, and pressure tests remain later release gates |
+| Treat source-exact presentation as the default for unaffected UI | The previous reference-inspired rewrite lost upstream detail; only public data, auth, moderation, routing, and branding justify adapters |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |
@@ -115,6 +124,8 @@ Checkpoint 3 complete
 | Phase 9 Music RED test could not import the contracts module | 1 | Add a typed no-op scaffold, rerun to obtain playback-rule failures, then implement the contracts |
 | Dev server briefly reported a missing Letters client during the delete/re-add replacement window | 1 | Complete the file replacement before browsing; final HMR compilation and `/letters` response succeeded |
 | Home queue refactor left an old `track` JSX reference during HMR | 1 | Replace all old single-track references with `currentTrack`; fresh `/` reload returned 200 and rendered the welcome scene |
+| Source-exact Canvas adapters lost DOM null narrowing inside nested animation callbacks | 1 | Keep the guarded DOM acquisition but bind non-null lifecycle-local aliases before declaring callbacks |
+| `SourceMist` reran after the hidden state removed its canvas and accessed a null ref | 1 | Check the ref before acquiring the context, then bind explicit non-null aliases for the animation callbacks |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

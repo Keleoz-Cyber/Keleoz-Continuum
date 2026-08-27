@@ -260,3 +260,21 @@
 - Added `src/modules/home/glass-water-canvas.tsx` based on the upstream `gw-ripple` algorithm: height-field waves, refractive background sampling, ambient/rain drops, plips, and tap/stir pointer input.
 - Kept the existing Canvas fog/ink controls and switched the welcome scene to the source water layer; the water layer stops after entering the main scene.
 - Fresh browser console check at `/` reported 0 errors and 0 warnings after enabling `willReadFrequently` on the readback canvas.
+
+### Phase 10 start: source-exact frontend recovery (2026-08-27)
+- User rejected reference-inspired approximations across Home, Music, Blog, and Letters and required direct upstream reuse wherever public-site requirements do not change behavior.
+- Recovery rule: preserve backend/auth/publication/moderation work; replace provisional presentation layers with source-extracted DOM, CSS, assets, animation parameters, and interaction algorithms.
+- Work remains on `main`, with one lightweight rollback tag and short local/browser verification only.
+
+### Phase 10 implementation checkpoint: source-exact Home/Music/Blog/Letters (2026-08-27)
+- Replaced the provisional Home scene with source-derived Desktop markup/CSS and lifecycle adapters for the complete glass-window stack, source water simulation, splash mist, rain field, controls, theme transition, and staged entry.
+- Added the source-derived Mobile Desk/topbar/drawer/dock shell at the source's responsive breakpoint.
+- Replaced the Home floating player with the source 300px Desktop player contract and replaced `/music` with the Mobile source fullscreen vinyl/tonearm/lyrics contract; local browser media remains the only media boundary.
+- Replaced Blog and Letters page shells with source module hierarchy and CSS. Letters keeps the envelope wall and moves public guest composition into an explicit public-site adapter layer.
+- Real-browser evidence captured under `output/playwright/`: `source-home-welcome.png`, `source-home-entered.png`, `source-mobile-home.png`, `source-home-player.png`, `source-blog.png`, `source-letters-demo.png`, `source-letter-open.png`, `source-letter-compose.png`, `source-music-desktop.png`, and `source-music-mobile.png`.
+- Fresh local verification passed: Vitest 14 files / 44 tests, ESLint, TypeScript, Next production build, and `git diff --check`.
+
+### Phase 10 reader follow-up and final browser check (2026-08-27)
+- Replaced the remaining custom Blog reader wrapper with the upstream `#blog-read-view` / `brv-top` / `brv-search` / `read-fontsize-wrap` / `brv-progress` / `post-view` structure and retained the server projection boundary.
+- Fresh Playwright session opened `/`, `/blog`, `/letters`, and `/music` at desktop size and `/` at 390×844; all pages rendered without console errors. Existing source comparison screenshots and envelope/player interaction screenshots remain under `output/playwright/`.
+- No public route is claimed for unimplemented Room/Tea/Story/Tarot logic; mobile Desk keeps their source-style entry positions for the next experience-module slice.

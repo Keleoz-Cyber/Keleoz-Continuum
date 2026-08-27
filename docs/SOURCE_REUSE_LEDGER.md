@@ -177,3 +177,45 @@ Preserved behavior: Blog title/subtitle/category/summary search, category filter
 Reuse classification: Adapter reuse. Existing PostgreSQL projections, stable URLs, Letters moderation, and privacy boundaries remain unchanged; the simplified visual shells were replaced with source-derived structure and styling.
 
 Intentional differences: Password Diary and AI-request-from-selected-provider remain outside the current public surface until their respective security/AI gateway boundaries are available; the brand and source-identifying marks use Keleoz Continuum wording.
+
+## Implemented evidence: Source-exact frontend recovery
+
+Feature: Desktop Home scene and responsive Mobile Desk shell
+
+Implemented paths and symbols: `src/modules/home/home-scene.tsx`, `source-glass-canvas.tsx`, `source-mist.tsx`, `source-rain.tsx`, `src/app/source-home.css`; source Desktop `InternalBeyond.html:60-105`, `:193-240`, `:5359-5490`, `:8040-8118`, `:26780-27440`; source Mobile `index.html:172-214`, `:2453-2585`, `:416-425`, `:1356-1429`
+
+Preserved behavior: source background layers, splash blur/dissolve, glass-window mask, image grade/frost/noise/depth layers, source water height-field/refraction/drop parameters, fog and white-pen tools, MIST/BRUSH thermometers, 45-drop rain field, glass navigation language, and Mobile safe-area Desk/topbar/drawer/dock vocabulary.
+
+Reuse classification: Exact reuse for visual layers, animation parameters, and interaction algorithms; adapter reuse for React lifecycle, Keleoz branding, public links, and cleanup of global listeners.
+
+Intentional differences: upstream local lock, export/import, and private identity controls are not exposed in the public Home shell; only reachable V1 routes are shown until the remaining public modules are implemented.
+
+Feature: Desktop Music floating player and Mobile fullscreen Music app
+
+Implemented paths and symbols: `src/modules/home/source-music-player.tsx`, `src/modules/music/source-music-client.tsx`, `src/app/source-music.css`; source Desktop `InternalBeyond.html:3308-3366`, `:7289-7306`, `:9252-9271`; source Mobile `index.html:3224-3270`, `:17359-17614`
+
+Preserved behavior: 300px Desktop glass player, 48-band analyzer, local file queue, list/single/random playback, progress seeking, draggable panel header, Mobile vinyl/tonearm/lyrics/progress/five-control fullscreen layout, and browser-local media boundary.
+
+Reuse classification: Exact reuse for markup hierarchy, controls, icon paths, vinyl/tonearm styling, and visualizer parameters; adapter reuse for React state and browser object URLs.
+
+Intentional differences: Together/Member synchronization and server media storage remain deferred; no new visual treatment was added.
+
+Feature: Blog and Letters public presentation
+
+Implemented paths and symbols: `src/modules/content/blog-list-client.tsx`, `src/modules/letters/letters-client.tsx`, `src/modules/home/source-public-nav.tsx`, `src/app/source-public.css`; source Desktop `InternalBeyond.html:5489-5710`, `:2528-2770`, `:390-535`
+
+Preserved behavior: source module intro, Blog dual-wing list/search/category/card layout, Letters toolbar and envelope postal/stamp/flap/seal/open-paper treatment.
+
+Reuse classification: Exact reuse for unaffected presentation and envelope interaction; adapter reuse for server publication projections, public approval/privacy, and the separate guest composition layer.
+
+Intentional differences: Owner-only local Password Diary and AI request controls are not exposed; public letters use a server-backed form with anonymity, visibility, moderation, and rate limits.
+
+Feature: Blog public reader
+
+Implemented paths and symbols: `src/app/blog/[slug]/page.tsx`, `src/modules/content/reading-progress.tsx`, `src/app/source-public.css`; source Desktop `InternalBeyond.html:2767-2800`, `:2936-3022`, `:5489-5540`
+
+Preserved behavior: source reader toolbar, in-article search/count/navigation, three font sizes, reading progress, document typography, and adjacent-post navigation.
+
+Reuse classification: Exact reuse for reader hierarchy and interaction vocabulary; adapter reuse for server-rendered published HTML, stable slugs, and Full/Summary/Hidden exposure.
+
+Intentional differences: Owner edit/delete/export controls and local annotations remain outside the public reader until their server authorization boundaries are implemented.

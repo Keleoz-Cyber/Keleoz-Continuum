@@ -13,9 +13,5 @@ export const metadata: Metadata = {
 export default async function BlogPage() {
   const items = await getCachedPublicList('blog')
 
-  return (
-    <main className="blog-reference-page">
-      <BlogListClient items={items} />
-    </main>
-  )
+  return <BlogListClient items={items} />
 }

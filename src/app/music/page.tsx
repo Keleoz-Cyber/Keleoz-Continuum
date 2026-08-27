@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { MusicClient } from '@/modules/music/music-client'
+import { SourceMusicClient } from '@/modules/music/source-music-client'
 
 export const metadata: Metadata = {
   title: 'Music',
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function MusicPage() {
-  return <MusicClient />
+  return <SourceMusicClient />
 }
