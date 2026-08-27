@@ -205,8 +205,22 @@
 @keyframes source-splash-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
 #source-home .splash-swap { position: relative; z-index: 2; display: grid; }
+#source-home .source-space-toggle { margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+#source-home #ib-mode-toggle { pointer-events: auto; transition: color .35s ease, text-shadow .35s ease, filter .35s ease; }
+#source-home #ib-mode-toggle:hover { color: #fff; filter: none; text-shadow: 0 0 14px rgba(180,210,255,.55), 0 0 28px rgba(150,195,248,.28), 0 1px 6px rgba(0,0,0,.3); }
+#source-home .splash-orig { grid-area: 1 / 1; opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .9s ease, visibility .9s ease; }
+#source-home .splash-swap.ib-mode .splash-orig { opacity: 0; visibility: hidden; pointer-events: none; }
 #source-home .splash-ib { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: flex-start; padding-top: 6px; opacity: 0; visibility: hidden; pointer-events: none; --ti: #f2f7ff; --tb: #d9e6f8; --tiglow: 0 2px 14px rgba(4, 12, 34, 0.84), 0 0 22px rgba(150, 190, 245, 0.48), 0 0 36px rgba(120, 160, 230, 0.25), 0 0 5px rgba(200, 225, 255, 0.12); --tbglow: 0 2px 14px rgba(4, 12, 34, 0.84), 0 0 20px rgba(150, 190, 245, 0.42), 0 0 32px rgba(120, 160, 230, 0.22); --hrule: rgba(196, 216, 246, 0.7); --hsec: rgba(228, 239, 252, 0.94); --hsecglow: 0 1px 12px rgba(4, 10, 26, 0.8), 0 0 18px rgba(0, 0, 0, 0.3), 0 0 5px rgba(140, 180, 240, 0.25); }
 #source-home .splash-swap.ib-mode .splash-ib { opacity: 1; visibility: visible; }
+#source-home .splash-title { position: relative; z-index: 1; margin: 0 0 20px; color: rgba(222,234,250,.92); font-family: "Cormorant Garamond", "Iowan Old Style", serif; font-size: 15.5px; font-style: italic; font-weight: 300; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 1px 12px rgba(4,10,26,.8), 0 0 22px rgba(0,0,0,.38); }
+#source-home .splash-title .ib-hl { color: #f8fcff; font-weight: 400; }
+#source-home .splash-desc { position: relative; z-index: 1; margin: 0 0 10px; color: rgba(240,245,255,.95); font-family: "Noto Serif SC", "Source Han Serif SC", serif; font-size: 21px; font-weight: 600; line-height: 2; text-align: left; text-shadow: 0 2px 14px rgba(4,10,26,.84), 0 0 24px rgba(0,0,0,.38); }
+#source-home .splash-desc2 { position: relative; z-index: 1; margin: 0 0 10px; color: rgba(230,239,252,.92); font-family: Raleway, "Noto Sans SC", sans-serif; font-size: 15.5px; font-weight: 300; line-height: 2; text-align: left; text-shadow: 0 1px 12px rgba(4,10,26,.76), 0 0 20px rgba(0,0,0,.32); }
+#source-home .splash-note { position: relative; z-index: 1; margin: 0 0 44px; color: rgba(224,236,252,.86); font-family: Raleway, "Noto Sans SC", sans-serif; font-size: 12.5px; font-weight: 300; text-align: left; text-shadow: 0 1px 10px rgba(4,10,26,.72); }
+#source-home .splash-white { color: #fff; }
+#source-home .splash-buttons { position: relative; z-index: 10; display: flex; gap: 12px; margin-bottom: 20px; pointer-events: auto; }
+#source-home .splash-action-btn { padding: 10px 24px; border: 1px solid rgba(200,220,245,.42); border-radius: 8px; background: rgba(200,220,245,.13); color: rgba(236,244,255,.96); font-family: "Noto Serif SC", "Source Han Serif SC", serif; font-size: 13.5px; font-weight: 500; letter-spacing: .1em; cursor: pointer; box-shadow: inset 0 1px rgba(255,255,255,.16), inset 0 -1px rgba(14,30,62,.18), 0 2px 6px rgba(4,12,30,.2); transition: background .4s, border-color .4s, color .4s, transform .16s, box-shadow .25s; }
+#source-home .splash-action-btn:hover { border-color: rgba(220,235,255,.45); background: rgba(200,220,245,.15); color: #fff; transform: translateY(-1.5px); box-shadow: inset 0 1px rgba(255,255,255,.24), 0 6px 16px rgba(4,12,30,.28), 0 0 12px rgba(150,190,245,.14); }
 #source-home .splash-public-definition { margin: 26px 0 0; color: rgba(229, 239, 252, 0.86); font-family: "Noto Serif SC", "Iowan Old Style", serif; font-size: 13px; letter-spacing: 0.12em; text-shadow: 0 1px 10px rgba(4, 10, 26, 0.72); animation: source-splash-up 1s ease-out 0.9s both; }
 
 #source-home .source-enter { display: inline-flex; margin-top: 25px; padding: 0 0 5px; border: 0; border-bottom: 1px solid rgba(224, 236, 252, 0.38); background: none; pointer-events: auto; }

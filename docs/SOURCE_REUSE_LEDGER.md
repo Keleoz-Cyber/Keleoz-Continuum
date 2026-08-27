@@ -220,6 +220,18 @@ Reuse classification: Exact reuse for reader hierarchy and interaction vocabular
 
 Intentional differences: Owner edit/delete/export controls and local annotations remain outside the public reader until their server authorization boundaries are implemented.
 
+## Corrective evidence: Home uses the immutable source runtime directly
+
+Feature: Home source runtime boundary
+
+Implemented paths and symbols: `src/app/reference/internal-beyond/[...path]/route.ts`, `src/modules/home/source-home-frame.tsx`, `src/app/source-home-frame.css`, `src/app/page.tsx`; source `upstream/InternalBeyond-Desktop/InternalBeyond.html` and all relative Desktop assets/scripts.
+
+Verification: the original local file and immutable snapshot both hash to `92F8255E6B710FEA150F3F08BC51737442C6CC2F707C3DCB4A64C4AC1FBE8D28`; the live Next route `/reference/internal-beyond/InternalBeyond.html` is byte-identical to the snapshot. A fresh browser confirmed the iframe owns the original `enterSite`, `ibModeToggle`, `gw-ripple`, and `music-panel` implementations; Music computed transparency is `rgba(155,180,218,0.1)` with `blur(16px) saturate(1.15)`, matching upstream.
+
+Reuse classification: Exact runtime reuse. The parent only injects an in-memory public adapter for Keleoz wording, reachable public routes, and hiding local-only controls; it never writes to or transforms the upstream files on disk.
+
+Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM; the source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior and are not silently changed.
+
 Feature: Desktop Room runtime
 
 Implemented paths and symbols: `src/modules/room/room-client.tsx`, `src/app/room/page.tsx`, `src/app/game/[...path]/route.ts`, `src/app/source-room.css`; source `upstream/InternalBeyond-Desktop/game/game_module.js` and its `game/` artwork assets.

@@ -1,5 +1,5 @@
-import { HomeScene } from '@/modules/home/home-scene'
+import { SourceHomeFrame } from '@/modules/home/source-home-frame'
 
 export default function HomePage() {
-  return <HomeScene />
+  return <SourceHomeFrame />
 }

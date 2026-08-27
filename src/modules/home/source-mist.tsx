@@ -38,6 +38,7 @@ export function SourceMist({ dissolving, hidden }: { dissolving: boolean; hidden
     let height = 0
     let frame = 0
     let time = 0
+    let stopped = false
     const blobs: MistBlob[] = []
     const lightColors = [
       { red: 150, green: 195, blue: 255 },
@@ -101,6 +102,7 @@ export function SourceMist({ dissolving, hidden }: { dissolving: boolean; hidden
     }
 
     function draw() {
+      if (stopped) return
       context.clearRect(0, 0, width, height)
       time += 0.016
       context.globalCompositeOperation = 'source-over'
@@ -117,6 +119,7 @@ export function SourceMist({ dissolving, hidden }: { dissolving: boolean; hidden
     window.addEventListener('resize', resize)
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) draw()
     return () => {
+      stopped = true
       window.removeEventListener('resize', resize)
       if (frame) window.cancelAnimationFrame(frame)
     }

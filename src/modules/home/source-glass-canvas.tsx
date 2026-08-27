@@ -398,6 +398,7 @@ export function SourceGlassCanvas({ active, exiting, off }: { active: boolean; e
     let last = 0
     let stepAccumulator = 0
     let frame = 0
+    let stopped = false
     const damping = 0.9855
     const refraction = 2
     const light = 10
@@ -677,6 +678,7 @@ export function SourceGlassCanvas({ active, exiting, off }: { active: boolean; e
     }
 
     function loop(timestamp: number) {
+      if (stopped) return
       frame = window.requestAnimationFrame(loop)
       const nextMode = computeMode()
       if (nextMode !== mode) {
@@ -732,6 +734,7 @@ export function SourceGlassCanvas({ active, exiting, off }: { active: boolean; e
     window.addEventListener('resize', () => { if (mode) targetReady = retarget(mode) }, { signal: abort.signal })
     const loadedImage = new Image()
     loadedImage.onload = () => {
+      if (stopped) return
       image = loadedImage
       document.documentElement.style.setProperty('--gw-ar', (loadedImage.naturalWidth / loadedImage.naturalHeight).toFixed(6))
       slot.classList.add('gw-has-img')
@@ -747,6 +750,7 @@ export function SourceGlassCanvas({ active, exiting, off }: { active: boolean; e
     if (!reduced) frame = window.requestAnimationFrame(loop)
 
     return () => {
+      stopped = true
       abort.abort()
       observer.disconnect()
       if (frame) window.cancelAnimationFrame(frame)

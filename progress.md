@@ -288,3 +288,9 @@
 - Room source engine reloaded in a fresh real-browser session at 1440×900 with `G.initialized=true`, `G.running=true`, `#page-game.active`, and a live `.game-viewport`; source artwork and Menu were visible in `output/playwright/source-room-desktop-final.png`.
 - Fresh 390×844 navigation renders the explicit Desktop Room boundary message and does not load `window.G` or inject `#page-game`.
 - Room host lint and typecheck pass; the full test/build checkpoint follows after this slice is staged.
+
+### Corrective Home source-runtime pass (2026-08-27)
+- Replaced the React-reimplemented Home route with an iframe running the byte-identical immutable Desktop `InternalBeyond.html` through a traversal-safe source route.
+- Added only an in-memory public adapter: Keleoz branding, public Blog/Letters/Room route mapping, removal of local-only Owner controls, source-mode toggle preservation, and a public Enter button. The original source `enterSite()`, `ibModeToggle()`, Canvas stack, and Music panel remain the executing implementation.
+- Same-origin browser verification confirmed `enterSite`, `ibModeToggle`, `gw-ripple`, and `music-panel` are present inside the frame; Music panel computed transparency matches the upstream values.
+- Browser console still reports the same two optional upstream misses (`bg-canvas.jpg` probe and `signs.js`) as the original standalone source; no new adapter exception occurs.

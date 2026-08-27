@@ -77,6 +77,13 @@ Phase 10 in progress: source-exact frontend recovery
 - [x] Verify Room interactions and production build together with the public shells
 - **Status:** complete
 
+### Phase 12: Home Exact Runtime Boundary
+- [x] Prove the local source, immutable snapshot, and live source route are byte-identical
+- [x] Run the original Home runtime inside the public route instead of a second visual implementation
+- [x] Apply only in-memory branding, public navigation, and local-only control adapters
+- [x] Verify original mode toggle, enter timeline, Canvas stack, and Music transparency in a real browser
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -134,6 +141,10 @@ Phase 10 in progress: source-exact frontend recovery
 | Source-exact Canvas adapters lost DOM null narrowing inside nested animation callbacks | 1 | Keep the guarded DOM acquisition but bind non-null lifecycle-local aliases before declaring callbacks |
 | `SourceMist` reran after the hidden state removed its canvas and accessed a null ref | 1 | Check the ref before acquiring the context, then bind explicit non-null aliases for the animation callbacks |
 | Room engine initialized but its original navigation hook had no-op page activation in the new host | 1 | Provide a minimal host `navTo` adapter that toggles the injected page active before the source engine opens the page |
+| React development remounts could leave a source Canvas RAF alive after effect cleanup | 1 | Add an explicit stopped guard to every source animation loop before scheduling its next frame |
+| Public Home initially had no source `ibModeToggle` state and mounted its signature above the title | 1 | Restore the source two-layer splash swap, measured signature translation, and independent glass-board toggle |
+| Signature measurement computed correctly but CSS `splashFadeUp` animation overrode the inline transform | 1 | Disable the source entrance animation before applying the measured brand-mode translation, matching `ibModeToggle` |
+| First iframe adapter string contained literal newlines inside an injected single-quoted CSS string | 1 | Remove the unnecessary line breaks so the in-memory adapter script parses as valid JavaScript |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

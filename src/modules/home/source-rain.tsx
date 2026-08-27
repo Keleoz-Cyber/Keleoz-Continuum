@@ -31,6 +31,7 @@ export function SourceRain({ visible }: { visible: boolean }) {
     let height = 0
     let frame = 0
     let last = 0
+    let stopped = false
 
     function reset(drop: RainDrop) {
       drop.z = randomBetween(0.35, 1)
@@ -55,6 +56,7 @@ export function SourceRain({ visible }: { visible: boolean }) {
     }
 
     function draw(timestamp: number) {
+      if (stopped) return
       frame = window.requestAnimationFrame(draw)
       const delta = Math.min(0.05, (timestamp - last) / 1_000 || 0.016)
       last = timestamp
@@ -100,6 +102,7 @@ export function SourceRain({ visible }: { visible: boolean }) {
       frame = window.requestAnimationFrame(draw)
     }
     return () => {
+      stopped = true
       window.removeEventListener('resize', resize)
       if (frame) window.cancelAnimationFrame(frame)
     }

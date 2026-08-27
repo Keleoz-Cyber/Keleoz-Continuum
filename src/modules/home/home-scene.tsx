@@ -108,9 +108,14 @@ export function HomeScene() {
   const [glassOff, setGlassOff] = useState(false)
   const [theme, setTheme] = useState<Theme>('internal')
   const [themeFading, setThemeFading] = useState(false)
+  const [spaceMode, setSpaceMode] = useState<'brand' | 'welcome'>('brand')
+  const [welcomeFading, setWelcomeFading] = useState(false)
   const [mobile, setMobile] = useState(false)
   const timersRef = useRef<number[]>([])
   const themeLockedRef = useRef(false)
+  const splashLeftRef = useRef<HTMLDivElement | null>(null)
+  const splashSignRef = useRef<HTMLParagraphElement | null>(null)
+  const splashBrandRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 900px)')
@@ -137,6 +142,37 @@ export function HomeScene() {
 
   useEffect(() => () => timersRef.current.forEach((timer) => window.clearTimeout(timer)), [])
 
+  useEffect(() => {
+    const left = splashLeftRef.current
+    const sign = splashSignRef.current
+    const brand = splashBrandRef.current
+    if (!left || !sign || !brand) return
+    sign.style.transform = ''
+    if (spaceMode !== 'brand') return
+    let frame = 0
+    let timer = 0
+    let cancelled = false
+    const measure = () => {
+      if (cancelled) return
+      sign.style.animation = 'none'
+      sign.style.transform = ''
+      const title = brand.querySelector<HTMLElement>('.home-title')
+      const subtitle = brand.querySelector<HTMLElement>('.home-subtitle')
+      if (!title || !subtitle) return
+      const signRect = sign.getBoundingClientRect()
+      const titleRect = title.getBoundingClientRect()
+      const subtitleRect = subtitle.getBoundingClientRect()
+      const gap = Math.min(16, Math.max(9, window.innerWidth * 0.011))
+      const dx = subtitleRect.left - signRect.left
+      const dy = titleRect.bottom + gap - signRect.top
+      sign.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`
+    }
+    frame = window.requestAnimationFrame(measure)
+    void document.fonts?.ready.then(() => { frame = window.requestAnimationFrame(measure) })
+    timer = window.setTimeout(measure, 1_200)
+    return () => { cancelled = true; window.cancelAnimationFrame(frame); window.clearTimeout(timer) }
+  }, [spaceMode, ready])
+
   function later(callback: () => void, delay: number) {
     timersRef.current.push(window.setTimeout(callback, delay))
   }
@@ -144,7 +180,8 @@ export function HomeScene() {
   function enterSite() {
     if (entering) return
     setEntering(true)
-    later(() => setDissolving(true), 340)
+    setWelcomeFading(true)
+    later(() => setDissolving(true), 640)
     later(() => setNavVisible(true), 2_340)
     later(() => setAppVisible(true), 2_740)
     later(() => setTitleVisible(true), 2_940)
@@ -171,19 +208,28 @@ export function HomeScene() {
       <SourceRain visible={dissolving || splashHidden} />
       <SourceMist dissolving={dissolving} hidden={splashHidden} />
 
-      <div id="splash" className={`${dissolving ? 'dissolving ' : ''}${splashHidden ? 'hidden' : ''}`.trim()}>
+      <div id="splash" className={`${dissolving ? 'dissolving ' : ''}${splashHidden ? 'hidden' : ''}`.trim()} style={{ backdropFilter: dissolving ? 'blur(0px) saturate(1) brightness(1)' : 'blur(30px) saturate(.72) brightness(.92)', WebkitBackdropFilter: dissolving ? 'blur(0px) saturate(1) brightness(1)' : 'blur(30px) saturate(.72) brightness(.92)' }}>
         <div className="splash-glow" />
         <SourceGlassCanvas active={!splashHidden} exiting={entering} off={glassOff} />
         <div className="splash-content" id="splash-welcome">
-          <div className="splash-left ib-on">
-            <p className="splash-sign"><span className="splash-sign-claude">Keleoz Continuum</span><button type="button" id="gw-toggle" className={glassOff ? 'off' : ''} aria-label="切换玻璃画窗" aria-pressed={!glassOff} onClick={() => setGlassOff((current) => !current)}><svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg></button></p>
+          <div ref={splashLeftRef} className={`splash-left${spaceMode === 'brand' ? ' ib-on' : ''}`} style={{ opacity: welcomeFading ? 0 : 1, transition: 'opacity .6s ease-out' }}>
+            <p ref={splashSignRef} className="splash-sign"><button type="button" id="ib-mode-toggle" className="source-space-toggle" onClick={() => setSpaceMode((current) => current === 'brand' ? 'welcome' : 'brand')}><span className="splash-sign-claude">Keleoz Continuum</span></button><button type="button" id="gw-toggle" className={glassOff ? 'off' : ''} aria-label="切换玻璃画窗" aria-pressed={!glassOff} onClick={() => setGlassOff((current) => !current)}><svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg></button></p>
             <div className="splash-left-rule" />
-            <div className="splash-swap ib-mode"><div className="splash-ib">
+            <div className={`splash-swap${spaceMode === 'brand' ? ' ib-mode' : ''}`}>
+              <div className="splash-orig">
+                <p className="splash-title">Welcome to <span className="ib-hl">Keleoz</span> Continuum</p>
+                <p className="splash-desc">这是一个<span className="splash-white">面向公开访问</span>的个人数字空间。</p>
+                <p className="splash-desc2">你可以在这里阅读书写、探索房间，<br />也可以留下来信，让这个空间继续生长。</p>
+                <p className="splash-note">公开内容由 Owner 发布，私人来信不会被公开。</p>
+                <div className="splash-buttons"><button type="button" className="splash-action-btn" onClick={enterSite}>进入空间</button></div>
+              </div>
+              <div ref={splashBrandRef} className="splash-ib">
               <p className="home-subtitle text-entered">A personal digital space.<br />All traces are kept here, waiting to continue.</p>
               <h1 className="home-title text-entered"><span className="t-internal">Keleoz</span><span className="home-rule" /><span className="t-beyond">Continuum</span></h1>
               <p className="splash-public-definition">一个持续生长的个人数字空间。</p>
               <button type="button" className="splash-skip source-enter" onClick={enterSite}>Enter / 进入</button>
-            </div></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
