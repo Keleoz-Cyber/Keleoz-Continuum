@@ -54,6 +54,7 @@ export function RoomClient() {
 
   return (
     <main className="source-room-page">
+      <div className="source-public-bg" aria-hidden="true" />
       <div id="app">
         <div id="splash" className="hidden" />
         <div className="page" id="page-home" />

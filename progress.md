@@ -302,3 +302,41 @@
 - Fresh browser evidence: `home-no-skip-unified.png`, `blog-unified-nav.png`, `letters-unified-nav-final.png`, `room-unified-nav-final.png`, `music-desktop-redirect-final.png`, `home-mobile-source-unlocked2.png`, and `mobile-music-source-open.png`.
 - Rechecked the topbar against the immutable Desktop source: the Home adapter was hiding only navigation anchors, leaving their parent list items in the flex gap and producing the large `KC`→`Blog` spacing. The adapter now hides the unused parent items, while the public Blog/Letters/Room shell uses the same `ul`/`li` hierarchy, source butterfly mark, source font weights, dimensions, and responsive breakpoints. Browser font loading is shared from the source stylesheet so the text widths and baselines match across Home and subpages.
 - Fresh topbar evidence: `nav-home-source-match-fixed2.png`, `nav-blog-source-exact2.png`, `nav-blog-768-source-match.png`, and `nav-blog-480-source-match.png`; at 1440px the public and source Home brand/link x-positions match (`KC` x=51, Blog x=126.609, Room x=182.938, Letters x=248.625).
+
+### Phase 13 start: implemented-surface source parity audit (2026-08-27)
+- Re-read the design baseline, provenance, reuse ledger, active planning files, and the systematic-debugging/browser-verification rules.
+- Audit target is evidence-backed parity for all already implemented surfaces, with special attention to Home brightness, ripple sparkle, and Blog/Letters background brightness.
+- Upstream snapshots remain immutable; no corrective parameter changes will be made before source/public layer evidence is captured.
+- Restored the stopped local Next dev server and opened a fresh headed Playwright browser at 1440×900.
+- Captured the raw immutable Desktop source over HTTP as `output/playwright/audit-source-home-http.png`; its two known optional source misses remain present, and the local-data guard appears only in the raw source comparison surface.
+- Dismissed the raw source's local-data warning solely for visual comparison and captured `audit-source-home-clean.png` plus `audit-public-home-current.png` at the same 1440×900 viewport.
+- Computed-style comparison found the public adapter's forced `overlay` blend is the only sampled Home glass-stack difference; this explains both the brighter image and the ripple sparkle amplification.
+- Captured raw source Blog and public Blog at the same viewport. The background brightness difference is confirmed in computed styles rather than subjective screenshots: the public shell omits the source brightness/desaturation filter, raises the pale overlay alpha, and adds an opaque light root.
+- Captured `audit-source-letters.png` and `audit-public-letters.png`. Envelope color/border/shadow match the source; the shared page composition and missing effective backdrop blur account for the visible drift.
+- Captured source/public Room geometry. The source engine dimensions match, but the public host background and vertical page sizing do not; the public game sits 33px higher and on a flat brighter root.
+- Inspected live CSSOM on public Letters: the compiled rules have dropped every declared backdrop-filter for nav, intro, glass card, and envelope. Missing glass blur is a confirmed compiler/output difference, not merely subjective appearance.
+- Compared compiled rules: declarations authored only in standard form retain both forms, while manually duplicated standard-then-prefixed declarations collapse to the unusable prefixed form. This identifies the exact build-time cause of missing public glass blur.
+- Compared raw-source and public Desktop Music panels. Geometry, colors, blur, shadow, and control count match exactly; only the already-identified Home ripple blend changes the scene behind it.
+- Captured source/public Mobile Home at 390×844. Sampled topbar/dock/body values match exactly after removing the source-only local lock; no unintended Mobile shell color drift was found.
+- Captured source/public Mobile Music. Fullscreen geometry and sampled visual values match exactly; only branding/routing adapters differ.
+- Re-captured source Blog and Letters after completing the original `enterSite()` flow. These are the valid visual references; they confirm background wash as the dominant mismatch rather than a wholesale module-layout failure.
+- Reproduced the source's local/offline water fallback in a fresh HTTP tab by forcing only the `rebuildBg()` readback failure before source startup. The resulting `gw-gloss` state is source-owned and captured in `audit-source-home-forced-fallback.png`.
+- Captured 12-frame sequences for the source gloss fallback and current public Home. Pixel analysis confirms higher public brightness, temporal variance, and extreme highlight incidence; the user's reported sparkle is reproducible and attributable to the current adapter branch.
+- Audited public Blog controls against the product boundary: Guest-visible write/category/password-diary controls are unintended; only an authenticated Owner should receive the working Studio entry.
+- Added `source-visual-parity.test.ts`. The first run failed at the missing adapter import; a behavior-free typed scaffold then produced the intended two RED failures for missing gloss injection and missing source background/blur/Room contracts.
+- Implemented the public Home bootstrap adapter, source-valued Blog/Letters background composition, working public glass filters, Room source background/full-height host, and Owner-only Blog Studio control projection.
+- Focused visual-parity contract is GREEN: 1 file / 2 tests passed.
+- Production-browser recheck passed for fixed Home, Blog, Letters, and Room. Home is in source `gw-gloss`; Blog/Letters computed filters match source and Guest controls are absent; Room page height and y-position match source.
+- Visual side-by-side review found and corrected one remaining layer-order issue: the public pale overlay is now independent from the filtered image, matching upstream sibling-layer composition instead of being dimmed by the image filter.
+- Final production captures `audit-final-blog.png`, `audit-final-letters.png`, `audit-final-room.png`, and `audit-source-room-entered.png` confirm corrected visual composition and near-identical Room geometry.
+- Raw source route, immutable snapshot, and original local HTML remain byte-identical at SHA-256 `92F8255E6B710FEA150F3F08BC51737442C6CC2F707C3DCB4A64C4AC1FBE8D28`; the query-adapted response is separately identified by `x-content-adapter`.
+- Final local verification: Vitest 15 files / 46 tests, ESLint, TypeScript, and production build all pass. Phase 13 parity audit is complete; remaining Phase 9 modules are outside this audit rather than claimed complete.
+- Independent completion review returned no Critical issues and two Important fixes. Verified both against current code and began follow-up: adapted-cache versioning/revalidation and failure-closed optional Owner decoration. Also accepted the Mobile Room overlay exclusion and replaced stack-dependent Canvas detection after confirming the Desktop snapshot has only one readback call.
+
+### Phase 14 start: completion-review hardening (2026-08-28)
+- Added RED coverage for adapted raw/query route caching and optional Owner lookup failure-closed behavior; both now pass after targeted fixes.
+- Replaced the gloss bootstrap's stack-text check with a direct readback interception for the pinned Desktop source and added execution/idempotence coverage.
+- Scoped the public background overlay away from the Mobile Room boundary note.
+- Final production browser smoke captured `final-home-parity.png`, `final-blog-parity.png`, `final-letters-parity.png`, and `final-room-parity.png` at 1440×900. Computed Home is `gw-gloss` with `opacity:1`/`overlay`; Blog/Letters use source filters and blur; Room is 1440×900 with the source y=`199.03125` placement.
+- Production route-header check: raw source is 200 with `public, max-age=31536000, immutable`; `?continuum-gloss=2` is 200 with `no-cache` and `x-content-adapter: Continuum source gloss fallback v2`.
+- Full final verification passed: Vitest 17 files / 51 tests, ESLint, TypeScript, Next production build, and `git diff --check`. Phase 14 is complete; the remaining Phase 9 experience modules are not being claimed complete.

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { PublicContentListItem } from '@/modules/content/dto'
 import { SourcePublicNav } from '@/modules/home/source-public-nav'
 
-export function BlogListClient({ items }: { items: PublicContentListItem[] }) {
+export function BlogListClient({ items, isOwner }: { items: PublicContentListItem[]; isOwner: boolean }) {
   const [query, setQuery] = useState('')
   const [settledQuery, setSettledQuery] = useState('')
   const [category, setCategory] = useState('All')
@@ -46,12 +46,9 @@ export function BlogListClient({ items }: { items: PublicContentListItem[] }) {
                 <button className={`cat-tag${category === 'All' ? ' active' : ''}`} type="button" onClick={() => setCategory('All')}>All</button>
                 {categories.map((itemCategory) => <button className={`cat-tag${category === itemCategory ? ' active' : ''}`} type="button" key={itemCategory} onClick={() => setCategory(itemCategory)}>{itemCategory}</button>)}
               </div>
-              <div className="blog-side-rule" />
-              <div className="blog-actions">
-                <Link className="btn btn-primary" href="/studio/login">+ 写日志</Link>
-                <button className="btn" type="button" disabled>+ 分类</button>
-                <button className="btn" type="button" disabled>密码日记本</button>
-              </div>
+              {isOwner ? <><div className="blog-side-rule" /><div className="blog-actions">
+                <Link className="btn btn-primary" href="/studio">+ 写日志</Link>
+              </div></> : null}
             </aside>
             <div className="blog-main">
               <input className="blog-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索标题、副标题、分类或内容…" />

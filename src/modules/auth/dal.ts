@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { SESSION_COOKIE_NAME } from '@/modules/auth/constants'
+import { resolveOptionalOwner } from '@/modules/auth/optional'
 import { authRepository } from '@/modules/auth/runtime'
 
 export const getCurrentOwner = cache(async () => {
@@ -13,6 +14,8 @@ export const getCurrentOwner = cache(async () => {
 
   return authRepository.resolveOwnerByToken(token)
 })
+
+export const getOptionalCurrentOwner = cache(() => resolveOptionalOwner(getCurrentOwner))
 
 export async function requireOwner(): Promise<{ id: string; username: string }> {
   const owner = await getCurrentOwner()

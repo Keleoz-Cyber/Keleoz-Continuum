@@ -230,7 +230,7 @@ Verification: the original local file and immutable snapshot both hash to `92F82
 
 Reuse classification: Exact runtime reuse. The parent only injects an in-memory public adapter for Keleoz wording, reachable public routes, and hiding local-only controls; it never writes to or transforms the upstream files on disk.
 
-Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM. HTTP Canvas readback succeeds where the original offline `file://` run falls back to `REFRACT_OK=false`; the public adapter therefore keeps the source high-resolution `gw-img` dominant and composites the unchanged source ripple layer with the source fallback's `overlay` blend at full ripple opacity, matching the clear offline presentation without changing the source file. The source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior.
+Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM. The raw source route remains byte-identical; only the public Home request adds `?continuum-gloss=1`, which injects a pre-runtime compatibility bootstrap that rejects Canvas readback only inside source `rebuildBg()`. The unchanged source code then selects its own `REFRACT_OK=false` / `gw-gloss` fallback, including the source transparent gloss pixels, opacity, blend mode, drops, and pointer simulation. This matches the clear offline branch without rewriting the algorithm or changing the snapshot. The source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior.
 
 Feature: Shared public navigation and source-responsive Home/Music routing
 
@@ -251,3 +251,15 @@ Preserved behavior: original 1672×941 pixel room, source asset loading, charact
 Reuse classification: Exact runtime reuse through a thin host/navigation adapter and a traversal-safe immutable-source asset route.
 
 Intentional differences: the public host does not expose the upstream local lock or browser API-key mechanisms; Mobile does not squeeze the Desktop Room into a phone viewport and will receive its own fullscreen App adapters.
+
+Feature: Implemented-surface visual parity audit
+
+Implemented paths and symbols: `src/modules/home/source-html-adapter.ts`, `src/app/reference/internal-beyond/[...path]/route.ts`, `src/app/source-public.css`, `src/app/source-room.css`, `src/app/blog/page.tsx`, `src/modules/content/blog-list-client.tsx`; source Desktop `InternalBeyond.html:71-89`, `:243-336`, `:2539-2785`, `:3368-3369`, `:27069-27362`; source Room `game/game_module.js:805-820`, `:1314-1347`.
+
+Preserved behavior: source Home gloss-water branch; source Internal subpage background filter and pale overlay as separate layers; source navigation/module-intro/card/envelope blur; source Room full-height centering and game geometry; source Desktop/Mobile Music runtime surfaces.
+
+Verification: raw route, snapshot, and original HTML all hash to `92F8255E6B710FEA150F3F08BC51737442C6CC2F707C3DCB4A64C4AC1FBE8D28`. Twelve-frame Home analysis reduced public mean luminance from `156.53` to `150.04` against source fallback `149.88`, and matched the source near-white-pixel ratio. Production browser captures: `audit-fixed-home.png`, `audit-final-blog.png`, `audit-final-letters.png`, `audit-final-room.png`, and `audit-source-room-entered.png`.
+
+Reuse classification: exact source runtime reuse for Home/Music/Room internals; adapter reuse for server-backed Blog/Letters and public routing/identity/security.
+
+Intentional differences: Keleoz branding and public copy replace upstream identity; Guest Blog hides local Owner/deferred controls; public Letters uses server submission/moderation; source-only clock, export/import, dock, local lock, API keys, and private identity controls are not exposed.

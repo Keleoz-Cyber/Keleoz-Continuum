@@ -1,9 +1,9 @@
-.source-room-page { position: relative; min-height: 100svh; overflow: hidden; background: #dfe9f6; color: #16294f; }
+.source-room-page { position: relative; min-height: 100svh; overflow: hidden; background: #181e32; color: #16294f; }
 .source-room-page #app { position: relative; min-height: 100svh; z-index: 2; }
 .source-room-page #page-home { display: none; }
 .source-room-page #navbar { display: none; }
-.source-room-loading { position: fixed; inset: 0; z-index: 1; display: grid; place-items: center; color: #274673; font-family: "Cormorant Garamond", serif; font-size: 1rem; font-style: italic; letter-spacing: .08em; background: linear-gradient(rgba(229,240,252,.15), rgba(210,228,248,.32)), url('/reference/internal-beyond/bg-internal.jpg') center / cover no-repeat; }
-.source-room-page #page-game { position: relative; z-index: 3; }
+.source-room-loading { position: fixed; inset: 0; z-index: 1; display: grid; place-items: center; color: #274673; font-family: "Cormorant Garamond", serif; font-size: 1rem; font-style: italic; letter-spacing: .08em; background: rgba(235,244,255,.5); backdrop-filter: blur(32px); }
+.source-room-page #page-game { position: relative; z-index: 3; min-height: 100vh; margin: 0 auto; }
 @media (max-width: 900px) {
   .source-room-page { overflow: auto; }
   .source-room-page #app,

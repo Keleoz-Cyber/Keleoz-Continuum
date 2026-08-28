@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 10 in progress: source-exact frontend recovery
+Phase 14 complete: completion-review hardening for parity adapters; remaining Phase 9 experience modules stay in progress
 
 ## Phases
 
@@ -84,6 +84,23 @@ Phase 10 in progress: source-exact frontend recovery
 - [x] Verify original mode toggle, enter timeline, Canvas stack, and Music transparency in a real browser
 - **Status:** complete
 
+### Phase 13: Implemented-Surface Source Parity Audit
+- [x] Capture comparable source/public screenshots and computed-style evidence for Desktop Home, Blog, Letters, Room, and Music
+- [x] Classify every visible difference as exact-source behavior, public-site-required adaptation, or unintended drift
+- [x] Diagnose Home brightness and ripple sparkle from the actual layer/compositing branches before changing parameters
+- [x] Diagnose Blog/Letters background brightness from source overlay and page-layer values before changing colors
+- [x] Correct confirmed unintended drift with source values or the thinnest compatible adapter
+- [x] Re-run desktop/mobile browser checks and the proportional local verification suite
+- **Status:** complete
+
+### Phase 14: Completion-Review Hardening
+- [x] Revalidate adapted-source cache semantics and bust the previously immutable query URL
+- [x] Make optional Owner decoration fail closed without blocking public content
+- [x] Remove non-standard stack dependence from the source gloss bootstrap and test idempotence
+- [x] Exclude Mobile Room boundary note from the Desktop background overlay
+- [x] Re-run browser smoke and full local verification after review fixes
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -145,10 +162,24 @@ Phase 10 in progress: source-exact frontend recovery
 | Public Home initially had no source `ibModeToggle` state and mounted its signature above the title | 1 | Restore the source two-layer splash swap, measured signature translation, and independent glass-board toggle |
 | Signature measurement computed correctly but CSS `splashFadeUp` animation overrode the inline transform | 1 | Disable the source entrance animation before applying the measured brand-mode translation, matching `ibModeToggle` |
 | First iframe adapter string contained literal newlines inside an injected single-quoted CSS string | 1 | Remove the unnecessary line breaks so the in-memory adapter script parses as valid JavaScript |
-| HTTP same-origin Canvas readback made the source refracted 320-grid layer replace the high-resolution image, unlike the offline file fallback | 1 | Match the source fallback visually in the public in-memory adapter by keeping `gw-img` dominant and using the source ripple layer's `overlay` blend at full opacity |
+| HTTP same-origin Canvas readback made the source refracted 320-grid layer replace the high-resolution image, unlike the offline file fallback | 1 | Keep the raw source route byte-identical; only the public Home query injects a pre-runtime adapter that forces the source's own `REFRACT_OK=false` / `gw-gloss` branch, removing the incorrect CSS overlay simulation |
 | Public ripple was too subtle after the sharp-image adapter set `gw-ripple` to `0.2` | 1 | Test opacity, then use the source fallback's `overlay` blend at opacity `1` after the opacity-only trial blurred the HTTP presentation |
 | Home still loaded the Desktop source at mobile width, so Mobile was only a responsive crop | 1 | Select the immutable Desktop or Mobile source route from the viewport and apply a separate in-memory public adapter for each shell |
 | Home topbar kept large gaps after hiding unused anchors because the source flex gap belongs to their parent `<li>` items | 1 | Hide unused parent list items and make public subpage navigation use the same `ul`/`li` hierarchy, font loading, and responsive breakpoints as the source |
+| Playwright audit session was no longer open | 1 | Start a fresh headed CLI browser before collecting comparable source/public screenshots |
+| First browser audit navigation hit `ERR_CONNECTION_REFUSED` because the dev server had stopped | 1 | Restart `pnpm dev`, confirm Next 16.3.3 is ready on port 3000, then repeat the source capture |
+| Raw source Blog/Letters screenshots still showed the splash after direct `navTo()` | 1 | Keep the computed-style evidence, but recapture visual evidence after completing the source entry transition before switching pages |
+| Playwright `run-code` examples used a stale raw-`await page` form and produced a syntax error | 1 | Use the installed CLI's reported contract: pass a JavaScript function that receives `page`, or avoid `run-code` when ordinary commands suffice |
+| Combined fallback/public 12-frame capture reached the 30-second command boundary after finishing fallback frames | 1 | Keep the completed fallback set and run the public 12-frame capture as a separate bounded command |
+| Combined Room component/CSS patch used an invalid multi-file hunk boundary | 1 | Keep the successful component edit and apply the Room CSS correction as a separate exact patch |
+| Turn interruption stopped the prior dev-server and Playwright process IDs | 1 | Start fresh bounded server/browser sessions and rerun all post-fix visual evidence rather than relying on pre-interruption state |
+| Windows Turbopack dev runtime entered an HMR panic loop while recreating existing `.next/dev/node_modules` junctions | 1 | Stop the unstable dev process and perform post-fix browser verification against a fresh production build/server, without deleting user/source data |
+| Production Blog/Letters browser routes returned 500 during visual verification | 1 | Server trace shows `ECONNREFUSED 127.0.0.1:55432`; restore the existing development PostgreSQL container, then repeat unchanged route checks |
+| Docker Compose start used the guessed service name `postgres` | 1 | Read `compose.dev.yml`; the existing service is `continuum-db`, so start that exact service instead |
+| Completion review found adapted HTML inherited one-year immutable caching | 1 | Add adapter version `continuum-gloss=2`, mark only adapted HTML `no-cache`, and test raw/adapted headers separately |
+| Completion review found optional Owner lookup could turn a DB outage into a public Blog 500 | 1 | Add a failure-closed optional identity resolver and keep `requireOwner` strict for protected actions |
+| Completion review found the gloss bootstrap depended on `Error().stack` text | 1 | Confirm the pinned Desktop snapshot has exactly one `getImageData()` call and intercept that readback directly; add execution/idempotence coverage |
+| Completion review found the Desktop overlay selector affected the Mobile Room boundary note | 1 | Scope the pseudo-layer to `.source-room-page:not(.source-room-mobile-note)` |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
