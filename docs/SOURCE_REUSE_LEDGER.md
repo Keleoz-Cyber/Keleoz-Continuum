@@ -230,7 +230,7 @@ Verification: the original local file and immutable snapshot both hash to `92F82
 
 Reuse classification: Exact runtime reuse. The parent only injects an in-memory public adapter for Keleoz wording, reachable public routes, and hiding local-only controls; it never writes to or transforms the upstream files on disk.
 
-Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM. The raw source route remains byte-identical; only the public Home request adds `?continuum-gloss=1`, which injects a pre-runtime compatibility bootstrap that rejects Canvas readback only inside source `rebuildBg()`. The unchanged source code then selects its own `REFRACT_OK=false` / `gw-gloss` fallback, including the source transparent gloss pixels, opacity, blend mode, drops, and pointer simulation. This matches the clear offline branch without rewriting the algorithm or changing the snapshot. The source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior.
+Intentional differences: public branding and route/security boundaries are adapted in the iframe DOM. The raw source route remains byte-identical; only the public Home request adds `?continuum-gloss=2`, which injects a pre-runtime compatibility bootstrap that rejects the pinned source's sole Canvas readback. The unchanged source code then selects its own `REFRACT_OK=false` / `gw-gloss` fallback, including the source transparent gloss pixels, opacity, blend mode, drops, and pointer simulation. This matches the clear offline branch without rewriting the algorithm or changing the snapshot. The source's optional `bg-canvas.jpg` probe and missing `signs.js` remain source behavior.
 
 Feature: Shared public navigation and source-responsive Home/Music routing
 
@@ -251,6 +251,18 @@ Preserved behavior: original 1672×941 pixel room, source asset loading, charact
 Reuse classification: Exact runtime reuse through a thin host/navigation adapter and a traversal-safe immutable-source asset route.
 
 Intentional differences: the public host does not expose the upstream local lock or browser API-key mechanisms; Mobile does not squeeze the Desktop Room into a phone viewport and will receive its own fullscreen App adapters.
+
+Feature: Wardrobe and Sleep browser-local state boundary
+
+Implemented paths and symbols: `src/modules/room/source-state.ts`, `src/modules/room/source-state-browser.ts`, `src/modules/room/room-client.tsx`; source Desktop `game/game_module.js:50-70`, `:1517-1572`, `:1725-1750`, `:2850-2888`, `:3637-3712`, `:3730-3763`.
+
+Preserved behavior: unchanged six-outfit Wardrobe panel and dialogue; synchronized walk/idle/lie/portrait source assets; unchanged bed pathfinding, two-stage sleep dialogue, lie-frame animation, pointer wake, and source-disabled Zzz rule.
+
+Reuse classification: Exact runtime reuse for presentation and character mechanics; adapter reuse only for the Guest browser-storage boundary.
+
+Contract evidence: `tests/unit/room-source-state.test.ts` covers source-key isolation, unrelated-key delegation, clear behavior, state validation, and versioned records. Production browser smoke covered Casual -> JK selection, `idle_jk.png` -> `lie_jk.png` -> wake, version 1 IndexedDB updates, empty physical localStorage, clean Room-to-Blog teardown, and Room re-entry with zero console errors.
+
+Intentional differences: the unchanged source continues to call the synchronous `localStorage.suiGameState` API, but the public host serves that one compatibility key from memory and persists it in versioned IndexedDB. Other localStorage keys retain native behavior. If IndexedDB is unavailable, Room degrades to the exact source localStorage behavior instead of blocking non-AI gameplay.
 
 Feature: Implemented-surface visual parity audit
 

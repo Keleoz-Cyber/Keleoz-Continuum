@@ -18,14 +18,28 @@ function PublicMark() {
   </svg>
 }
 
-export function SourcePublicNav({ current }: { current?: 'blog' | 'letters' | 'room' }) {
+function PublicNavLink({ children, className, href, reloadDocument }: {
+  children: React.ReactNode
+  className?: string
+  href: string
+  reloadDocument?: boolean
+}) {
+  return reloadDocument
+    ? <a className={className} href={href}>{children}</a>
+    : <Link className={className} href={href}>{children}</Link>
+}
+
+export function SourcePublicNav({ current, reloadDocument = false }: {
+  current?: 'blog' | 'letters' | 'room'
+  reloadDocument?: boolean
+}) {
   return (
     <nav className="source-public-nav" aria-label="主导航">
-      <Link className="source-public-brand" href="/"><PublicMark /> KC</Link>
+      <PublicNavLink className="source-public-brand" href="/" reloadDocument={reloadDocument}><PublicMark /> KC</PublicNavLink>
       <ul className="source-public-links">
-        <li><Link className={current === 'blog' ? 'active' : ''} href="/blog">Blog</Link></li>
-        <li><Link className={current === 'room' ? 'active' : ''} href="/room">Room</Link></li>
-        <li><Link className={current === 'letters' ? 'active' : ''} href="/letters">Letters</Link></li>
+        <li><PublicNavLink className={current === 'blog' ? 'active' : ''} href="/blog" reloadDocument={reloadDocument}>Blog</PublicNavLink></li>
+        <li><PublicNavLink className={current === 'room' ? 'active' : ''} href="/room" reloadDocument={reloadDocument}>Room</PublicNavLink></li>
+        <li><PublicNavLink className={current === 'letters' ? 'active' : ''} href="/letters" reloadDocument={reloadDocument}>Letters</PublicNavLink></li>
       </ul>
     </nav>
   )

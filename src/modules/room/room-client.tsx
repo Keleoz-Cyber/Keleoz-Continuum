@@ -2,6 +2,32 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { acquireRoomSourceStateBridge } from './source-state-browser'
+
+function stopSourceRoomRuntime() {
+  try {
+    window.navTo?.('home')
+  } catch (error) {
+    console.warn('Room source navigation could not be paused during teardown.', error)
+  }
+
+  const game = window.G
+  if (!game) return
+  game.running = false
+  game.state = 'idle'
+  if (typeof game.animFrame === 'number') window.cancelAnimationFrame(game.animFrame)
+  if (typeof game.typewriterTimer === 'number') window.clearInterval(game.typewriterTimer)
+  if (typeof game._interactTimeout === 'number') window.clearTimeout(game._interactTimeout)
+  if (typeof game._teaAnimInterval === 'number') window.clearInterval(game._teaAnimInterval)
+  if (typeof game._deskSprTimer === 'number') window.clearInterval(game._deskSprTimer)
+  if (typeof game.swFrameTimer === 'number') window.clearInterval(game.swFrameTimer)
+  if (typeof game.swBubbleTimer === 'number') window.clearInterval(game.swBubbleTimer)
+  game._teaThemeObs?.disconnect()
+  game.swThemeObs?.disconnect()
+  game.viewport = null
+  game.container = null
+}
+
 export function RoomClient() {
   const [loaded, setLoaded] = useState(false)
   const [mobile, setMobile] = useState(false)
@@ -21,23 +47,49 @@ export function RoomClient() {
       window.setTimeout(() => setMobile(true), 0)
       return
     }
+    let cancelled = false
+    let releaseStateBridge: (() => void) | undefined
+    let startTimer: number | undefined
     const previousNavTo = window.navTo
-    window.navTo = (page) => {
-      document.querySelectorAll('.source-room-page .page').forEach((element) => element.classList.remove('active'))
-      document.getElementById(`page-${page}`)?.classList.add('active')
+
+    const mountSourceRuntime = () => {
+      if (cancelled) {
+        return
+      }
+      window.navTo = (page) => {
+        document.querySelectorAll('.source-room-page .page').forEach((element) => element.classList.remove('active'))
+        document.getElementById(`page-${page}`)?.classList.add('active')
+      }
+      const script = document.createElement('script')
+      script.src = '/game/game_module.js'
+      script.async = false
+      script.onload = () => {
+        setLoaded(true)
+        startTimer = window.setTimeout(startRoom, 60)
+      }
+      script.onerror = () => setLoaded(true)
+      scriptRef.current = script
+      document.body.appendChild(script)
     }
-    const script = document.createElement('script')
-    script.src = '/game/game_module.js'
-    script.async = false
-    script.onload = () => {
-      setLoaded(true)
-      window.setTimeout(startRoom, 60)
-    }
-    script.onerror = () => setLoaded(true)
-    scriptRef.current = script
-    document.body.appendChild(script)
+
+    void acquireRoomSourceStateBridge()
+      .then((release) => {
+        if (cancelled) {
+          release()
+          return
+        }
+        releaseStateBridge = release
+        mountSourceRuntime()
+      })
+      .catch((error) => {
+        console.warn('Room state bridge failed; loading the immutable source runtime without it.', error)
+        mountSourceRuntime()
+      })
     return () => {
-      script.remove()
+      cancelled = true
+      if (startTimer !== undefined) window.clearTimeout(startTimer)
+      stopSourceRoomRuntime()
+      scriptRef.current?.remove()
       scriptRef.current = null
       document.getElementById('game-css')?.remove()
       document.getElementById('game-panel')?.remove()
@@ -45,6 +97,7 @@ export function RoomClient() {
       document.getElementById('game-mini')?.remove()
       if (previousNavTo) window.navTo = previousNavTo
       else delete window.navTo
+      releaseStateBridge?.()
     }
   }, [])
 
@@ -68,5 +121,20 @@ export function RoomClient() {
 declare global {
   interface Window {
     navTo?: (page: string) => void
+    G?: {
+      running?: boolean
+      state?: string
+      animFrame?: number | null
+      typewriterTimer?: number | null
+      _interactTimeout?: number | null
+      _teaAnimInterval?: number | null
+      _deskSprTimer?: number | null
+      swFrameTimer?: number | null
+      swBubbleTimer?: number | null
+      _teaThemeObs?: MutationObserver
+      swThemeObs?: MutationObserver
+      viewport?: HTMLElement | null
+      container?: HTMLElement | null
+    }
   }
 }

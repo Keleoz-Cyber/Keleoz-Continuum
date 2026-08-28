@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default function RoomPage() {
-  return <><SourcePublicNav current="room" /><RoomClient /></>
+  return <><SourcePublicNav current="room" reloadDocument /><RoomClient /></>
 }

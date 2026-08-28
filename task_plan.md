@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 14 complete: completion-review hardening for parity adapters; remaining Phase 9 experience modules stay in progress
+Phase 15 complete: source-exact Wardrobe and Sleep with versioned browser-local persistence
 
 ## Phases
 
@@ -56,9 +56,10 @@ Phase 14 complete: completion-review hardening for parity adapters; remaining Ph
 - **Status:** complete
 
 ### Phase 9: Continue Continuum Experience Modules
-- [ ] Build final Home/Desktop/Mobile shells while preserving the current public content core
+- [x] Build final Home/Desktop/Mobile shells while preserving the current public content core
 - [x] Adapt Letters submission, public wall, Owner review, and reply in a focused slice
-- [ ] Adapt Music, Room, Tea, Story, Tarot, Wardrobe, Sleep, and Moments in focused slices
+- [x] Adapt source-exact Music and Desktop Room, including Wardrobe and Sleep
+- [ ] Adapt Tea, Story, Tarot, and Moments in focused slices
 - [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
 - **Status:** in_progress
 
@@ -99,6 +100,15 @@ Phase 14 complete: completion-review hardening for parity adapters; remaining Ph
 - [x] Remove non-standard stack dependence from the source gloss bootstrap and test idempotence
 - [x] Exclude Mobile Room boundary note from the Desktop background overlay
 - [x] Re-run browser smoke and full local verification after review fixes
+- **Status:** complete
+
+### Phase 15: Wardrobe and Sleep Source Contract
+- [x] Capture the original Wardrobe and Sleep interaction/state contracts from the immutable Desktop source
+- [x] Reproduce both flows in the public Room host and identify only host/storage/identity incompatibilities
+- [x] Add contract coverage before introducing any adapter behavior
+- [x] Preserve the source UI, six-outfit sprite synchronization, bed dialogue, sleep frames, and wake flow
+- [x] Move Guest Wardrobe/Sleep persistence behind a versioned browser-local adapter without editing the snapshot
+- [x] Verify source/public behavior in a real browser and run one proportional local checkpoint
 - **Status:** complete
 
 ## Key Questions
@@ -180,6 +190,22 @@ Phase 14 complete: completion-review hardening for parity adapters; remaining Ph
 | Completion review found optional Owner lookup could turn a DB outage into a public Blog 500 | 1 | Add a failure-closed optional identity resolver and keep `requireOwner` strict for protected actions |
 | Completion review found the gloss bootstrap depended on `Error().stack` text | 1 | Confirm the pinned Desktop snapshot has exactly one `getImageData()` call and intercept that readback directly; add execution/idempotence coverage |
 | Completion review found the Desktop overlay selector affected the Mobile Room boundary note | 1 | Scope the pseudo-layer to `.source-room-page:not(.source-room-mobile-note)` |
+| Phase 15 inspection guessed a Room `host.html` path that does not exist | 1 | Follow the actual Next host chain: `RoomClient` mounts the immutable `/game/game_module.js` route directly |
+| Phase 15 asset inventory searched a nonexistent `public/game` directory | 1 | Treat `/game/*` as a traversal-safe runtime route over the immutable Desktop snapshot rather than copied public assets |
+| Phase 15 RED test initially failed at the missing `source-state` module boundary | 1 | Add a typed no-op scaffold, then rerun until the test fails on the intended storage behavior rather than import resolution |
+| First Phase 15 Playwright IndexedDB inspection had one extra closing parenthesis | 1 | Reduce the browser expression to a single `page.evaluate` return and rerun with balanced delimiters |
+| Room re-entry smoke used a guessed `f2e21` ref after a fresh Blog snapshot | 1 | Use the actual current snapshot ref `f1e106` instead of carrying a ref from another page tree |
+| Review-hardening lint rejected three bridge method bindings under `prefer-const` | 1 | Break the fallback/restore closure cycle with one reassigned restore callback and declare the actual bridged methods as `const` |
+| Focused Playwright spec could not launch the package-version headless shell because that browser binary is not installed | 1 | Run this local lifecycle spec against the already installed Chrome channel instead of downloading another browser bundle |
+| Live-failover E2E stopped at the first non-null fallback record while the async Salome assets were still loading | 1 | Poll the actual persisted `outfitIdx === 3` contract instead of treating any earlier source state as completion |
+| First three SPA-back regression attempts missed the intended inner-wake assertion due to source timing/setup | 3 | Drive the original Sleep flow, wait briefly after each completed typewriter line before activating its replaced Next handler, then extend the wake timer and leave during `waking` |
+| Phase 15 SPA regression fell back to `next dev` and Blog returned DB connection errors because Docker Desktop was no longer running | 1 | Restore the existing Docker Desktop engine and `continuum-db`, rebuild/start production once, then rerun the focused test against that stable server |
+| First Docker-error log patch used a stale wording variant for the SPA row | 1 | Locate the exact current row and apply the log-only patch against that text |
+| Docker Desktop did not expose its Linux engine within the first bounded 20-second readiness window | 1 | Continue useful build/static verification, then perform one later engine check instead of polling continuously |
+| SPA-back test still assumed one Next click always advances after visible text | 1 | Model the source typewriter contract explicitly: boundedly click until the requested next state is visible, because the first click may only finish typing |
+| Dialogue helper retried a removed Next button during the source's 400 ms lie transition | 1 | When Next disappears, wait for the requested target state instead of attempting another click; give this single timing test a 45-second ceiling |
+| SPA-back test targeted guessed `#game-viewport`, but the immutable source creates `.game-viewport` without an id | 1 | Use the exact source class from `createViewport()` and keep the runtime untouched |
+| Playwright actionability rejected the transformed Room viewport because scaled ancestor layers intercept the synthetic pointer | 1 | Dispatch a real bubbling `MouseEvent` at the source viewport's measured coordinates, exercising its registered click handler without changing layout |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

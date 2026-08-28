@@ -192,6 +192,31 @@
 | 2026-08-26 | Docker engine pipe was absent while starting Task 2 PostgreSQL | 1 | Start local Docker Desktop and poll readiness before creating the database container |
 | 2026-08-26 | Test-database existence check returned null through the Compose command wrapper | 1 | Query with direct `docker exec`, inspect output, then create only if absent |
 | 2026-08-26 | Checkpoint typecheck failed because invalid environment fixtures could not satisfy Next's narrowed `ProcessEnv` | 1 | Changed only the parser input boundary to `Record<string, string | undefined>` |
+
+### Phase 15 start: Wardrobe and Sleep source contract (2026-08-28)
+- Re-read the V1 baseline, provenance record, reuse ledger, and the relevant immutable Desktop Room source before product changes.
+- Confirmed that the public Room already executes the original Wardrobe/Sleep UI and state machine through the immutable `/game/*` route; no visual rewrite is needed.
+- Isolated the first required public adapter to browser-local persistence: preserve source runtime behavior while replacing the source `localStorage` boundary with versioned IndexedDB.
+- Next checkpoint is a real-browser source/public flow comparison before writing production adapter code.
+- Browser checkpoint: `/room` opened the original Wardrobe dialogue and six-outfit panel; selecting Wedding completed without console-visible failure and produced `output/playwright/phase15-public-wardrobe-wedding.png`.
+- Completed the public source Sleep dialogue after selecting Wedding. The final lie sprite was `lie_wedding.png`, proving cross-state outfit synchronization; the corresponding capture is `output/playwright/phase15-public-sleep-wedding.png`.
+- Observed a potentially source-intentional Zzz mismatch (`display:none`) and paused changes pending exact source CSS/runtime confirmation.
+- Confirmed the Zzz state is intentionally disabled by the immutable source CSS (`.game-zzz{display:none !important}`); no visual change was made.
+- Added the first Room browser-state bridge implementation: the original source key is exposed synchronously to the unchanged runtime through an in-memory channel while versioned records persist in IndexedDB before source script startup.
+- Fresh production build completed and `/room` started with a version 1 IndexedDB record visible to the browser. Physical localStorage-key absence and post-selection record updates remain to be checked before completion.
+- Confirmed physical `localStorage` enumeration is empty after bridge installation; the original `localStorage.getItem('suiGameState')` call still receives its in-memory compatibility value. Reopened the unchanged source Wardrobe panel successfully.
+- Selected JK and observed the original sprite plus matching versioned IndexedDB record with no physical localStorage key; began the post-bridge Sleep flow at the source first dialogue.
+- Post-bridge Sleep advanced through the original second dialogue (`我知道了，好。 / 晚安。`) without altering source timing or controls.
+- Completed the sleep transition with JK selected; verified `lie_jk.png` and a matching version 1 IndexedDB state, with no physical `suiGameState` localStorage key.
+- Verified source pointer wake back to idle JK and clean client-navigation teardown to Blog; the bridged key is no longer exposed outside Room and no physical localStorage key reappeared.
+- Verified client-navigation back into Room reinstalls the bridge and source runtime with one Room container, empty physical localStorage, and zero browser console messages.
+- Completion review identified runtime IndexedDB failover, install rejection, validation, rapid-unmount cleanup, and production-bridge test gaps. Verified each against the implementation before changing code.
+- Added bounded Room coordinates and complete version-1 record validation; added permanent live failover from IndexedDB to the source physical localStorage key; legacy fallback state now wins the next successful migration.
+- Added pre-await shared leases, bridge-install rejection recovery, tracked Room startup timer cleanup, source pause/timer/observer teardown, and hard-document navigation out of the monolithic Room runtime.
+- Added focused Playwright coverage for the production bridge's normal IndexedDB path, physical-key cleanup after navigation, and simulated live IndexedDB quota failure.
+- Hardened review findings: a failed install generation cannot clear its replacement; live IndexedDB failure switches once to exact source localStorage and migrates that newer fallback record on reload; invalid records/coordinates are rejected; source runtime teardown invalidates the detached viewport before delayed callbacks run.
+- Final focused browser checkpoint passed 4/4 Desktop Room cases; the same suite reports 4/4 skipped under the intentional Mobile boundary. Independent final checks passed: Vitest 18 files / 60 tests, ESLint, TypeScript, production build, `git diff --check`, healthy PostgreSQL, `/room` HTTP 200, and zero upstream snapshot changes.
+- Final code re-review found no remaining Critical or Important issues and returned a merge-ready verdict.
 | 2026-08-27 | Public-page patch attempted Delete and Add operations on the same path | 1 | Split file replacement into separate operations |
 | 2026-08-27 | Playwright Bash wrapper unavailable on Windows | 1 | Used the same official CLI through `npx --package @playwright/cli` |
 | 2026-08-27 | Editor mounted with an unnecessary initial autosave | 1 | Track the last saved snapshot and skip unchanged initial state |
