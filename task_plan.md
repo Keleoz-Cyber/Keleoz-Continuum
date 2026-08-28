@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 15 complete: source-exact Wardrobe and Sleep with versioned browser-local persistence
+Phase 16 in progress: source-exact Tea with a public server AI and quota adapter
 
 ## Phases
 
@@ -59,7 +59,7 @@ Phase 15 complete: source-exact Wardrobe and Sleep with versioned browser-local 
 - [x] Build final Home/Desktop/Mobile shells while preserving the current public content core
 - [x] Adapt Letters submission, public wall, Owner review, and reply in a focused slice
 - [x] Adapt source-exact Music and Desktop Room, including Wardrobe and Sleep
-- [ ] Adapt Tea, Story, Tarot, and Moments in focused slices
+- [ ] Adapt Desktop/Mobile Tea, Story, Tarot, and Moments in focused slices
 - [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
 - **Status:** in_progress
 
@@ -110,6 +110,17 @@ Phase 15 complete: source-exact Wardrobe and Sleep with versioned browser-local 
 - [x] Move Guest Wardrobe/Sleep persistence behind a versioned browser-local adapter without editing the snapshot
 - [x] Verify source/public behavior in a real browser and run one proportional local checkpoint
 - **Status:** complete
+
+### Phase 16: Tea Source Runtime and Guest AI Boundary
+- [x] Capture the immutable source Tea selection, 25-combination, animation, chat, and save contracts
+- [x] Define the shared server-held AI provider and quota contracts with focused RED/GREEN tests
+- [x] Add PostgreSQL request reservations for per-source, per-session, cooldown, concurrency, and daily-budget enforcement
+- [x] Inject only the public `apiConfigs` / `callApiChat` / local-history seams while keeping source Tea UI and animation untouched
+- [x] Keep Tea history in versioned browser IndexedDB and never persist Guest dialogue text on the server
+- [x] Verify original Desktop selection/animation/chat behavior and failure states in a real browser
+- [x] Run one proportional local checkpoint and source-reuse review
+- [ ] Add the Mobile fullscreen Tea adapter from the same contracts (the pinned Mobile source has no complete Tea equivalent)
+- **Status:** in_progress
 
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
@@ -206,6 +217,22 @@ Phase 15 complete: source-exact Wardrobe and Sleep with versioned browser-local 
 | Dialogue helper retried a removed Next button during the source's 400 ms lie transition | 1 | When Next disappears, wait for the requested target state instead of attempting another click; give this single timing test a 45-second ceiling |
 | SPA-back test targeted guessed `#game-viewport`, but the immutable source creates `.game-viewport` without an id | 1 | Use the exact source class from `createViewport()` and keep the runtime untouched |
 | Playwright actionability rejected the transformed Room viewport because scaled ancestor layers intercept the synthetic pointer | 1 | Dispatch a real bubbling `MouseEvent` at the source viewport's measured coordinates, exercising its registered click handler without changing layout |
+| Phase 16 inspection guessed a nonexistent `tests/helpers/database.ts` path | 1 | Follow the actual `@/test/db` import and inspect `src/test/db.ts` instead |
+| Phase 16 Tea contract RED test first stopped at the missing module boundary | 1 | Add a typed no-op Tea contract scaffold, then rerun until assertions fail on the intended source matrix and validation behavior |
+| Tea contract replacement patch combined delete/add operations for the same file and was rejected | 1 | Update the existing scaffold in place rather than replacing the path twice in one patch |
+| Phase 16 quota RED test first stopped at the missing shared AI module boundary | 1 | Add a typed no-op quota scaffold, then rerun for policy assertion failures before implementing limits |
+| Phase 16 provider RED test first stopped at the missing adapter module boundary | 1 | Add a typed no-op provider scaffold, then rerun for HTTP contract assertion failures |
+| Phase 16 Tea service RED test first stopped at the missing orchestration module boundary | 1 | Add typed error/service scaffolding, then rerun for ordering, cleanup, and prompt ownership failures |
+| Phase 16 Tea HTTP RED test first stopped at the missing boundary module | 1 | Add a typed no-op handler scaffold, then rerun for origin, validation, response, and error-mapping failures |
+| Phase 16 local-history RED test first stopped at the missing codec boundary | 1 | Add a typed no-op codec, then rerun for versioning and source-payload validation failures |
+| Phase 16 source-adapter RED test first stopped at the missing module boundary | 1 | Add a pure payload scaffold before browser globals, then rerun for system-stripping and incomplete-state failures |
+| First Tea browser flow lost the active feature when Start was clicked because the capture listener treated every non-marker click as `other` | 1 | Change feature state only for explicit Room interaction buttons/markers; preserve Tea across its internal controls |
+| Story isolation smoke expected the No-API panel immediately, but the immutable source intentionally shows its multi-page Story introduction first | 1 | Assert the active Story introduction plus `apiConfigs.length === 0`; do not skip or rewrite the source introduction |
+| First Phase 16 aggregate typecheck found a Window index-signature cast and Vitest generic matcher/table inference issues | 1 | Use an explicit unknown bridge for browser globals, remove unsupported matcher generics, and narrow the quota usage patch structurally |
+| First clean lint pass warned that Room's Tea companion prop was omitted from the effect dependency list | 1 | Include the primitive `companionName` dependency; the server-provided value is stable and remount-safe |
+| Phase 16 quota repository RED test first stopped at the missing repository boundary | 1 | Add the typed reservation scaffold and schema/migration, then rerun until failures describe quota behavior |
+| Drizzle migration command exited 1 for both existing dev/test databases without printing the underlying SQL error | 1 | Inspect migration journal and live schema read-only before choosing a non-destructive repair; do not rerun the same opaque command |
+| First direct migrator diagnostic used top-level await in `tsx -e` CJS output | 1 | Wrap the diagnostic in an async IIFE so the real database error can be observed |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

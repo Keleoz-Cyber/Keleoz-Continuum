@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { RoomClient } from '@/modules/room/room-client'
 import { SourcePublicNav } from '@/modules/home/source-public-nav'
+import { serverEnv } from '@/shared/env'
 
 export const metadata: Metadata = {
   title: 'Room',
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 }
 
 export default function RoomPage() {
-  return <><SourcePublicNav current="room" reloadDocument /><RoomClient /></>
+  return <><SourcePublicNav current="room" reloadDocument /><RoomClient companionName={serverEnv.AI_COMPANION_NAME} /></>
 }

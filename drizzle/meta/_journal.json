@@ -15,6 +15,13 @@
       "when": 1787776697081,
       "tag": "0001_puzzling_miracleman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787955281116,
+      "tag": "0002_quiet_cargill",
+      "breakpoints": true
     }
   ]
 }

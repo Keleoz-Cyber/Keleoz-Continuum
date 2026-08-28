@@ -264,6 +264,18 @@ Contract evidence: `tests/unit/room-source-state.test.ts` covers source-key isol
 
 Intentional differences: the unchanged source continues to call the synchronous `localStorage.suiGameState` API, but the public host serves that one compatibility key from memory and persists it in versioned IndexedDB. Other localStorage keys retain native behavior. If IndexedDB is unavailable, Room degrades to the exact source localStorage behavior instead of blocking non-AI gameplay.
 
+Feature: Desktop Tea source runtime and Guest AI boundary
+
+Implemented paths and symbols: `src/modules/tea/contracts.ts`, `local-history.ts`, `source-adapter.ts`, `service.ts`, `http.ts`, `runtime.ts`; `src/modules/ai/provider.ts`, `quota.ts`, `repository.ts`; `src/app/api/ai/tea/route.ts`; `src/db/schema/ai.ts`; source Desktop `game/game_module.js:4244-4290`, `:4532-4908`, `:4917-5304`.
+
+Preserved behavior: source five-drink/five-dessert matrix and 25 mood combinations; theme-crossfade selection art; icon flight and wobble; Help/Reset/Exit/Start; companion picker; current-outfit tea sprite animation; opening message; 70-character input; round/Bye behavior; and Save interaction vocabulary.
+
+Reuse classification: Exact runtime reuse for Tea UI, animation, and chat state machine; adapter reuse for server-held provider calls, quotas, public safety, and Guest local history.
+
+Contract evidence: `tests/unit/tea-contracts.test.ts`, `tea-source-adapter.test.ts`, `tea-local-history.test.ts`, `ai-quota.test.ts`, `ai-provider.test.ts`, `tea-service.test.ts`, `tea-http.test.ts`, and `tests/integration/ai-quota-repository.test.ts`; `tests/e2e/tea-source-adapter.spec.ts` covers the production source flow with a mocked provider, disabled-gateway error, IndexedDB Save, and Story isolation.
+
+Intentional differences: source browser `apiConfigs` is replaced by a Tea-only site companion; system prompts are rebuilt server-side and never trusted from the browser; provider key/model stay server-only; quota metadata is PostgreSQL-only and contains no dialogue text; Tea history stays in versioned Guest IndexedDB; and the mobile fullscreen Tea app remains a separate pending adapter because the pinned Mobile source has no complete equivalent.
+
 Feature: Implemented-surface visual parity audit
 
 Implemented paths and symbols: `src/modules/home/source-html-adapter.ts`, `src/app/reference/internal-beyond/[...path]/route.ts`, `src/app/source-public.css`, `src/app/source-room.css`, `src/app/blog/page.tsx`, `src/modules/content/blog-list-client.tsx`; source Desktop `InternalBeyond.html:71-89`, `:243-336`, `:2539-2785`, `:3368-3369`, `:27069-27362`; source Room `game/game_module.js:805-820`, `:1314-1347`.

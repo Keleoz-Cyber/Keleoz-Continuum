@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { acquireRoomSourceStateBridge } from './source-state-browser'
+import { installTeaSourceAdapter } from '@/modules/tea/source-adapter'
 
 function stopSourceRoomRuntime() {
   try {
@@ -28,7 +29,7 @@ function stopSourceRoomRuntime() {
   game.container = null
 }
 
-export function RoomClient() {
+export function RoomClient({ companionName }: { companionName: string }) {
   const [loaded, setLoaded] = useState(false)
   const [mobile, setMobile] = useState(false)
   const scriptRef = useRef<HTMLScriptElement | null>(null)
@@ -49,6 +50,7 @@ export function RoomClient() {
     }
     let cancelled = false
     let releaseStateBridge: (() => void) | undefined
+    let releaseTeaAdapter: (() => void) | undefined
     let startTimer: number | undefined
     const previousNavTo = window.navTo
 
@@ -79,6 +81,11 @@ export function RoomClient() {
           return
         }
         releaseStateBridge = release
+        try {
+          releaseTeaAdapter = installTeaSourceAdapter({ companionName })
+        } catch (error) {
+          console.warn('Tea source adapter could not be installed; the remaining Room stays available.', error)
+        }
         mountSourceRuntime()
       })
       .catch((error) => {
@@ -97,9 +104,10 @@ export function RoomClient() {
       document.getElementById('game-mini')?.remove()
       if (previousNavTo) window.navTo = previousNavTo
       else delete window.navTo
+      releaseTeaAdapter?.()
       releaseStateBridge?.()
     }
-  }, [])
+  }, [companionName])
 
   if (mobile) {
     return <main className="source-room-page source-room-mobile-note"><div><h1>Room</h1><p>Room 是桌面端的像素空间，请在较宽屏幕上打开。</p><small>Mobile 端的 Tea、Story、Tarot 与 Character 入口会以独立 App 形式提供。</small></div></main>

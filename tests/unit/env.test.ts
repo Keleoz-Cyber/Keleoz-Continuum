@@ -36,6 +36,36 @@ describe('parseServerEnv', () => {
   })
 
   it('returns a typed copy of a valid environment', () => {
-    expect(parseServerEnv(validEnv)).toEqual(validEnv)
+    expect(parseServerEnv(validEnv)).toMatchObject({
+      ...validEnv,
+      AI_GATEWAY_ENABLED: false,
+      AI_TEA_MAX_OUTPUT_TOKENS: 320,
+      AI_TEA_MAX_REQUESTS_PER_SESSION: 12,
+      AI_TEA_MAX_REQUESTS_PER_SOURCE_DAY: 20,
+      AI_TEA_COOLDOWN_SECONDS: 3,
+      AI_GLOBAL_MAX_CONCURRENCY: 2,
+      AI_TIMEOUT_MS: 30_000,
+    })
+  })
+
+  it('requires a complete server-held provider configuration when AI is enabled', () => {
+    expect(() => parseServerEnv({ ...validEnv, AI_GATEWAY_ENABLED: 'true' })).toThrow('AI_API_KEY')
+
+    expect(parseServerEnv({
+      ...validEnv,
+      AI_GATEWAY_ENABLED: 'true',
+      AI_BASE_URL: 'https://provider.example/v1',
+      AI_API_KEY: 'server-secret',
+      AI_MODEL: 'model-id',
+      AI_DAILY_BUDGET_MICRO_USD: '100000',
+      AI_INPUT_MICRO_USD_PER_MILLION_TOKENS: '200000',
+      AI_OUTPUT_MICRO_USD_PER_MILLION_TOKENS: '800000',
+    })).toMatchObject({
+      AI_GATEWAY_ENABLED: true,
+      AI_BASE_URL: 'https://provider.example/v1',
+      AI_API_KEY: 'server-secret',
+      AI_MODEL: 'model-id',
+      AI_DAILY_BUDGET_MICRO_USD: 100_000,
+    })
   })
 })

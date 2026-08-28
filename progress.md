@@ -217,6 +217,17 @@
 - Hardened review findings: a failed install generation cannot clear its replacement; live IndexedDB failure switches once to exact source localStorage and migrates that newer fallback record on reload; invalid records/coordinates are rejected; source runtime teardown invalidates the detached viewport before delayed callbacks run.
 - Final focused browser checkpoint passed 4/4 Desktop Room cases; the same suite reports 4/4 skipped under the intentional Mobile boundary. Independent final checks passed: Vitest 18 files / 60 tests, ESLint, TypeScript, production build, `git diff --check`, healthy PostgreSQL, `/room` HTTP 200, and zero upstream snapshot changes.
 - Final code re-review found no remaining Critical or Important issues and returned a merge-ready verdict.
+
+### Phase 16 start: Tea source runtime and Guest AI boundary (2026-08-29)
+- Re-read the active plan and relevant skills, confirmed the worktree is clean at `a069511`, PostgreSQL is healthy, and `/room` returns 200.
+- Audited the immutable Tea flow and isolated the only public incompatibilities to local API configuration/direct calls, private local database helpers, and Guest quota/security requirements.
+- Chosen reuse boundary: preserve the source 5×5 UI, animations, companion/chat layout, and state machine; inject a site companion plus server-call/local-history adapters rather than rebuilding Tea as React UI.
+- Added RED/GREEN coverage for the 25-combination Tea contract, server-owned prompts, request validation, cost reservations, quota decisions, concurrency, OpenAI-compatible HTTP parsing, orchestration cleanup, safe HTTP error mapping, and local-history versioning.
+- Added migration `0002_quiet_cargill.sql` and applied it through the direct Drizzle migrator to both development and test databases after the CLI wrapper failed opaquely. Both now contain `ai_usage_events`.
+- Added `/api/ai/tea`, disabled-by-default provider configuration, PostgreSQL quota reservations, global concurrency gate, and safe server error responses.
+- Installed a thin Tea source adapter before the immutable Room script: Tea alone receives the site companion; source UI/animation/chat remain untouched; Guest Save persists to versioned IndexedDB.
+- Production browser checkpoints passed for full mocked Tea chat/save, disabled kill-switch UX, and isolation from unfinished Story. Mobile Tea remains pending and is not claimed complete.
+- Final Tea checkpoint: Desktop Chrome 3/3 source-flow cases passed (mocked chat/save, disabled kill switch, Story isolation); Mobile project explicitly skipped all 3 because its source has no complete Tea engine. `pnpm db:migrate` now applies migration 0002 cleanly.
 | 2026-08-27 | Public-page patch attempted Delete and Add operations on the same path | 1 | Split file replacement into separate operations |
 | 2026-08-27 | Playwright Bash wrapper unavailable on Windows | 1 | Used the same official CLI through `npx --package @playwright/cli` |
 | 2026-08-27 | Editor mounted with an unnecessary initial autosave | 1 | Track the last saved snapshot and skip unchanged initial state |
