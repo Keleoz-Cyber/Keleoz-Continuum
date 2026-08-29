@@ -1,4 +1,26 @@
-.source-room-page { position: relative; min-height: 100svh; overflow: hidden; background: #181e32; color: #16294f; }
+.source-room-page {
+  --bg-deep: #181e32;
+  --bg-mid: #263050;
+  --mist: #8895b4;
+  --silver: #b2c0d8;
+  --light: #cdd6ea;
+  --pale: #e2e9f5;
+  --white: #eff2fa;
+  --accent: #5080b0;
+  --accent-light: #72a8d8;
+  --glass-bg: rgba(155,180,218,.1);
+  --glass-border: rgba(165,188,230,.2);
+  --glass-shadow: rgba(0,0,0,.18);
+  --text-primary: #e0e6f2;
+  --text-secondary: #adb8d0;
+  --text-muted: #7e90b2;
+  --transition: cubic-bezier(.4,0,.2,1);
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #181e32;
+  color: #16294f;
+}
 .source-room-page #app { position: relative; min-height: 100svh; z-index: 2; }
 .source-room-page #page-home { display: none; }
 .source-room-page #navbar { display: none; }

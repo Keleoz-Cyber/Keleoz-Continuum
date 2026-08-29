@@ -252,6 +252,8 @@ Reuse classification: Exact runtime reuse through a thin host/navigation adapter
 
 Intentional differences: the public host does not expose the upstream local lock or browser API-key mechanisms; Mobile does not squeeze the Desktop Room into a phone viewport and will receive its own fullscreen App adapters.
 
+Follow-up visual parity: the independent Room host now supplies the immutable Desktop root theme tokens (`--silver`, `--glass-border`, `--accent`, `--white`, and the remaining Room-used palette variables) with their exact source values. This restores source Tarot/action button text, border, and hover colors without overriding `.tarot-btn` or redesigning any Room surface.
+
 Feature: Wardrobe and Sleep browser-local state boundary
 
 Implemented paths and symbols: `src/modules/room/source-state.ts`, `src/modules/room/source-state-browser.ts`, `src/modules/room/room-client.tsx`; source Desktop `game/game_module.js:50-70`, `:1517-1572`, `:1725-1750`, `:2850-2888`, `:3637-3712`, `:3730-3763`.
