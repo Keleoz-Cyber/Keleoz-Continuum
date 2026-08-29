@@ -1,11 +1,8 @@
-import { normalizeTeaSourcePost } from './local-history'
+import { saveTeaHistoryRecord } from './local-history-browser'
 
 const drinkIds = new Set(['black', 'green', 'floral', 'coffee', 'milk'])
 const dessertIds = new Set(['strawberry', 'vanilla', 'blueberry', 'matcha', 'tiramisu'])
 const sessionPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-const guestDatabaseName = 'keleoz-continuum-guest'
-const guestDatabaseVersion = 1
-const guestStoreName = 'experience-state'
 
 type SourceMessage = { role?: unknown; content?: unknown }
 
@@ -38,36 +35,6 @@ export function createTeaGatewayPayload(input: {
     dessert: input.dessert,
     isNight: input.isNight,
     messages: boundedMessages,
-  }
-}
-
-function openGuestDatabase() {
-  return new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(guestDatabaseName, guestDatabaseVersion)
-    request.addEventListener('upgradeneeded', () => {
-      if (!request.result.objectStoreNames.contains(guestStoreName)) {
-        request.result.createObjectStore(guestStoreName, { keyPath: 'id' })
-      }
-    })
-    request.addEventListener('success', () => resolve(request.result), { once: true })
-    request.addEventListener('error', () => reject(request.error), { once: true })
-  })
-}
-
-async function saveTeaHistory(value: unknown) {
-  const record = normalizeTeaSourcePost(value)
-  if (!record) throw new Error('Invalid Tea history record')
-  const database = await openGuestDatabase()
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const transaction = database.transaction(guestStoreName, 'readwrite')
-      transaction.objectStore(guestStoreName).put(record)
-      transaction.addEventListener('complete', () => resolve(), { once: true })
-      transaction.addEventListener('abort', () => reject(transaction.error), { once: true })
-      transaction.addEventListener('error', () => reject(transaction.error), { once: true })
-    })
-  } finally {
-    database.close()
   }
 }
 
@@ -162,7 +129,7 @@ export function installTeaSourceAdapter(options: { companionName: string }) {
     configurable: true,
     value: async (store: string, value: unknown) => {
       if (store !== 'posts') throw new Error('Unsupported local store')
-      await saveTeaHistory(value)
+      await saveTeaHistoryRecord(value)
     },
   })
   Object.defineProperty(sourceWindow, 'ensureDiaryInit', { configurable: true, value: async () => undefined })

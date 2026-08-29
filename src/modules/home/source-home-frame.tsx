@@ -42,9 +42,12 @@ const PUBLIC_MOBILE_PATCH = `
   var lockObserver = new MutationObserver(applyBranding); lockObserver.observe(document.documentElement,{childList:true,subtree:true}); window.setTimeout(function(){ lockObserver.disconnect(); applyBranding(); },4000);
   var style = document.getElementById('continuum-public-mobile-style');
   if (!style) { style = document.createElement('style'); style.id = 'continuum-public-mobile-style'; style.textContent = '#dw-name{font-family:var(--disp);letter-spacing:.06em}'; document.head.appendChild(style); }
+  function ensureTeaTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="tea"]')) return; var music = document.getElementById('sb-musicapp'); if (!music || !music.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="tea" data-dk="app:tea"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 5.5c0 1-.8 1.4-.8 2.3M11 4.5c0 1-.8 1.4-.8 2.3"/></svg></span><span class="sb-t">茶歇</span></button>'; music.parentNode.insertBefore(template.content.firstElementChild, music.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:tea']='茶歇'; if (typeof window.deskApplyLayout==='function') Promise.resolve(window.deskApplyLayout()).catch(function(){}); }
+  ensureTeaTile();
   function external(selector, href) { document.querySelectorAll(selector).forEach(function(el) { if (el.dataset.continuumBound) return; el.dataset.continuumBound='1'; el.addEventListener('click', function(ev) { ev.preventDefault(); ev.stopPropagation(); window.parent.location.href=href; }, true); }); }
   external('#drawer .dw-item[data-page="blog"],#sec-profile-cal .sb-app[data-page="blog"]','/blog');
   external('#drawer .dw-item[data-page="letters"],#sec-profile-cal .sb-app[data-page="letters"]','/letters');
+  external('#sec-profile-cal .sb-app[data-page="tea"]','/tea');
   if (new URLSearchParams(window.parent.location.search).get('openMusic') === '1') window.setTimeout(function(){ document.getElementById('sb-musicapp')?.click(); },900);
 `
 

@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 16 in progress: source-exact Tea with a public server AI and quota adapter
+Phase 16 complete: source-exact Desktop Tea plus a reviewed Mobile-native fullscreen Tea adapter
 
 ## Phases
 
@@ -119,8 +119,8 @@ Phase 16 in progress: source-exact Tea with a public server AI and quota adapter
 - [x] Keep Tea history in versioned browser IndexedDB and never persist Guest dialogue text on the server
 - [x] Verify original Desktop selection/animation/chat behavior and failure states in a real browser
 - [x] Run one proportional local checkpoint and source-reuse review
-- [ ] Add the Mobile fullscreen Tea adapter from the same contracts (the pinned Mobile source has no complete Tea equivalent)
-- **Status:** in_progress
+- [x] Add and harden the Mobile fullscreen Tea adapter from the same contracts (the pinned Mobile source has no complete Tea equivalent)
+- **Status:** complete
 
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
@@ -230,6 +230,15 @@ Phase 16 in progress: source-exact Tea with a public server AI and quota adapter
 | Story isolation smoke expected the No-API panel immediately, but the immutable source intentionally shows its multi-page Story introduction first | 1 | Assert the active Story introduction plus `apiConfigs.length === 0`; do not skip or rewrite the source introduction |
 | First Phase 16 aggregate typecheck found a Window index-signature cast and Vitest generic matcher/table inference issues | 1 | Use an explicit unknown bridge for browser globals, remove unsupported matcher generics, and narrow the quota usage patch structurally |
 | First clean lint pass warned that Room's Tea companion prop was omitted from the effect dependency list | 1 | Include the primitive `companionName` dependency; the server-provided value is stable and remount-safe |
+| Phase 16 Mobile Tea state RED test first stopped at the missing module boundary | 1 | Add typed selection/chat state scaffolding, then rerun for transition and round-count failures |
+| Mobile Tea state replacement patch combined delete/add operations on one path | 1 | Replace the scaffold in place with a single update hunk |
+| First Mobile Tea typecheck lost `result.content` narrowing inside a state callback | 1 | Bind the validated assistant content to a local string before entering the callback |
+| First Mobile Tea lint pass warned on five raw source-asset images | 1 | Render the fixed source layers through `next/image` with `fill`, explicit sizes, and `unoptimized` to preserve exact pixels without duplicate optimization work |
+| First Mobile Tea browser run found no heading semantics and overlapping 44px drink hotspots at narrow width | 1 | Use an `h1` in the source-style header and reduce centered hotspots to 36px so adjacent source coordinates remain independently tappable |
+| Functional Mobile Tea E2E exposed a 120px shrink-to-fit selector/chat column on a 412px viewport | 1 | Give the app, header, selector, and chat explicit viewport-relative widths and assert both source panels occupy at least 88% of the viewport |
+| Mobile selection visual check found an 18px document-height overflow and visible page scrollbar | 1 | Make the app a fixed `100svh` flex column; let selection/chat consume the remaining height instead of stacking viewport-relative minima |
+| Mobile Tea kept Save disabled after new input following a successful save | 1 | Clear the saved marker and stale save notice when the visitor edits the next message, preserving repeatable source Save behavior |
+| Second full Mobile Tea run had one `page.goto('/tea')` wait for the load event until the 30-second test ceiling | 1 | Wait for `domcontentloaded` in the isolated flow; visual/asset readiness continues to be asserted through the actual Tea controls and panels |
 | Phase 16 quota repository RED test first stopped at the missing repository boundary | 1 | Add the typed reservation scaffold and schema/migration, then rerun until failures describe quota behavior |
 | Drizzle migration command exited 1 for both existing dev/test databases without printing the underlying SQL error | 1 | Inspect migration journal and live schema read-only before choosing a non-destructive repair; do not rerun the same opaque command |
 | First direct migrator diagnostic used top-level await in `tsx -e` CJS output | 1 | Wrap the diagnostic in an async IIFE so the real database error can be observed |

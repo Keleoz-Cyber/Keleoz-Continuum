@@ -27,6 +27,18 @@ describe('Tea public gateway contract', () => {
     expect(TEA_COMBOS['green+matcha']).toBe('绿色心情。亲爱的，我想知道你在暗示我什么？')
   })
 
+  it('preserves source selection labels and hotspot geometry for responsive adapters', () => {
+    expect(TEA_DRINKS.find((item) => item.id === 'green')).toMatchObject({
+      en: 'Green Tea',
+      motto: '你坐远一点也没关系，只要能看见你，被泡多久都可以。',
+      hotspot: { x: 173, y: 102, width: 31, height: 55 },
+    })
+    expect(TEA_DESSERTS.find((item) => item.id === 'matcha')).toMatchObject({
+      en: 'Matcha Pudding',
+      hotspot: { x: 106, y: 306, width: 35, height: 38 },
+    })
+  })
+
   it('accepts bounded user and assistant history', () => {
     expect(teaGatewayRequestSchema.parse(validRequest)).toEqual(validRequest)
   })

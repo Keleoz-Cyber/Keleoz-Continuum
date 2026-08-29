@@ -54,4 +54,18 @@ describe('source visual parity adapters', () => {
     expect(roomCss).toContain('--accent: #5080b0')
     expect(roomCss).toContain('--white: #eff2fa')
   })
+
+  it('adds Mobile Tea as a real Desk app without routing into the pixel Room', () => {
+    const homeFrame = readFileSync('src/modules/home/source-home-frame.tsx', 'utf8')
+
+    expect(homeFrame).toContain('data-page="tea"')
+    expect(homeFrame).toContain("external('#sec-profile-cal .sb-app[data-page=\"tea\"]','/tea')")
+    expect(homeFrame).not.toContain("external('#sec-profile-cal .sb-app[data-page=\"tea\"]','/room')")
+    expect(homeFrame).toContain("window.DK_NAMES['app:tea']='茶歇'")
+    expect(homeFrame).toContain("window.deskApplyLayout")
+
+    const mobileTeaCss = readFileSync('src/app/source-tea-mobile.css', 'utf8')
+    expect(mobileTeaCss).toContain('object-fit: cover')
+    expect(mobileTeaCss).not.toContain('object-fit: fill')
+  })
 })
