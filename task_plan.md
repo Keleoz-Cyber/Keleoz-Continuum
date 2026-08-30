@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 18 in progress: source-exact Desktop Tarot adapter and Mobile reuse decision
+Phase 18 complete: source-exact Desktop Tarot plus a source-backed Mobile fullscreen adapter
 
 ## Phases
 
@@ -139,8 +139,8 @@ Phase 18 in progress: source-exact Desktop Tarot adapter and Mobile reuse decisi
 - [x] Adapt only the original Desktop provider/storage seams while keeping deck faces, fan, slots, animation, and controls untouched
 - [x] Keep Guest Tarot records in versioned browser IndexedDB and isolate Tarot from Tea/Story providers
 - [x] Verify original Desktop draw/read/follow-up/save/failure flows in a real browser
-- [ ] Implement and review the thinnest source-backed Mobile Tarot fullscreen App after Desktop parity is proven
-- **Status:** in_progress
+- [x] Implement and review the thinnest source-backed Mobile Tarot fullscreen App after Desktop parity is proven
+- **Status:** complete
 
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
@@ -252,6 +252,9 @@ Phase 18 in progress: source-exact Desktop Tarot adapter and Mobile reuse decisi
 | Phase 18 Tarot RED tests first stopped at missing contract/history/adapter modules | 1 | Add typed no-op module boundaries, rerun for deck/spread/save/payload assertion failures, then implement source contracts |
 | Tarot grant/service RED tests first stopped at missing module boundaries | 1 | Add typed no-op grant/service scaffolds, rerun for authorization/orchestration failures, then implement |
 | Tarot HTTP RED test first stopped at a missing module boundary | 1 | Add a typed no-op handler scaffold, rerun for origin/grant/error-mapping failures, then implement |
+| Mobile Tarot state RED test first stopped at a missing module boundary | 1 | Add the typed spread/guide/draw state contract and rerun the intended behavior assertions |
+| Mobile Tarot typecheck could not narrow `maxCards` through an independently found spread union | 1 | Use the source-constant Free maximum directly after discriminating by spread id |
+| Mobile Tarot E2E tried to physically click a covered middle card in the overlapping fan | 1 | Keep the source-like overlap and force the indistinguishable back-card event in the state test instead of flattening the fan |
 | Tarot Room adapter typecheck lost snapshot narrowing across expressions | 1 | Bind the non-null Tarot snapshot once before building/updating the follow-up payload |
 | Combined Mobile Story E2E/CSS patch had an invalid hunk boundary | 1 | Split the browser assertion and one-line CSS correction into separate exact patches |
 | Mobile Story cap/order patch missed a compressed CSS line and a PowerShell regex quote | 1 | Read the exact compressed rule with single-quoted patterns, then patch client, CSS, and E2E separately |

@@ -46,11 +46,14 @@ const PUBLIC_MOBILE_PATCH = `
   ensureTeaTile();
   function ensureStoryTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="story"]')) return; var tea = document.querySelector('#sec-profile-cal .sb-app[data-page="tea"]'); if (!tea || !tea.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="story" data-dk="app:story"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M5 4.5h5.2A2.8 2.8 0 0 1 13 7.3V20a3.2 3.2 0 0 0-3-2H5z"/><path d="M19 4.5h-5.2A2.8 2.8 0 0 0 11 7.3V20a3.2 3.2 0 0 1 3-2h5z"/></svg></span><span class="sb-t">故事</span></button>'; tea.parentNode.insertBefore(template.content.firstElementChild, tea.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:story']='故事'; if (typeof window.deskApplyLayout==='function') Promise.resolve(window.deskApplyLayout()).catch(function(){}); }
   ensureStoryTile();
+  function ensureTarotTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="tarot"]')) return; var story = document.querySelector('#sec-profile-cal .sb-app[data-page="story"]'); if (!story || !story.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="tarot" data-dk="app:tarot"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.3 5.2L20 10l-4.4 3.7L17 20l-5-3-5 3 1.4-6.3L4 10l5.7-1.8z"/></svg></span><span class="sb-t">占卜</span></button>'; story.parentNode.insertBefore(template.content.firstElementChild, story.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:tarot']='占卜'; if (typeof window.deskApplyLayout==='function') Promise.resolve(window.deskApplyLayout()).catch(function(){}); }
+  ensureTarotTile();
   function external(selector, href) { document.querySelectorAll(selector).forEach(function(el) { if (el.dataset.continuumBound) return; el.dataset.continuumBound='1'; el.addEventListener('click', function(ev) { ev.preventDefault(); ev.stopPropagation(); window.parent.location.href=href; }, true); }); }
   external('#drawer .dw-item[data-page="blog"],#sec-profile-cal .sb-app[data-page="blog"]','/blog');
   external('#drawer .dw-item[data-page="letters"],#sec-profile-cal .sb-app[data-page="letters"]','/letters');
   external('#sec-profile-cal .sb-app[data-page="tea"]','/tea');
   external('#sec-profile-cal .sb-app[data-page="story"]','/story');
+  external('#sec-profile-cal .sb-app[data-page="tarot"]','/tarot');
   if (new URLSearchParams(window.parent.location.search).get('openMusic') === '1') window.setTimeout(function(){ document.getElementById('sb-musicapp')?.click(); },900);
 `
 

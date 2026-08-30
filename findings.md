@@ -174,6 +174,8 @@
 - Initial reading returns a one-time follow-up grant bound to the exact session/spread/cards/history. Each successful question consumes it and, up to index 2, returns the next history-bound grant. Session quota is four requests (one reading plus three follow-ups); source/IP/global daily controls remain shared.
 - Production browser evidence passed 2/2: original 78-card fan, source nearest-card selection and 580ms fly-to-slot, generated card face/reversal, Invite AI, one follow-up, Save to versioned `tarot-history`, and disabled-AI retry/Exit. Screenshot `output/playwright/tarot-source-reading.png` confirms no Tarot presentation rewrite is executing.
 - Independent review dispatch failed because the reviewer account remained over its usage limit. No independent approval is claimed; the checkpoint uses explicit local review, 150-test full regression, and production browser evidence.
+- Mobile Tarot now injects `app:tarot` after Story in the authoritative Mobile Desk and exposes `/tarot`. It renders all 78 source cards as an overlapping fan, exact spread/guide slot counts, deterministic unique draw state, physical 180-degree reversal, and compact Veil/Orrery generated faces without loading Desktop Room.
+- Mobile reading/follow-up uses the same server grant chain and saves only `tarot-history` IndexedDB records. Browser QA covers all 78 backs, draw, face style switch, initial reading, follow-up, Save and overflow; controls that could mutate the table are locked while a request is in flight to prevent stale reading/grant application.
 
 ## Visual/Browser Findings
 - The approved visual direction is scene-first: fogged window, butterflies, blue light, negative space, and content below the first viewport.
