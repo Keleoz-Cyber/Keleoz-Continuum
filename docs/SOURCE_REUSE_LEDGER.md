@@ -321,3 +321,19 @@ Verification: raw route, snapshot, and original HTML all hash to `92F8255E6B710F
 Reuse classification: exact source runtime reuse for Home/Music/Room internals; adapter reuse for server-backed Blog/Letters and public routing/identity/security.
 
 Intentional differences: Keleoz branding and public copy replace upstream identity; Guest Blog hides local Owner/deferred controls; public Letters uses server submission/moderation; source-only clock, export/import, dock, local lock, API keys, and private identity controls are not exposed.
+
+## Implemented evidence: Mobile Character Wardrobe and Sleep adapter
+
+Feature: Mobile Character fullscreen App
+
+Upstream paths and symbols: Desktop `game/game_module.js:50-70` (six exact outfits/assets), `:230-237` (fixed Wardrobe/Sleep lines), `:1517-1572` and `:1725-1750` (wake and two-stage Sleep flow), `:2850-2888` (Wardrobe flow), `:3637-3712` (idle/lie sprite rendering), `:3730-3763` (source state); Mobile `index.html:2453-2595` and its fullscreen Music/Calendar App surfaces provide the authoritative Desk/safe-area shell. The pinned Mobile snapshot contains no Wardrobe/Sleep engine.
+
+Implemented paths and adapters: `src/modules/character/mobile-state.ts`, `mobile-character-client.tsx`, `src/app/character/page.tsx`, `src/app/source-character-mobile.css`, direct record access in `src/modules/room/source-state-browser.ts`, and Character Desk injection in `src/modules/home/source-home-frame.tsx`.
+
+Preserved behavior: six source outfits and exact walk/idle/lie/portrait asset paths; all three random Wardrobe introductions; source Wardrobe hierarchy, labels and active styling; synchronized selected portrait/idle/lie assets; exact two-stage Sleep copy; 400ms lie transition; 800ms sleeping-frame cadence; tap wake; 800ms waking transition; source-disabled Zzz behavior; restored sleeping state briefly auto-wakes like a fresh Desktop Room load.
+
+Reuse classification: exact reuse for source assets, labels, state schema, animation timing and Wardrobe surface values; adapter reuse for the Mobile safe-area fullscreen composition and direct versioned IndexedDB access. The 1672×941 Room engine is not mounted or scaled on Mobile.
+
+Contract evidence: `tests/unit/character-mobile-state.test.ts` covers all six asset contracts, Wardrobe dialogue/selection, Sleep stages, wake projection, persisted hydration and corrupt fallback. `tests/e2e/character-mobile.spec.ts` covers Mobile Desk order/routing, six-item Wardrobe, selected portrait/idle/lie synchronization, shared version 1 `wardrobe-sleep` IndexedDB persistence, Sleep and wake at 390×667. Combined Mobile experience regression passed 12/12 and Desktop Room state bridge regression passed 4/4.
+
+Intentional differences and approved reason: Keleoz replaces the upstream private character name; Mobile crops the exact Room artwork as a noninteractive stage instead of loading the Desktop pathfinding engine. Guest Character data remains entirely browser-local, with source localStorage used only as the existing degradation fallback when IndexedDB cannot operate.

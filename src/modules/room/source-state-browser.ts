@@ -66,6 +66,44 @@ async function writeRoomState(database: IDBDatabase, sourceState: string | null)
   await complete
 }
 
+export async function loadRoomSourceStateFromBrowser() {
+  let database: IDBDatabase | null = null
+  try {
+    database = await openRoomStateDatabase()
+    const stored = await readRoomState(database)
+    if (stored.corrupt) await writeRoomState(database, null)
+    return stored.sourceState
+  } catch (error) {
+    console.warn('Character IndexedDB state could not be read; using the source localStorage fallback.', error)
+    try {
+      return normalizeRoomSourceState(window.localStorage.getItem(ROOM_SOURCE_STATE_KEY))
+    } catch {
+      return null
+    }
+  } finally {
+    database?.close()
+  }
+}
+
+export async function saveRoomSourceStateFromBrowser(sourceState: string) {
+  const normalized = normalizeRoomSourceState(sourceState)
+  if (!normalized) throw new Error('Invalid Room source state')
+
+  let database: IDBDatabase | null = null
+  try {
+    database = await openRoomStateDatabase()
+    await writeRoomState(database, normalized)
+    try {
+      window.localStorage.removeItem(ROOM_SOURCE_STATE_KEY)
+    } catch {}
+  } catch (error) {
+    console.warn('Character IndexedDB state could not be saved; using the source localStorage fallback.', error)
+    window.localStorage.setItem(ROOM_SOURCE_STATE_KEY, normalized)
+  } finally {
+    database?.close()
+  }
+}
+
 async function installBridge(): Promise<InstalledBridge> {
   let browserStorage: Storage
   let storagePrototype: Storage

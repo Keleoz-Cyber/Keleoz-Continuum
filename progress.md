@@ -405,3 +405,14 @@
 - Final production browser smoke captured `final-home-parity.png`, `final-blog-parity.png`, `final-letters-parity.png`, and `final-room-parity.png` at 1440×900. Computed Home is `gw-gloss` with `opacity:1`/`overlay`; Blog/Letters use source filters and blur; Room is 1440×900 with the source y=`199.03125` placement.
 - Production route-header check: raw source is 200 with `public, max-age=31536000, immutable`; `?continuum-gloss=2` is 200 with `no-cache` and `x-content-adapter: Continuum source gloss fallback v2`.
 - Full final verification passed: Vitest 17 files / 51 tests, ESLint, TypeScript, Next production build, and `git diff --check`. Phase 14 is complete; the remaining Phase 9 experience modules are not being claimed complete.
+
+### Phase 19 start: Mobile Character Wardrobe and Sleep adapter (2026-08-31)
+- Reconfirmed the current checkout is `D:\study\blog\blog_pro` on `main`; the similarly named current app workspace is an empty unrelated repository.
+- Re-read the active planning files, V1 baseline, provenance, reuse ledger, relevant Next.js local guides, and the pinned Desktop/Mobile Character evidence.
+- Confirmed Mobile has no Wardrobe/Sleep engine. Locked the implementation boundary to Desktop Character assets/contracts plus the Mobile safe-area fullscreen shell and the existing versioned `wardrobe-sleep` IndexedDB record.
+- Next checkpoint is a focused RED test for the six-outfit and sleep/wake state contract before production UI code.
+- RED/GREEN evidence: the new Character unit suite first failed all five behavior assertions, then passed 5/5 after implementing the exact six-outfit and sleep/wake state contract.
+- Mobile browser contract first failed on the missing Desk tile and route, then passed 2/2 after `/character`, Desk injection, Wardrobe selection, source sprite synchronization, Sleep, wake, and shared IndexedDB persistence were implemented.
+- Manual Playwright CLI inspection at 390×667 captured the Wardrobe panel and the selected JK sleeping on the original source bed; there were no browser warnings or errors.
+- Proportional regression passed: Vitest 44 files / 157 tests; Mobile Character + Tea + Story + Tarot 12/12; Desktop Room state bridge 4/4; ESLint, TypeScript, and production build all passed. PostgreSQL remained healthy.
+- Phase 19 is complete. No independent reviewer result is claimed for this slice.

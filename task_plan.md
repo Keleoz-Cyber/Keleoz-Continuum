@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 18 complete: source-exact Desktop Tarot plus a source-backed Mobile fullscreen adapter
+Phase 19 complete: source-backed Mobile Character for Wardrobe and Sleep
 
 ## Phases
 
@@ -140,6 +140,16 @@ Phase 18 complete: source-exact Desktop Tarot plus a source-backed Mobile fullsc
 - [x] Keep Guest Tarot records in versioned browser IndexedDB and isolate Tarot from Tea/Story providers
 - [x] Verify original Desktop draw/read/follow-up/save/failure flows in a real browser
 - [x] Implement and review the thinnest source-backed Mobile Tarot fullscreen App after Desktop parity is proven
+- **Status:** complete
+
+### Phase 19: Mobile Character Wardrobe and Sleep Adapter
+- [x] Reconfirm the pinned Mobile snapshot has no authoritative Wardrobe/Sleep engine and inventory its Character/fullscreen-shell patterns
+- [x] Capture the exact Desktop six-outfit, sprite synchronization, sleep, wake, and persisted-state contracts used by the existing Room adapter
+- [x] Add focused RED/GREEN coverage for the shared Mobile Character state boundary before production UI code
+- [x] Implement `/character` in the authoritative Mobile shell without mounting or scaling Desktop Room
+- [x] Reuse the exact source sprite assets and the existing versioned `wardrobe-sleep` IndexedDB record
+- [x] Inject Character into the Mobile Desk and verify Wardrobe/Sleep at phone viewports in a real browser
+- [x] Run one proportional local checkpoint and update the source-reuse ledger
 - **Status:** complete
 
 ## Key Questions
@@ -283,6 +293,7 @@ Phase 18 complete: source-exact Desktop Tarot plus a source-backed Mobile fullsc
 | Phase 16 quota repository RED test first stopped at the missing repository boundary | 1 | Add the typed reservation scaffold and schema/migration, then rerun until failures describe quota behavior |
 | Drizzle migration command exited 1 for both existing dev/test databases without printing the underlying SQL error | 1 | Inspect migration journal and live schema read-only before choosing a non-destructive repair; do not rerun the same opaque command |
 | First direct migrator diagnostic used top-level await in `tsx -e` CJS output | 1 | Wrap the diagnostic in an async IIFE so the real database error can be observed |
+| First Mobile Character lint pass found a synchronous sleep-frame reset inside an effect and an over-broad state dependency | 1 | Move frame reset into the delayed source transition and persist the primitive source-state string rather than the whole React state |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
