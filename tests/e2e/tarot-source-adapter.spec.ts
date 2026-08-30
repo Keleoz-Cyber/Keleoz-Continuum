@@ -22,6 +22,35 @@ async function drawSingle(page: Page) {
   await expect(page.locator('.tarot-slot-item.filled')).toHaveCount(1, { timeout: 3_000 })
 }
 
+test('lifts the visually topmost card under the desktop pointer', async ({ page }) => {
+  await openTarot(page)
+  const mismatch = await page.locator('#tarot-fan').evaluate((fanElement) => {
+    const fan = fanElement as HTMLElement & { _centers?: Array<{ el: HTMLElement; x: number; y: number }> }
+    const cards = Array.from(fan.querySelectorAll<HTMLElement>('.tarot-fan-card'))
+    cards.forEach((card) => card.classList.remove('lift'))
+    const bounds = fan.getBoundingClientRect()
+    for (let y = bounds.top + 20; y < bounds.bottom - 10; y += 6) {
+      for (let x = bounds.left + 20; x < bounds.right - 20; x += 6) {
+        const actual = document.elementsFromPoint(x, y).find((element) => element.classList.contains('tarot-fan-card')) as HTMLElement | undefined
+        if (!actual) continue
+        let nearest: HTMLElement | null = null
+        let distance = Number.POSITIVE_INFINITY
+        for (const center of fan._centers ?? []) {
+          const candidate = Math.hypot(x - bounds.left - center.x, y - bounds.top - center.y)
+          if (candidate < distance) { distance = candidate; nearest = center.el }
+        }
+        if (nearest && distance <= 130 && nearest.dataset.idx !== actual.dataset.idx) {
+          return { x, y, actual: actual.dataset.idx, oldNearest: nearest.dataset.idx }
+        }
+      }
+    }
+    return null
+  })
+  expect(mismatch).not.toBeNull()
+  await page.mouse.move(mismatch!.x, mismatch!.y)
+  await expect.poll(async () => page.locator('.tarot-fan-card.lift').getAttribute('data-idx')).toBe(mismatch!.actual)
+})
+
 test('preserves the source draw/read/follow-up/save flow in Guest IndexedDB', async ({ page }) => {
   const requests: Array<Record<string, unknown>> = []
   await page.route('**/api/ai/tarot', async (route) => {

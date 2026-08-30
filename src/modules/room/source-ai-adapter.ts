@@ -173,7 +173,33 @@ export function installRoomSourceAiAdapter(options: { companionName: string }) {
     const action = target?.dataset.action ?? target?.dataset.id
     if (action) activeFeature = roomAiFeatureForAction(action)
   }
+  const alignTarotFanHit = (event: Event) => {
+    if (!(event instanceof PointerEvent || event instanceof MouseEvent)) return
+    const target = event.target instanceof Element ? event.target : null
+    const fan = target?.closest<HTMLElement>('#tarot-fan')
+    if (!fan) return
+    const cards = Array.from(fan.querySelectorAll<HTMLElement>('.tarot-fan-card:not(.picked)'))
+    cards.forEach((card) => card.classList.remove('lift'))
+    const actual = document.elementsFromPoint(event.clientX, event.clientY)
+      .find((element) => element.classList.contains('tarot-fan-card') && fan.contains(element)) as HTMLElement | undefined
+    const centers = (fan as HTMLElement & { _centers?: Array<{ el: HTMLElement; x: number; y: number }> })._centers
+    if (!centers) return
+    const bounds = fan.getBoundingClientRect()
+    const pointerX = event.clientX - bounds.left
+    const pointerY = event.clientY - bounds.top
+    centers.forEach((center, index) => {
+      if (center.el === actual) {
+        center.x = pointerX
+        center.y = pointerY
+      } else {
+        center.x = -10_000 - index
+        center.y = -10_000
+      }
+    })
+  }
   document.addEventListener('click', identifyInteraction, true)
+  document.addEventListener('pointermove', alignTarotFanHit, true)
+  document.addEventListener('click', alignTarotFanHit, true)
 
   Object.defineProperty(sourceWindow, 'apiConfigs', {
     configurable: true,
@@ -314,6 +340,8 @@ export function installRoomSourceAiAdapter(options: { companionName: string }) {
 
   return () => {
     document.removeEventListener('click', identifyInteraction, true)
+    document.removeEventListener('pointermove', alignTarotFanHit, true)
+    document.removeEventListener('click', alignTarotFanHit, true)
     for (const [name, descriptor] of previousDescriptors) {
       if (descriptor) Object.defineProperty(sourceWindow, name, descriptor)
       else delete sourceWindow[name]
