@@ -16,7 +16,10 @@ const providerResponseSchema = z.object({
   model: z.string(),
   choices: z.array(z.object({
     index: z.number(),
-    message: z.object({ role: z.literal('assistant'), content: z.string().trim().min(1) }),
+    message: z.object({
+      role: z.literal('assistant'),
+      content: z.string().refine((value) => value.trim().length > 0),
+    }),
     finish_reason: z.string().nullable(),
   })).min(1),
   usage: z.object({
@@ -73,6 +76,7 @@ export function createOpenAiCompatibleProvider(config: {
 
       return {
         content: parsed.data.choices[0]!.message.content,
+        truncated: parsed.data.choices[0]!.finish_reason === 'length',
         providerRequestId: parsed.data.id,
         promptTokens: parsed.data.usage.prompt_tokens,
         completionTokens: parsed.data.usage.completion_tokens,

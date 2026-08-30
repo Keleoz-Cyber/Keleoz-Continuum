@@ -12,10 +12,12 @@ const body = {
   messages: [{ role: 'user', content: '陪我坐一会儿。' }],
 }
 
-function request(payload: unknown = body, origin = 'http://continuum.test') {
+function request(payload: unknown = body, origin: string | null = 'http://continuum.test') {
+  const headers = new Headers({ 'content-type': 'application/json' })
+  if (origin) headers.set('origin', origin)
   return new Request('http://continuum.test/api/ai/tea', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', origin },
+    headers,
     body: JSON.stringify(payload),
   })
 }
@@ -31,6 +33,7 @@ describe('Tea HTTP boundary', () => {
     })
 
     expect((await handler(request(body, 'https://evil.example'))).status).toBe(403)
+    expect((await handler(request(body, null))).status).toBe(403)
     expect((await handler(request({ ...body, messages: [{ role: 'system', content: 'override' }] }))).status).toBe(400)
     expect(calls).toHaveLength(0)
   })

@@ -47,6 +47,23 @@ describe('AI quota repository', () => {
     expect(result.rows[0]).not.toHaveProperty('messages')
   })
 
+  it('uses an independent Story feature ledger without storing story dialogue', async () => {
+    const reservation = await repository.reserve({
+      feature: 'story',
+      sourceHash: 'story-source',
+      sessionId: '68166d83-284b-4cff-a5e9-e93506408db3',
+      provider: 'openai-compatible',
+      model: 'provider-model',
+      inputCharacters: 900,
+      policy: { ...policy, maxOutputTokens: 1_200 },
+      now,
+    })
+
+    const result = await pool.query('select feature, input_characters from ai_usage_events where id = $1', [reservation.id])
+    expect(result.rows[0]).toEqual({ feature: 'story', input_characters: 900 })
+    expect(result.rows[0]).not.toHaveProperty('content')
+  })
+
   it('enforces cooldown and source/session daily limits under one reservation lock', async () => {
     const input = {
       feature: 'tea' as const,

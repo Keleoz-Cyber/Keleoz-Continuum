@@ -4,6 +4,7 @@ import {
   calculateAiReservationMicroUsd,
   createAiConcurrencyGate,
   evaluateAiQuota,
+  getSharedAiConcurrencyGate,
   type AiQuotaPolicy,
 } from '@/modules/ai/quota'
 
@@ -34,6 +35,18 @@ const rejectedCases: Array<[string, Partial<AiQuotaPolicy>, string, UsagePatch?]
 ]
 
 describe('AI quota policy', () => {
+  it('shares one concurrency gate across feature runtimes in production too', () => {
+    const holder: { continuumAiGate?: ReturnType<typeof createAiConcurrencyGate> } = {}
+    const teaGate = getSharedAiConcurrencyGate(holder, 1)
+    const release = teaGate.tryAcquire()
+    const storyGate = getSharedAiConcurrencyGate(holder, 1)
+
+    expect(storyGate).toBe(teaGate)
+    expect(storyGate.tryAcquire()).toBeNull()
+    release?.()
+    expect(storyGate.tryAcquire()).toBeTypeOf('function')
+  })
+
   it('reserves against the maximum bounded output before calling a provider', () => {
     expect(calculateAiReservationMicroUsd(300, policy)).toBe(376)
   })

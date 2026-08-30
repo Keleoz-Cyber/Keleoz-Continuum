@@ -2,7 +2,7 @@ import 'server-only'
 
 import { db } from '@/db/client'
 import { AiProviderError, createOpenAiCompatibleProvider } from '@/modules/ai/provider'
-import { createAiConcurrencyGate } from '@/modules/ai/quota'
+import { createAiConcurrencyGate, getSharedAiConcurrencyGate } from '@/modules/ai/quota'
 import { createAiQuotaRepository } from '@/modules/ai/repository'
 import { serverEnv } from '@/shared/env'
 import { createTeaService } from '@/modules/tea/service'
@@ -11,8 +11,7 @@ const runtimeGlobal = globalThis as typeof globalThis & {
   continuumAiGate?: ReturnType<typeof createAiConcurrencyGate>
 }
 
-const gate = runtimeGlobal.continuumAiGate ?? createAiConcurrencyGate(serverEnv.AI_GLOBAL_MAX_CONCURRENCY)
-if (serverEnv.NODE_ENV !== 'production') runtimeGlobal.continuumAiGate = gate
+const gate = getSharedAiConcurrencyGate(runtimeGlobal, serverEnv.AI_GLOBAL_MAX_CONCURRENCY)
 
 const provider = serverEnv.AI_GATEWAY_ENABLED
   ? createOpenAiCompatibleProvider({

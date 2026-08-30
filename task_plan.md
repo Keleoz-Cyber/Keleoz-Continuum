@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 16 complete: source-exact Desktop Tea plus a reviewed Mobile-native fullscreen Tea adapter
+Phase 17 in progress: source-exact Desktop Story adapter and Mobile reuse decision
 
 ## Phases
 
@@ -122,6 +122,16 @@ Phase 16 complete: source-exact Desktop Tea plus a reviewed Mobile-native fullsc
 - [x] Add and harden the Mobile fullscreen Tea adapter from the same contracts (the pinned Mobile source has no complete Tea equivalent)
 - **Status:** complete
 
+### Phase 17: Story Source Runtime and Guest AI Boundary
+- [x] Capture the immutable Desktop Story UI, state machine, prompt, round, exit, and save contracts
+- [x] Confirm whether the Mobile snapshot contains a complete Story surface or only reusable fullscreen-shell patterns
+- [x] Add Story-specific server AI and quota contracts without exposing provider credentials or dialogue text
+- [x] Adapt only the original Desktop API/storage seams and keep Story presentation and animation untouched
+- [x] Keep Guest Story history in versioned browser IndexedDB and isolate Story from Tea/Tarot providers
+- [x] Verify the original Desktop Story flow and failure states in a real browser
+- [ ] Decide and implement the thinnest source-backed Mobile Story surface only after the Desktop contract is proven
+- **Status:** in_progress
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -218,6 +228,17 @@ Phase 16 complete: source-exact Desktop Tea plus a reviewed Mobile-native fullsc
 | SPA-back test targeted guessed `#game-viewport`, but the immutable source creates `.game-viewport` without an id | 1 | Use the exact source class from `createViewport()` and keep the runtime untouched |
 | Playwright actionability rejected the transformed Room viewport because scaled ancestor layers intercept the synthetic pointer | 1 | Dispatch a real bubbling `MouseEvent` at the source viewport's measured coordinates, exercising its registered click handler without changing layout |
 | Phase 16 inspection guessed a nonexistent `tests/helpers/database.ts` path | 1 | Follow the actual `@/test/db` import and inspect `src/test/db.ts` instead |
+| Phase 17 Story RED tests first stopped at missing contract/history/adapter modules | 1 | Add typed no-op module boundaries, rerun for behavioral assertion failures, then implement the source contracts |
+| Phase 17 combined scaffold replacement patch used delete/add on the same paths | 1 | Update each existing scaffold in place with exact hunks instead of replacing a path twice in one patch |
+| Phase 17 Story service/HTTP RED tests stopped at missing module boundaries | 1 | Add typed no-op service/handler scaffolds, rerun for orchestration and response assertion failures, then implement |
+| Story service typecheck lost the discriminated-union narrowing through a boolean alias | 1 | Branch directly on `request.mode` at the document-message call site so TypeScript retains the document variant |
+| Room AI router RED test stopped at the missing shared adapter module | 1 | Add a typed no-op router boundary, rerun for feature-scoping assertion failures, then replace the Tea-only installer |
+| Phase 17 attempted to stop an expired production server session id | 1 | Verify port ownership directly; port 3000 was already closed, so proceed to a fresh build/server |
+| First Story E2E helper missed source choice buttons by accessible-name exact match and advanced past them | 1 | Target the source `.game-choice-btn` / `.game-dialogue-action` classes with visible text so the helper stops on the actual immutable controls |
+| Story recovery E2E `hasText: '退出'` matched both Exit actions under strict mode | 1 | Anchor the source button text with `/^退出$/` so only the standalone Exit action is asserted |
+| Review-hardening test patch assumed a one-line AI quota import | 1 | Read the actual multiline import and apply the additions against exact surrounding lines |
+| Story document-grant RED test first stopped at a missing module boundary | 1 | Add a typed no-op grant manager, rerun for binding/expiry assertion failures, then implement signed one-time grants |
+| Story service fixture missed the new document grant and segment fields | 1 | Update the typed document fixture to satisfy the hardened gateway contract, then rerun typecheck |
 | Phase 16 Tea contract RED test first stopped at the missing module boundary | 1 | Add a typed no-op Tea contract scaffold, then rerun until assertions fail on the intended source matrix and validation behavior |
 | Tea contract replacement patch combined delete/add operations for the same file and was rejected | 1 | Update the existing scaffold in place rather than replacing the path twice in one patch |
 | Phase 16 quota RED test first stopped at the missing shared AI module boundary | 1 | Add a typed no-op quota scaffold, then rerun for policy assertion failures before implementing limits |

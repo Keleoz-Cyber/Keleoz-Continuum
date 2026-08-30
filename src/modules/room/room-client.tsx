@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { acquireRoomSourceStateBridge } from './source-state-browser'
-import { installTeaSourceAdapter } from '@/modules/tea/source-adapter'
+import { installRoomSourceAiAdapter } from './source-ai-adapter'
 
 function stopSourceRoomRuntime() {
   try {
@@ -50,7 +50,7 @@ export function RoomClient({ companionName }: { companionName: string }) {
     }
     let cancelled = false
     let releaseStateBridge: (() => void) | undefined
-    let releaseTeaAdapter: (() => void) | undefined
+    let releaseAiAdapter: (() => void) | undefined
     let startTimer: number | undefined
     const previousNavTo = window.navTo
 
@@ -82,9 +82,9 @@ export function RoomClient({ companionName }: { companionName: string }) {
         }
         releaseStateBridge = release
         try {
-          releaseTeaAdapter = installTeaSourceAdapter({ companionName })
+          releaseAiAdapter = installRoomSourceAiAdapter({ companionName })
         } catch (error) {
-          console.warn('Tea source adapter could not be installed; the remaining Room stays available.', error)
+          console.warn('Room AI source adapter could not be installed; the remaining Room stays available.', error)
         }
         mountSourceRuntime()
       })
@@ -104,7 +104,7 @@ export function RoomClient({ companionName }: { companionName: string }) {
       document.getElementById('game-mini')?.remove()
       if (previousNavTo) window.navTo = previousNavTo
       else delete window.navTo
-      releaseTeaAdapter?.()
+      releaseAiAdapter?.()
       releaseStateBridge?.()
     }
   }, [companionName])

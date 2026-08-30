@@ -76,11 +76,13 @@ test('keeps the exact Tea flow visible when the site AI kill switch is off', asy
   await expect(page.getByRole('button', { name: '离开茶歇' })).toBeVisible()
 })
 
-test('does not expose the Tea companion as an unfinished Story provider', async ({ page }) => {
+test('keeps the site companion scoped to implemented Room features', async ({ page }) => {
   await page.goto('/room')
   await expect(page.getByRole('button', { name: 'Story' })).toBeVisible()
   await page.waitForTimeout(2_500)
   await page.getByRole('button', { name: 'Story' }).click()
   await expect(page.getByText('今天会给我设计怎样的游戏呢？', { exact: true })).toBeVisible()
+  expect(await page.evaluate(() => (window as Window & { apiConfigs?: unknown[] }).apiConfigs?.length)).toBe(1)
+  await page.getByRole('button', { name: 'Tarot' }).click()
   expect(await page.evaluate(() => (window as Window & { apiConfigs?: unknown[] }).apiConfigs?.length)).toBe(0)
 })

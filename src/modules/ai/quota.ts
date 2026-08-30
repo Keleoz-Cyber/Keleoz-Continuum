@@ -59,3 +59,11 @@ export function createAiConcurrencyGate(limit: number) {
     },
   }
 }
+
+export function getSharedAiConcurrencyGate(
+  holder: { continuumAiGate?: ReturnType<typeof createAiConcurrencyGate> },
+  limit: number,
+) {
+  holder.continuumAiGate ??= createAiConcurrencyGate(limit)
+  return holder.continuumAiGate
+}
