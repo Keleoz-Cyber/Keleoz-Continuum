@@ -4,6 +4,9 @@ import { createStoryGatewayPayload } from '@/modules/story/source-adapter'
 import { saveTeaHistoryRecord } from '@/modules/tea/local-history-browser'
 import { normalizeTeaSourcePost } from '@/modules/tea/local-history'
 import { createTeaGatewayPayload } from '@/modules/tea/source-adapter'
+import { normalizeTarotSourcePost } from '@/modules/tarot/local-history'
+import { saveTarotHistoryRecord } from '@/modules/tarot/local-history-browser'
+import { createTarotFollowupPayload, createTarotReadingPayload } from '@/modules/tarot/source-adapter'
 
 export type RoomAiFeature = 'tea' | 'story' | 'tarot' | 'other' | null
 
@@ -70,7 +73,7 @@ export function roomAiFeatureForAction(action: string): RoomAiFeature {
 }
 
 export function roomFeatureHasCompanion(feature: RoomAiFeature) {
-  return feature === 'tea' || feature === 'story'
+  return feature === 'tea' || feature === 'story' || feature === 'tarot'
 }
 
 export function storyModeForSourceCall(input: { documentSaving: boolean; wantMeta: boolean }) {
@@ -97,6 +100,13 @@ type SourceGame = {
   _aiCustomScript?: string | null
   _docSaving?: boolean
   aiGameHistory?: SourceMessage[]
+  _tarot?: {
+    spread?: { id?: string }
+    guide?: boolean
+    slots?: Array<{ card?: Record<string, unknown>; reversed?: boolean } | null>
+    readingText?: string
+    _history?: SourceMessage[] | null
+  }
 }
 
 async function fetchGateway(path: string, payload: unknown) {
@@ -118,6 +128,7 @@ async function fetchGateway(path: string, payload: unknown) {
     content: result.content,
     truncated: result.truncated === true,
     documentGrant: typeof result.documentGrant === 'string' ? result.documentGrant : undefined,
+    followupGrant: typeof result.followupGrant === 'string' ? result.followupGrant : undefined,
   }
 }
 
@@ -140,6 +151,12 @@ export function installRoomSourceAiAdapter(options: { companionName: string }) {
   let storySessionId: string | null = null
   let storySourceSession: number | null = null
   let storyDocumentSnapshot: StoryDocumentSnapshot | null = null
+  let tarotSnapshot: {
+    sessionId: string; spread: string; guide: boolean
+    cards: Array<{ cardId: string; reversed: boolean }>
+    followupIndex: number; followupGrant: string | null
+    history: Array<{ role: 'user' | 'assistant'; content: string }>
+  } | null = null
   const companion = {
     id: 'continuum-site-companion',
     nickname: options.companionName,
@@ -235,6 +252,39 @@ export function installRoomSourceAiAdapter(options: { companionName: string }) {
         return callOptions?.wantMeta ? { text: result.content, truncated: result.truncated } : result.content
       }
 
+      if (activeFeature === 'tarot') {
+        const tarot = game._tarot
+        if (!tarot) throw new Error('Tarot 尚未准备好。')
+        const initial = !tarotSnapshot || !tarot._history || !tarot.readingText
+        if (initial) {
+          const payload = createTarotReadingPayload({
+            sessionId: crypto.randomUUID(), spread: tarot.spread?.id ?? '', guide: tarot.guide === true,
+            slots: tarot.slots ?? [],
+          })
+          if (!payload) throw new Error('Tarot 请求内容不符合要求。')
+          const result = await fetchGateway('/api/ai/tarot', payload)
+          tarotSnapshot = {
+            sessionId: payload.sessionId, spread: payload.spread, guide: payload.guide, cards: payload.cards,
+            followupIndex: 0, followupGrant: result.followupGrant ?? null,
+            history: [{ role: 'assistant', content: result.content }],
+          }
+          return result.content
+        }
+        const snapshot = tarotSnapshot
+        const question = [...messages].reverse().find((message) => message.role === 'user' && typeof message.content === 'string')?.content
+        if (typeof question !== 'string' || !snapshot?.followupGrant) throw new Error('Tarot 追问请求不符合要求。')
+        const payload = createTarotFollowupPayload({ ...snapshot, question, followupGrant: snapshot.followupGrant })
+        if (!payload) throw new Error('Tarot 追问请求不符合要求。')
+        const result = await fetchGateway('/api/ai/tarot', payload)
+        tarotSnapshot = {
+          ...snapshot,
+          followupIndex: snapshot.followupIndex + 1,
+          followupGrant: result.followupGrant ?? null,
+          history: [...snapshot.history, { role: 'user', content: question }, { role: 'assistant', content: result.content }],
+        }
+        return result.content
+      }
+
       throw new Error('该互动尚未开放。')
     },
   })
@@ -256,6 +306,7 @@ export function installRoomSourceAiAdapter(options: { companionName: string }) {
         if (storyRecord.stage !== 'generating') storyDocumentSnapshot = null
         return
       }
+      if (normalizeTarotSourcePost(value)) return saveTarotHistoryRecord(value)
       throw new Error('This feature cannot save yet')
     },
   })

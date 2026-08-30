@@ -84,5 +84,5 @@ test('keeps the site companion scoped to implemented Room features', async ({ pa
   await expect(page.getByText('今天会给我设计怎样的游戏呢？', { exact: true })).toBeVisible()
   expect(await page.evaluate(() => (window as Window & { apiConfigs?: unknown[] }).apiConfigs?.length)).toBe(1)
   await page.getByRole('button', { name: 'Tarot' }).click()
-  expect(await page.evaluate(() => (window as Window & { apiConfigs?: unknown[] }).apiConfigs?.length)).toBe(0)
+  expect(await page.evaluate(() => (window as Window & { apiConfigs?: unknown[] }).apiConfigs?.length)).toBe(1)
 })

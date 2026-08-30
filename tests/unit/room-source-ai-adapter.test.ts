@@ -17,7 +17,7 @@ describe('Room immutable-source AI feature router', () => {
     expect(roomAiFeatureForAction('wardrobe')).toBe('other')
     expect(roomFeatureHasCompanion('tea')).toBe(true)
     expect(roomFeatureHasCompanion('story')).toBe(true)
-    expect(roomFeatureHasCompanion('tarot')).toBe(false)
+    expect(roomFeatureHasCompanion('tarot')).toBe(true)
   })
 
   it('uses the document mode only for the source final-save metadata call', () => {

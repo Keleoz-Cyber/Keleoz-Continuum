@@ -294,6 +294,22 @@ Contract evidence: Story/provider/quota/HTTP/grant/history/source-router/mobile-
 
 Intentional differences and approved reason: source browser API configuration and password-diary persistence cannot be public security/storage boundaries. Public Story uses a fixed server-held companion and browser-local versioned history; all unaffected Desktop visuals and interactions remain source-owned. Long document mode requires a server-issued, five-minute, one-time authorization chained across at most four segments; direct browser requests cannot self-select the costly document path. Custom Blog scripts remain unavailable to Guests until an explicit public-content projection exists, so private Owner posts are never exposed through `dbGetAll`. The pinned Mobile snapshot has no Story engine, so Mobile reuses the exact 608×375 Story window, five-column/two-row sprite, dialogue artwork, mood/round/save contracts and Mobile safe-area fullscreen shell; it deliberately crops the wide Desktop dialogue artwork with `cover` rather than distorting it or scaling the 1672×941 Room.
 
+## Implemented evidence: Desktop Tarot runtime and Guest AI boundary
+
+Feature: Desktop source Tarot plus a later Mobile fullscreen adapter
+
+Upstream paths and symbols: Desktop `game/game_module.js:75-220` (22 majors, suits/ranks, 78-card builder, SVG face generator, two styles, five spreads), `:1761-2337` (guide, state, UI, fan picking, draw/reversal/fly animation, reading/follow-ups/save/reset/exit), and `:651-789` (source Tarot visual geometry); Mobile has no complete Tarot engine.
+
+Exact behavior to preserve: 78 cards; two face styles; physical reversal; nearest-card fan interaction; 580ms fly/flip; Free/Single/Timeline/Cross/Star spreads; optional guide card; companion selection; initial reading; retry; three typed/preset follow-ups; action log; Reshuffle/Deck/Save/Exit.
+
+Reuse classification: exact Desktop runtime reuse with feature-scoped AI/storage adapters; Mobile adapter reuse only after Desktop provider/history contracts pass.
+
+Implemented paths and adapters: `src/modules/tarot/contracts.ts`, `source-adapter.ts`, `followup-grant.ts`, `service.ts`, `http.ts`, `runtime.ts`, `local-history.ts`, and `local-history-browser.ts`; `/api/ai/tarot`; shared Room AI adapter and AI quota/provider/repository modules. The same original global seam is feature-scoped across Tea, Story, and Tarot.
+
+Contract evidence: Tarot contract/source/history/grant/service/HTTP tests cover all 78 unique cards, five spreads, exact fixed/free/guide slot counts, reversals, server prompts, one-time chained follow-up grants, the three-follow-up cap, quota metadata, and versioned local saves. `tests/e2e/tarot-source-adapter.spec.ts` proves the original 78-card fan, draw/fly/flip, companion selection, reading, follow-up, Save, IndexedDB, disabled-gateway retry, and Exit behavior.
+
+Intentional differences and approved reason: browser provider configuration, Memory context, local password diary, and direct sensitive calls are invalid public boundaries. Public Tarot uses the fixed site companion and server quotas; card visuals and unaffected interaction remain source-owned. Each reading receives a ten-minute one-time follow-up capability, and each successful follow-up chains the next capability; altered/replayed history cannot spend the remaining allowance. Mobile remains the explicit unfinished Phase 18 item.
+
 Feature: Implemented-surface visual parity audit
 
 Implemented paths and symbols: `src/modules/home/source-html-adapter.ts`, `src/app/reference/internal-beyond/[...path]/route.ts`, `src/app/source-public.css`, `src/app/source-room.css`, `src/app/blog/page.tsx`, `src/modules/content/blog-list-client.tsx`; source Desktop `InternalBeyond.html:71-89`, `:243-336`, `:2539-2785`, `:3368-3369`, `:27069-27362`; source Room `game/game_module.js:805-820`, `:1314-1347`.

@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 17 complete: source-exact Desktop Story plus a source-backed Mobile fullscreen adapter
+Phase 18 in progress: source-exact Desktop Tarot adapter and Mobile reuse decision
 
 ## Phases
 
@@ -132,6 +132,16 @@ Phase 17 complete: source-exact Desktop Story plus a source-backed Mobile fullsc
 - [x] Decide and implement the thinnest source-backed Mobile Story surface only after the Desktop contract is proven
 - **Status:** complete
 
+### Phase 18: Tarot Source Runtime and Guest AI Boundary
+- [x] Capture the immutable 78-card deck, five spreads, reversal, guide-card, reading, follow-up, save, and exit contracts
+- [x] Confirm the Mobile snapshot has no complete Tarot engine and identify the authoritative fullscreen-shell reuse boundary
+- [x] Add Tarot-specific server AI/quota contracts without browser keys or server-side reading text storage
+- [x] Adapt only the original Desktop provider/storage seams while keeping deck faces, fan, slots, animation, and controls untouched
+- [x] Keep Guest Tarot records in versioned browser IndexedDB and isolate Tarot from Tea/Story providers
+- [x] Verify original Desktop draw/read/follow-up/save/failure flows in a real browser
+- [ ] Implement and review the thinnest source-backed Mobile Tarot fullscreen App after Desktop parity is proven
+- **Status:** in_progress
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -239,6 +249,10 @@ Phase 17 complete: source-exact Desktop Story plus a source-backed Mobile fullsc
 | Review-hardening test patch assumed a one-line AI quota import | 1 | Read the actual multiline import and apply the additions against exact surrounding lines |
 | Story document-grant RED test first stopped at a missing module boundary | 1 | Add a typed no-op grant manager, rerun for binding/expiry assertion failures, then implement signed one-time grants |
 | Mobile Story state RED test first stopped at a missing module boundary | 1 | Add a typed no-op state scaffold, rerun for round/parser/ending assertion failures, then implement |
+| Phase 18 Tarot RED tests first stopped at missing contract/history/adapter modules | 1 | Add typed no-op module boundaries, rerun for deck/spread/save/payload assertion failures, then implement source contracts |
+| Tarot grant/service RED tests first stopped at missing module boundaries | 1 | Add typed no-op grant/service scaffolds, rerun for authorization/orchestration failures, then implement |
+| Tarot HTTP RED test first stopped at a missing module boundary | 1 | Add a typed no-op handler scaffold, rerun for origin/grant/error-mapping failures, then implement |
+| Tarot Room adapter typecheck lost snapshot narrowing across expressions | 1 | Bind the non-null Tarot snapshot once before building/updating the follow-up payload |
 | Combined Mobile Story E2E/CSS patch had an invalid hunk boundary | 1 | Split the browser assertion and one-line CSS correction into separate exact patches |
 | Mobile Story cap/order patch missed a compressed CSS line and a PowerShell regex quote | 1 | Read the exact compressed rule with single-quoted patterns, then patch client, CSS, and E2E separately |
 | Story service fixture missed the new document grant and segment fields | 1 | Update the typed document fixture to satisfy the hardened gateway contract, then rerun typecheck |

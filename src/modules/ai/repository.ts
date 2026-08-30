@@ -24,7 +24,7 @@ export class AiQuotaError extends Error {
 }
 
 type ReserveInput = {
-  feature: 'tea' | 'story'
+  feature: 'tea' | 'story' | 'tarot'
   sourceHash: string
   sessionId: string
   provider: string
