@@ -7,6 +7,7 @@ import './source-music.css'
 import './source-room.css'
 import './source-home-frame.css'
 import './source-tea-mobile.css'
+import './source-story-mobile.css'
 
 export const metadata: Metadata = {
   title: {

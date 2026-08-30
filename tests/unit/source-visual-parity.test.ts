@@ -63,6 +63,9 @@ describe('source visual parity adapters', () => {
     expect(homeFrame).not.toContain("external('#sec-profile-cal .sb-app[data-page=\"tea\"]','/room')")
     expect(homeFrame).toContain("window.DK_NAMES['app:tea']='茶歇'")
     expect(homeFrame).toContain("window.deskApplyLayout")
+    expect(homeFrame).toContain('data-page="story"')
+    expect(homeFrame).toContain("window.DK_NAMES['app:story']='故事'")
+    expect(homeFrame).toContain("external('#sec-profile-cal .sb-app[data-page=\"story\"]','/story')")
 
     const mobileTeaCss = readFileSync('src/app/source-tea-mobile.css', 'utf8')
     expect(mobileTeaCss).toContain('object-fit: cover')

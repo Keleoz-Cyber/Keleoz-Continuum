@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 17 in progress: source-exact Desktop Story adapter and Mobile reuse decision
+Phase 17 complete: source-exact Desktop Story plus a source-backed Mobile fullscreen adapter
 
 ## Phases
 
@@ -129,8 +129,8 @@ Phase 17 in progress: source-exact Desktop Story adapter and Mobile reuse decisi
 - [x] Adapt only the original Desktop API/storage seams and keep Story presentation and animation untouched
 - [x] Keep Guest Story history in versioned browser IndexedDB and isolate Story from Tea/Tarot providers
 - [x] Verify the original Desktop Story flow and failure states in a real browser
-- [ ] Decide and implement the thinnest source-backed Mobile Story surface only after the Desktop contract is proven
-- **Status:** in_progress
+- [x] Decide and implement the thinnest source-backed Mobile Story surface only after the Desktop contract is proven
+- **Status:** complete
 
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
@@ -238,6 +238,9 @@ Phase 17 in progress: source-exact Desktop Story adapter and Mobile reuse decisi
 | Story recovery E2E `hasText: '退出'` matched both Exit actions under strict mode | 1 | Anchor the source button text with `/^退出$/` so only the standalone Exit action is asserted |
 | Review-hardening test patch assumed a one-line AI quota import | 1 | Read the actual multiline import and apply the additions against exact surrounding lines |
 | Story document-grant RED test first stopped at a missing module boundary | 1 | Add a typed no-op grant manager, rerun for binding/expiry assertion failures, then implement signed one-time grants |
+| Mobile Story state RED test first stopped at a missing module boundary | 1 | Add a typed no-op state scaffold, rerun for round/parser/ending assertion failures, then implement |
+| Combined Mobile Story E2E/CSS patch had an invalid hunk boundary | 1 | Split the browser assertion and one-line CSS correction into separate exact patches |
+| Mobile Story cap/order patch missed a compressed CSS line and a PowerShell regex quote | 1 | Read the exact compressed rule with single-quoted patterns, then patch client, CSS, and E2E separately |
 | Story service fixture missed the new document grant and segment fields | 1 | Update the typed document fixture to satisfy the hardened gateway contract, then rerun typecheck |
 | Phase 16 Tea contract RED test first stopped at the missing module boundary | 1 | Add a typed no-op Tea contract scaffold, then rerun until assertions fail on the intended source matrix and validation behavior |
 | Tea contract replacement patch combined delete/add operations for the same file and was rejected | 1 | Update the existing scaffold in place rather than replacing the path twice in one patch |
