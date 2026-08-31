@@ -190,6 +190,12 @@
 .source-moment-empty { padding: 34px 18px; color: #5b769c; font-size: .8rem; line-height: 2; text-align: center; }
 .source-moment-detail { max-width: 720px; margin: 22px auto 0; padding: 20px 22px; border-radius: 20px; }
 .source-moment-detail .post-view-content { margin-top: 16px; }
+.source-moment-avatar.persona { color: #4b3f74; border-color: rgba(125,105,175,.34); background: rgba(227,221,246,.66); }
+.source-moment-ai { padding: 1px 6px; border: 1px solid rgba(105,120,175,.32); border-radius: 999px; color: #53648d; font: 500 .55rem Raleway,sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.source-moment-repost { display: block; margin-top: 9px; padding: 8px 11px; border: 1px solid rgba(165,188,230,.26); border-left: 2.5px solid rgba(95,135,190,.42); border-radius: 12px; color: #38577e; background: rgba(255,255,255,.42); font-size: .76rem; line-height: 1.7; text-decoration: none; }
+.source-moment-repost > span { margin-right: 6px; color: #5a749e; }.source-moment-repost b { color: #183660; }.source-moment-repost small { margin-left: 6px; color: #6982a5; }.source-moment-repost p { margin: 3px 0 0; white-space: pre-wrap; }
+.source-moment-comments { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; padding: 8px 11px 7px; border: 1px solid rgba(150,190,235,.26); border-radius: 12px; background: rgba(255,255,255,.42); }
+.source-moment-comments p { margin: 0; color: #2b4872; font-size: .78rem; line-height: 1.65; word-break: break-word; }.source-moment-comments b { color: #173a68; font-weight: 600; }.source-moment-comments small { margin-left: 6px; color: #65799a; font-size: .52rem; letter-spacing: .08em; }
 .source-comment-button { display: inline-flex; align-items: center; gap: 5px; padding: 3px 4px; border: 0; color: #657fa4; background: none; font-size: .7rem; cursor: pointer; }
 .source-comment-button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .source-comment-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(15,24,43,.34); backdrop-filter: blur(9px); }

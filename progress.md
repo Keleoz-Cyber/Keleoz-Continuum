@@ -447,3 +447,19 @@
 - Deleted all four Phase 21 visual fixtures by exact slug and verified zero matching rows; advanced list/detail/timeline cache generations so no QA projection can survive into the final build.
 - Final checkpoint passed after the Mobile menu refinement: Vitest 48 files / 166 tests, ESLint, TypeScript, production build, Desktop continuity/public-content 3 passed / 2 intentional skips, and Mobile continuity/public-content plus Character/Tea/Story/Tarot 14 passed / 3 intentional skips. PostgreSQL remains healthy and the production server remains open on port 3000.
 - Phase 21 is complete. Search is intentionally bounded PostgreSQL matching for the single-server V1; media indexing, AI Persona review and launch-scale load testing remain later work.
+
+### Phase 22 start: AI Persona Moments moderation (2026-08-31)
+- Re-read the active plan, V1 baseline, provenance, reuse ledger, local Next.js security guidance, and the authoritative Desktop/Mobile Circle implementations.
+- Confirmed `main` is clean at `e0e07e3`, PostgreSQL-backed production still listens on port 3000, and this phase needs no branch, queue, Redis, or new service.
+- Locked the adapter boundary: preserve source Circle permissions/card hierarchy, but replace direct local writes with authenticated Persona configuration and a PostgreSQL review inbox. Every AI post/comment/reply/repost/image proposal remains pending until explicit Owner approval.
+- Next checkpoint is focused RED coverage for permission enforcement, strict review payloads, review transitions, and public author/social projection before schema or UI implementation.
+- Contract RED/GREEN now passes for strict JSON proposals, target requirements, four independent permissions, disabled Personas, global AI concurrency and failure accounting.
+- PostgreSQL repository RED/GREEN now proves pending non-disclosure, permission recheck at approval, atomic Persona post publication, comment/reply/repost materialization, one-way review transitions, and reject/delete without public writes.
+- The source-backed public Moments renderer now receives a dedicated social projection with clear AI identity, repost quote cards, and nested comment/reply lines. Studio now exposes Persona configuration, owner-triggered AI drafting, and an editable AI Review inbox.
+- Full unit/integration checkpoint passed at 51 files / 179 tests; ESLint, TypeScript and the Next production build also pass. A fresh production server is running on port 3000.
+- Browser verification started with a temporary exact-scope Owner; `/studio` correctly redirects to the Owner login surface before authentication.
+- Production browser RED/GREEN covered Owner login and Persona creation, a pending review that remained absent from `/moments`, Owner text editing and approval, then a stable public AI-authored Moment at desktop and 390×844 mobile widths.
+- Deleted the temporary review, published AI Moment, Persona, Owner and cascaded session by exact identifiers; database verification returned zero rows for every fixture selector, and the browser session was closed.
+- Final checkpoint passed: ESLint, TypeScript, 51 Vitest files / 179 tests, Next production build, four new PostgreSQL tables, healthy database, zero Phase 22 fixture rows, `git diff --check`, and all four immutable upstream hashes.
+- Phase 22 is complete. Persona image prompts are permission-gated review proposals only; actual generated/uploaded media remains assigned to the later shared Media/LightCOS phase rather than being faked in Moments.
+- Post-commit HTTP smoke caught the deleted QA Moment in Next's persisted data cache despite zero database rows. Advanced the list/detail social cache generations to v2; final completion now requires a rebuilt server response with the exact test handle absent.

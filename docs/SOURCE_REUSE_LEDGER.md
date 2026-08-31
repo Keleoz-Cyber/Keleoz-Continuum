@@ -369,3 +369,19 @@ Reuse classification: exact visual-parameter reuse for the source observatory/se
 Contract evidence: `tests/unit/continuity-contracts.test.ts` covers chronology grouping, query bounds/CJK handling and Summary snippet isolation; `home-public-data.test.ts` covers partial-query degradation; `tests/integration/continuity-repository.test.ts` proves cross-type ordering, Hidden exclusion, Full body search and Summary metadata-only search; `tests/e2e/continuity-public.spec.ts` covers the untouched Desktop Scene boundary, below-fold continuation, Timeline/Archive/Search, Mobile Desk routing and mobile dropdown navigation.
 
 Intentional differences and approved reason: Archive is `/timeline?view=archive`, not a primary navigation item or duplicate table. Search uses bounded PostgreSQL substring matching for the current single-server scale; Elasticsearch is intentionally absent. Mobile reassigns the source Calendar and Guide public tiles to Timeline and Search because private Calendar/Guide are outside the current public V1 boundary. Desktop renders the approved below-fold editorial sequence; Mobile keeps the authoritative Desk/App shell instead of adding an unreachable parent-page scroll behind the full-viewport iframe.
+
+## Implemented evidence: AI Persona Moments moderation
+
+Feature: Review-first AI Persona posts, comments/replies, and reposts
+
+Upstream paths and symbols: Desktop Circle presentation `InternalBeyond.html:3724-3995`, post/comment/repost execution and permission language around `:16153-16800`; Mobile Circle markup/rendering `index.html:2740-2790`, `:14700-14855`, permission/operation contracts `:15165-15281`, and compact feed styling `:16850-17040`.
+
+Implemented paths and adapters: `src/db/schema/persona.ts`; migration `drizzle/0003_spicy_jackpot.sql`; `src/modules/persona/contracts.ts`, `repository.ts`, `service.ts`, `runtime.ts`, and `actions.ts`; social Moment caches in `src/modules/content/cache.ts`; source-backed public projection in `public-moments.tsx`; Owner controls in `src/app/studio/(protected)/page.tsx`.
+
+Preserved behavior: separate per-Persona publish, comment/reply, repost, and image-proposal permissions; clear author name/handle; source Circle body, repost quote, comment-box hierarchy, action labels, and compact Mobile feed behavior. Guest comments remain unavailable and retain the agreed Letters alternative.
+
+Reuse classification: adapter reuse for Circle presentation and interaction contracts; reimplementation required only for Owner authentication, PostgreSQL authority, stable public URLs, immutable publication versions, cost reservation, and mandatory moderation. The source direct-write AI execution path is intentionally not reused because it would let generated operations bypass public-site review.
+
+Contract evidence: `tests/unit/persona-review-contracts.test.ts` covers strict JSON, target binding, disabled state and four independent permissions; `persona-service.test.ts` covers review-only generation, provider isolation, cost reservation/failure and shared concurrency; `tests/integration/persona-review-repository.test.ts` covers pending non-disclosure, approval-time permission recheck, atomic post publication, source-hierarchy comments/replies/reposts, and reject/delete without public writes. Production-browser evidence covered Owner login, Persona creation, pending non-disclosure, edited approval, stable public AI identity and responsive 1440×900 / 390×844 Moments cards.
+
+Intentional differences and remaining boundary: V1 never auto-publishes an AI operation. `imagePrompt` is a permission-gated review proposal only in this slice; it does not masquerade as a generated image. Media-backed image generation/upload and public gallery projection remain part of the later shared Media/LightCOS implementation.

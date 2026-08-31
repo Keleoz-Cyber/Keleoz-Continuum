@@ -22,6 +22,13 @@
       "when": 1787955281116,
       "tag": "0002_quiet_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788183467279,
+      "tag": "0003_spicy_jackpot",
+      "breakpoints": true
     }
   ]
 }

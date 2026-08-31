@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 21 complete: Timeline, Archive, Global Search, and Home continuity sections
+Phase 22 complete: AI Persona Moments moderation
 
 ## Phases
 
@@ -174,6 +174,17 @@ Phase 21 complete: Timeline, Archive, Global Search, and Home continuity section
 - [x] Run one proportional local checkpoint and update the source-reuse ledger
 - **Status:** complete
 
+### Phase 22: AI Persona Moments Moderation
+- [x] Re-read the V1 Persona boundary and capture Desktop/Mobile Circle post, comment, reply, repost, image-permission, and card contracts
+- [x] Add RED/GREEN contracts for Persona permissions, review payloads, moderation state transitions, and public author projection
+- [x] Add PostgreSQL Persona, review-inbox, and approved social-interaction persistence without another service or queue
+- [x] Add Owner Studio Persona configuration plus AI Review approve/edit/reject/delete flows
+- [x] Keep every AI action review-first; approval is the only path that can publish a Moment/comment/repost
+- [x] Extend public Moments with clear AI identity, source-backed repost/comment hierarchy, and unchanged Guest-to-Letters notice
+- [x] Verify Owner and Guest desktop/mobile flows in a real browser, clean fixtures, and run one proportional local checkpoint
+- [x] Update the source-reuse ledger and commit the usable milestone on the existing `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -328,6 +339,10 @@ Phase 21 complete: Timeline, Archive, Global Search, and Home continuity section
 | First Phase 20 build tried to prerender `/about` and required PostgreSQL | 1 | Match the existing Blog boundary: mark public list/About routes dynamic while retaining tagged data caching, so local/CI builds remain database-independent |
 | Final action audit found Hidden publication skipped list/detail cache invalidation | 1 | Return type/slug from every publication result and invalidate both tags/paths before branching on the Guest projection |
 | Mobile menu `<summary>` exposed its label as a generic element in Chromium accessibility | 1 | Add an explicit button role while retaining native `<details>` toggle behavior and keyboard semantics |
+| Persona runtime typecheck treated a newly inserted review row as statically `pending`, while Drizzle exposes the full enum union | 1 | Keep the database return type honest as the full review-status union; runtime behavior still inserts `pending` and repository tests assert it |
+| Playwright skill wrapper could not launch because this Windows host has no Bash/WSL runtime | 1 | Keep the required `npx` prerequisite and invoke the wrapper's underlying `npx --package @playwright/cli playwright-cli` command directly |
+| PowerShell treated the unquoted `@morrow_phase22` Playwright fill value as a splatted variable | 1 | Preserve the still-filled form state, pass the handle as a single-quoted literal, then submit once instead of repeating the full flow |
+| Post-commit HTTP smoke found the deleted QA Persona Moment still present in Next's persisted Data Cache | 1 | Keep the verified database cleanup, advance both Moments social cache generations, rebuild/restart, and require an HTTP body check for the exact fixture handle before completion |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
