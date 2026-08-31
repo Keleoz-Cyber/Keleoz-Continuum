@@ -10,6 +10,7 @@ import './source-tea-mobile.css'
 import './source-story-mobile.css'
 import './source-tarot-mobile.css'
 import './source-character-mobile.css'
+import './source-continuity.css'
 
 export const metadata: Metadata = {
   title: {

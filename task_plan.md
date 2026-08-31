@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 20 complete: public Projects, Moments, and About content skeleton
+Phase 21 complete: Timeline, Archive, Global Search, and Home continuity sections
 
 ## Phases
 
@@ -163,6 +163,17 @@ Phase 20 complete: public Projects, Moments, and About content skeleton
 - [x] Run one proportional local checkpoint and update the source-reuse ledger
 - **Status:** complete
 
+### Phase 21: Timeline, Archive, Search, and Home Below-fold
+- [x] Capture source Timeline/search/archive interaction language and lock the public projection boundary
+- [x] Add RED/GREEN contracts for cross-type chronology, archive grouping, public search, and Summary body non-disclosure
+- [x] Implement PostgreSQL-backed Timeline and Global Search without duplicate entities or another service
+- [x] Keep Archive inside Timeline as a grouped/filterable long-term view rather than a duplicate top-level content store
+- [x] Extend Desktop navigation and Mobile Desk with Timeline/Search while preserving source layout order
+- [x] Add Home sections below the untouched source Scene in the approved Current Focus → Writing → Moments → Experience → Continuity order
+- [x] Verify empty and non-empty Desktop/Mobile flows plus search/exposure behavior in a real browser
+- [x] Run one proportional local checkpoint and update the source-reuse ledger
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -316,6 +327,7 @@ Phase 20 complete: public Projects, Moments, and About content skeleton
 | Docker Desktop stopped before the final checkpoint, causing 24 integration `ECONNREFUSED` failures | 1 | Separate external-runtime failure from code; keep unit/build work useful, restore Docker once, then rerun the unchanged integration suite |
 | First Phase 20 build tried to prerender `/about` and required PostgreSQL | 1 | Match the existing Blog boundary: mark public list/About routes dynamic while retaining tagged data caching, so local/CI builds remain database-independent |
 | Final action audit found Hidden publication skipped list/detail cache invalidation | 1 | Return type/slug from every publication result and invalidate both tags/paths before branching on the Guest projection |
+| Mobile menu `<summary>` exposed its label as a generic element in Chromium accessibility | 1 | Add an explicit button role while retaining native `<details>` toggle behavior and keyboard semantics |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

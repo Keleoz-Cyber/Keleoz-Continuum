@@ -1,4 +1,4 @@
-import { and, desc, eq, max, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, max, ne, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 import { contentEntries, contentPublications, contentVersions } from '@/db/schema'
@@ -8,6 +8,11 @@ import { projectPublishedVersion } from '@/modules/content/projection'
 import type { PublicContentListItem } from '@/modules/content/dto'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
 import { normalizeSlug, resolveStableSlug } from '@/modules/content/slug'
+import {
+  buildPublicSearchSnippet,
+  normalizePublicSearchQuery,
+  type PublicSearchResult,
+} from '@/modules/continuity/contracts'
 
 export class DraftConflictError extends Error {
   constructor(readonly currentRevision: number) {
@@ -284,6 +289,83 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         })
       }
       return items
+    },
+    async listTimeline(): Promise<PublicContentListItem[]> {
+      const rows = await database
+        .select({
+          type: contentVersions.type,
+          slug: contentVersions.slug,
+          title: contentVersions.title,
+          subtitle: contentVersions.subtitle,
+          categoryLabel: contentVersions.categoryLabel,
+          summary: contentVersions.summary,
+          exposure: contentVersions.exposure,
+          publishedAt: contentPublications.publishedAt,
+        })
+        .from(contentPublications)
+        .innerJoin(contentVersions, eq(contentPublications.versionId, contentVersions.id))
+        .where(ne(contentVersions.exposure, 'hidden'))
+        .orderBy(desc(contentPublications.publishedAt))
+
+      const items: PublicContentListItem[] = []
+      for (const row of rows) {
+        if (row.exposure === 'hidden') continue
+        items.push({ ...row, exposure: row.exposure, publishedAt: row.publishedAt.toISOString() })
+      }
+      return items
+    },
+    async searchPublic(value: string, limit = 40): Promise<PublicSearchResult[]> {
+      const query = normalizePublicSearchQuery(value)
+      if (!query) return []
+      const metadataMatch = or(
+        sql`position(${query} in lower(coalesce(${contentVersions.title}, ''))) > 0`,
+        sql`position(${query} in lower(coalesce(${contentVersions.subtitle}, ''))) > 0`,
+        sql`position(${query} in lower(coalesce(${contentVersions.categoryLabel}, ''))) > 0`,
+        sql`position(${query} in lower(coalesce(${contentVersions.summary}, ''))) > 0`,
+      )
+      const fullBodyMatch = and(
+        eq(contentVersions.exposure, 'full'),
+        sql`position(${query} in lower(coalesce(${contentVersions.plainText}, ''))) > 0`,
+      )
+      const rows = await database
+        .select({
+          type: contentVersions.type,
+          slug: contentVersions.slug,
+          title: contentVersions.title,
+          subtitle: contentVersions.subtitle,
+          categoryLabel: contentVersions.categoryLabel,
+          summary: contentVersions.summary,
+          exposure: contentVersions.exposure,
+          plainText: contentVersions.plainText,
+          publishedAt: contentPublications.publishedAt,
+        })
+        .from(contentPublications)
+        .innerJoin(contentVersions, eq(contentPublications.versionId, contentVersions.id))
+        .where(and(ne(contentVersions.exposure, 'hidden'), or(metadataMatch, fullBodyMatch)))
+        .orderBy(desc(contentPublications.publishedAt))
+        .limit(Math.max(1, Math.min(80, Math.trunc(limit))))
+
+      const results: PublicSearchResult[] = []
+      for (const row of rows) {
+        if (row.exposure === 'hidden') continue
+        results.push({
+          type: row.type,
+          slug: row.slug,
+          title: row.title,
+          subtitle: row.subtitle,
+          categoryLabel: row.categoryLabel,
+          summary: row.summary,
+          exposure: row.exposure,
+          publishedAt: row.publishedAt.toISOString(),
+          snippet: buildPublicSearchSnippet({
+            exposure: row.exposure,
+            summary: row.summary,
+            plainText: row.exposure === 'full' ? row.plainText : '',
+            query,
+          }),
+        })
+      }
+      return results
     },
     async updateDraftSlug(input: { entryId: string; requestedSlug: string }) {
       return database.transaction(async (transaction) => {

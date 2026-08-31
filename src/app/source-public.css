@@ -83,6 +83,14 @@
 .source-public-links a:hover,
 .source-public-links a.active { color: #0a1e42; text-shadow: 0 0 12px rgba(20,50,80,.35), 0 0 24px rgba(20,50,80,.15); }
 .source-public-owner { margin-left: auto; padding: 5px 13px; border: 1px solid rgba(50,90,130,.35); border-radius: 18px; background: rgba(255,255,255,.08); font-family: "Noto Sans SC", sans-serif; font-size: .65rem; }
+.source-public-mobile-menu { position: relative; display: none; margin-left: auto; }
+.source-public-mobile-menu summary { display: grid; width: 34px; height: 34px; place-content: center; gap: 4px; border-radius: 10px; color: #34547f; cursor: pointer; list-style: none; }
+.source-public-mobile-menu summary::-webkit-details-marker { display: none; }
+.source-public-mobile-menu summary span { display: block; width: 15px; height: 1px; background: currentColor; }
+.source-public-mobile-menu[open] summary { background: rgba(120,165,220,.12); }
+.source-public-mobile-menu > div { position: absolute; top: 39px; right: -4px; display: grid; width: 180px; padding: 8px; border: 1px solid rgba(190,215,242,.5); border-radius: 14px; background: rgba(244,250,255,.9); box-shadow: 0 16px 40px rgba(45,75,120,.22); backdrop-filter: blur(20px) saturate(1.2); }
+.source-public-mobile-menu a { padding: 9px 11px; border-radius: 9px; color: #294970; font: 400 .82rem "Cormorant Garamond",serif; letter-spacing: .08em; text-decoration: none; }
+.source-public-mobile-menu a.active { background: rgba(120,165,220,.12); color: #102b55; }
 
 .source-public-page .source-page {
   position: relative;
@@ -266,9 +274,8 @@
 }
 
 @media (max-width: 760px) {
-  .source-public-nav { overflow: hidden; }
-  .source-public-links { min-width: 0; gap: 18px; overflow-x: auto; scrollbar-width: none; }
-  .source-public-links::-webkit-scrollbar { display: none; }
+  .source-public-links { display: none; }
+  .source-public-mobile-menu { display: block; }
   .source-project-list { padding-left: 34px; }
   .source-project-entry { grid-template-columns: 1fr; padding: 18px 12px; }
   .source-project-entry time { position: absolute; top: 20px; right: 8px; }

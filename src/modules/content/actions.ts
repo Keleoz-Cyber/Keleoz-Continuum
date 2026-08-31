@@ -62,6 +62,7 @@ export async function publishContentAction(formData: FormData): Promise<never> {
   const path = contentPublicPath(published.type, published.slug)
   updateTag(`content:${published.type}`)
   updateTag(`content:${published.type}:${published.slug}`)
+  updateTag('content:timeline')
   revalidatePath(path)
   revalidatePath(published.type === 'page' ? '/about' : path.slice(0, path.lastIndexOf('/')) || path)
   if (projection) redirect(path)

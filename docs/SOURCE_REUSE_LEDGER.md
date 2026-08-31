@@ -353,3 +353,19 @@ Reuse classification: new domain presentation for Projects over the already-plan
 Contract evidence: `tests/unit/content-routing.test.ts` covers four-type route/slug parsing; `tests/integration/publish-repository.test.ts` proves type-isolated Project/Moment/Page list and detail queries; `tests/e2e/public-content-skeleton.spec.ts` covers the unified Desktop navigation and authoritative Mobile Desk routes. Manual real-browser evidence additionally covered non-empty Project/Moment/About rendering, Guest comment-to-Letters notice, and Owner login/create/autosave/publish/read flow.
 
 Intentional differences and remaining scope: V1 Guests cannot post Circle comments; the visible comment action shows the agreed Member-unavailable notice and Letters alternative. This slice publishes Owner Moments only. AI Persona Moment generation, per-Persona permissions, moderation inbox, media gallery uploads and repost/location projections remain explicit later V1 work and are not claimed complete here.
+
+## Implemented evidence: Timeline, Archive, Global Search, and Home continuity
+
+Feature: Derived public continuity and discovery surfaces
+
+Upstream paths and symbols: Desktop observatory Timeline styling `InternalBeyond.html:1191-1265` and Memory timeline layout/render functions around `:23573-23758`; Desktop Blog/reader/search controls `:2694-2709`, `:2947-2984`, `:5520-5534`; Mobile search controls `index.html:762-766`, `:1180-1182`, `:2038-2039`, and Mobile Desk/calendar/guide entries around `:2453-2520`. Source Archived behavior remains a mode/toggle inside owning modules rather than an independent data store.
+
+Implemented paths and adapters: `src/modules/continuity/contracts.ts`; `listTimeline` / `searchPublic` in `src/modules/content/repository.ts`; timeline caching and publish invalidation in `cache.ts` / `actions.ts`; `/timeline` and `/search`; `src/modules/home/public-home-data.ts`, `public-home-sections.tsx`, and `src/app/source-continuity.css`; Desktop/Mobile navigation adapters in `source-public-nav.tsx` and `source-home-frame.tsx`.
+
+Preserved behavior: observatory rail, luminous nodes, diamond month markers, italic month labels and glass records; compact glass search field, type filter, count feedback and stable result navigation; Archive as a view within Timeline; Mobile safe-area Desk entry and public-page menu language. The original source Home iframe remains the first exact `100svh` Scene and is not visually or behaviorally rewritten.
+
+Reuse classification: exact visual-parameter reuse for the source observatory/search/glass vocabulary; adapter reuse for public navigation and Mobile Desk labels; new server projection for cross-type chronology and search because upstream local stores cannot provide stable public URLs, PostgreSQL authority, SEO or Exposure enforcement.
+
+Contract evidence: `tests/unit/continuity-contracts.test.ts` covers chronology grouping, query bounds/CJK handling and Summary snippet isolation; `home-public-data.test.ts` covers partial-query degradation; `tests/integration/continuity-repository.test.ts` proves cross-type ordering, Hidden exclusion, Full body search and Summary metadata-only search; `tests/e2e/continuity-public.spec.ts` covers the untouched Desktop Scene boundary, below-fold continuation, Timeline/Archive/Search, Mobile Desk routing and mobile dropdown navigation.
+
+Intentional differences and approved reason: Archive is `/timeline?view=archive`, not a primary navigation item or duplicate table. Search uses bounded PostgreSQL substring matching for the current single-server scale; Elasticsearch is intentionally absent. Mobile reassigns the source Calendar and Guide public tiles to Timeline and Search because private Calendar/Guide are outside the current public V1 boundary. Desktop renders the approved below-fold editorial sequence; Mobile keeps the authoritative Desk/App shell instead of adding an unreachable parent-page scroll behind the full-viewport iframe.

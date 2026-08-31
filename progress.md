@@ -433,3 +433,17 @@
 - Final checkpoint passed: Vitest 45 files / 160 tests; ESLint; TypeScript; production build; Mobile public-content + Character/Tea/Story/Tarot 13 passed / 1 intentionally skipped; Desktop public-content 1 passed / 1 intentionally skipped; `git diff --check` clean. The final production server remains open on port 3000.
 - Phase 20 public skeleton is complete. AI Persona Moment moderation, media-backed galleries, Timeline/Archive/Search and Home below-fold aggregation remain later V1 work and are not claimed here.
 - Final cache-security hardening adds type/slug identity to every publication result, so switching an already-public entry to Hidden invalidates its old list/detail cache before redirecting to the Hidden Guest Preview. The focused repository RED/GREEN test and the fresh 160-test/build checkpoint passed afterward.
+
+### Phase 21 start: Timeline, Archive, Global Search, and Home below-fold (2026-08-31)
+- Re-read the active plans, V1 baseline, provenance, complete reuse ledger, relevant Next.js/React/browser guidance, and both upstream source surfaces.
+- Confirmed `main` is clean at `2dd46f9`, the final production server answers on port 3000, and no branch/worktree/new service is needed.
+- Locked the data boundary to derived published projections: observatory Timeline, integrated Archive grouping, PostgreSQL Global Search, and below-fold Home aggregation after the untouched source Scene.
+- Next checkpoint is RED coverage for chronology and search exposure before repository/UI implementation.
+- RED/GREEN contracts now cover observatory grouping, query normalization, Summary snippet isolation, cross-type chronological aggregation, Full-body search, Summary metadata-only search, and Home partial-query degradation.
+- Browser RED/GREEN now covers the untouched 900px Desktop Scene followed by below-fold sections, integrated Timeline/Archive/Search routes, and Mobile Desk Timeline/Search bindings.
+- Empty Home visual QA caught and corrected an over-bright combined background layer before completion. Non-empty Timeline/Archive/Search fixtures now render with the source public composition and source observatory/search vocabulary.
+- Non-empty Home QA verified the approved Current Focus → Writing → Moments → Experience → Continuity order below the untouched 900px source iframe. Mobile keeps its own Desk and does not render the Desktop below-fold editorial sections.
+- Replaced the clipped Mobile eight-link public bar with a source-like KC/menu topbar and full dropdown navigation; its RED/GREEN browser contract now passes.
+- Deleted all four Phase 21 visual fixtures by exact slug and verified zero matching rows; advanced list/detail/timeline cache generations so no QA projection can survive into the final build.
+- Final checkpoint passed after the Mobile menu refinement: Vitest 48 files / 166 tests, ESLint, TypeScript, production build, Desktop continuity/public-content 3 passed / 2 intentional skips, and Mobile continuity/public-content plus Character/Tea/Story/Tarot 14 passed / 3 intentional skips. PostgreSQL remains healthy and the production server remains open on port 3000.
+- Phase 21 is complete. Search is intentionally bounded PostgreSQL matching for the single-server V1; media indexing, AI Persona review and launch-scale load testing remain later work.

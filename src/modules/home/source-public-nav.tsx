@@ -1,5 +1,18 @@
 import Link from 'next/link'
 
+type PublicSection = 'blog' | 'projects' | 'moments' | 'timeline' | 'about' | 'letters' | 'room' | 'search'
+
+const publicLinks: Array<{ key: PublicSection; href: string; label: string }> = [
+  { key: 'blog', href: '/blog', label: 'Blog' },
+  { key: 'projects', href: '/projects', label: 'Projects' },
+  { key: 'moments', href: '/moments', label: 'Moments' },
+  { key: 'timeline', href: '/timeline', label: 'Timeline' },
+  { key: 'about', href: '/about', label: 'About' },
+  { key: 'room', href: '/room', label: 'Room' },
+  { key: 'search', href: '/search', label: 'Search' },
+  { key: 'letters', href: '/letters', label: 'Letters' },
+]
+
 function PublicMark() {
   return <svg className="source-public-mark" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M12 8.7 C11.72 10.4 11.72 13.9 12 16.1" fill="none" />
@@ -30,20 +43,19 @@ function PublicNavLink({ children, className, href, reloadDocument }: {
 }
 
 export function SourcePublicNav({ current, reloadDocument = false }: {
-  current?: 'blog' | 'projects' | 'moments' | 'about' | 'letters' | 'room'
+  current?: PublicSection
   reloadDocument?: boolean
 }) {
   return (
     <nav className="source-public-nav" aria-label="主导航">
       <PublicNavLink className="source-public-brand" href="/" reloadDocument={reloadDocument}><PublicMark /> KC</PublicNavLink>
       <ul className="source-public-links">
-        <li><PublicNavLink className={current === 'blog' ? 'active' : ''} href="/blog" reloadDocument={reloadDocument}>Blog</PublicNavLink></li>
-        <li><PublicNavLink className={current === 'projects' ? 'active' : ''} href="/projects" reloadDocument={reloadDocument}>Projects</PublicNavLink></li>
-        <li><PublicNavLink className={current === 'moments' ? 'active' : ''} href="/moments" reloadDocument={reloadDocument}>Moments</PublicNavLink></li>
-        <li><PublicNavLink className={current === 'about' ? 'active' : ''} href="/about" reloadDocument={reloadDocument}>About</PublicNavLink></li>
-        <li><PublicNavLink className={current === 'room' ? 'active' : ''} href="/room" reloadDocument={reloadDocument}>Room</PublicNavLink></li>
-        <li><PublicNavLink className={current === 'letters' ? 'active' : ''} href="/letters" reloadDocument={reloadDocument}>Letters</PublicNavLink></li>
+        {publicLinks.map((item) => <li key={item.key}><PublicNavLink className={current === item.key ? 'active' : ''} href={item.href} reloadDocument={reloadDocument}>{item.label}</PublicNavLink></li>)}
       </ul>
+      <details className="source-public-mobile-menu">
+        <summary aria-label="打开导航" role="button"><span /><span /><span /></summary>
+        <div>{publicLinks.map((item) => <PublicNavLink className={current === item.key ? 'active' : ''} href={item.href} key={item.key} reloadDocument={reloadDocument}>{item.label}</PublicNavLink>)}</div>
+      </details>
     </nav>
   )
 }

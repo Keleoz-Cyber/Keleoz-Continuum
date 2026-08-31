@@ -21,12 +21,12 @@ const PUBLIC_HOME_PATCH = `
   var ib = document.querySelector('#splash-ib');
   if (ib && !document.getElementById('public-enter-brand')) { var definition = document.createElement('p'); definition.className = 'source-public-definition'; definition.textContent = '一个持续生长的个人数字空间。'; ib.appendChild(definition); var b = document.createElement('button'); b.id = 'public-enter-brand'; b.type = 'button'; b.className = 'splash-skip public-enter-brand'; b.textContent = 'Enter / 进入'; b.onclick = function() { window.enterSite && enterSite(); }; ib.appendChild(b); }
   var style = document.getElementById('continuum-public-home-style');
-  if (!style) { style = document.createElement('style'); style.id = 'continuum-public-home-style'; style.textContent = '#nav-user-id,#navbar .nav-btn,#fab-dock,#chat-mini,#icode-mini{display:none!important}#navbar .nav-links li:has(>a[data-page="memory"]),#navbar .nav-links li:has(>a[data-page="api"]),#navbar .nav-links li:has(>a[data-page="diy"]){display:none!important}#navbar .nav-links a[data-page="blog"],#navbar .nav-links a[data-page="guide"],#navbar .nav-links a[data-page="chat"],#navbar .nav-links a[data-page="about"],#navbar .nav-links a[data-page="letters"],#navbar .nav-links a[data-page="game"]{display:inline-block!important}#splash-orig .splash-skip{display:none!important}#public-enter-brand{display:inline-flex;margin-top:25px;padding:0 0 5px;border:0;border-bottom:1px solid rgba(224,236,252,.38);background:none;color:rgba(224,236,252,.86);font:300 12px Raleway,"Segoe UI",sans-serif;letter-spacing:.12em;cursor:pointer;text-shadow:0 1px 8px rgba(0,0,0,.58);pointer-events:auto}#public-enter-brand:hover{color:#fff;border-color:rgba(244,250,255,.82)}.source-public-definition{margin:70px 0 0;color:rgba(229,239,252,.86);font:300 13px "Noto Serif SC","Source Han Serif SC",serif;letter-spacing:.08em;text-shadow:0 1px 10px rgba(4,10,26,.72)}'; document.head.appendChild(style); }
-  ['memory','api','diy'].forEach(function(page){var link=document.querySelector('#navbar .nav-links a[data-page="'+page+'"]');if(link&&link.parentElement)link.parentElement.style.display='none';});
+  if (!style) { style = document.createElement('style'); style.id = 'continuum-public-home-style'; style.textContent = '#nav-user-id,#navbar .nav-btn,#fab-dock,#chat-mini,#icode-mini{display:none!important}#navbar .nav-links li:has(>a[data-page="diy"]){display:none!important}#navbar .nav-links a[data-page="blog"],#navbar .nav-links a[data-page="guide"],#navbar .nav-links a[data-page="chat"],#navbar .nav-links a[data-page="memory"],#navbar .nav-links a[data-page="about"],#navbar .nav-links a[data-page="letters"],#navbar .nav-links a[data-page="game"],#navbar .nav-links a[data-page="api"]{display:inline-block!important}#splash-orig .splash-skip{display:none!important}#public-enter-brand{display:inline-flex;margin-top:25px;padding:0 0 5px;border:0;border-bottom:1px solid rgba(224,236,252,.38);background:none;color:rgba(224,236,252,.86);font:300 12px Raleway,"Segoe UI",sans-serif;letter-spacing:.12em;cursor:pointer;text-shadow:0 1px 8px rgba(0,0,0,.58);pointer-events:auto}#public-enter-brand:hover{color:#fff;border-color:rgba(244,250,255,.82)}.source-public-definition{margin:70px 0 0;color:rgba(229,239,252,.86);font:300 13px "Noto Serif SC","Source Han Serif SC",serif;letter-spacing:.08em;text-shadow:0 1px 10px rgba(4,10,26,.72)}'; document.head.appendChild(style); }
+  ['diy'].forEach(function(page){var link=document.querySelector('#navbar .nav-links a[data-page="'+page+'"]');if(link&&link.parentElement)link.parentElement.style.display='none';});
   function route(page, href, label) { var el = document.querySelector('#navbar .nav-links a[data-page="'+page+'"]'); if (!el) return; el.textContent = label; el.setAttribute('href', href); el.onclick = function(ev) { ev.preventDefault(); window.parent.location.href = href; }; }
   var navBrand = document.querySelector('#navbar .nav-brand'); if (navBrand) { var mark = navBrand.querySelector('#ghost-icon'); navBrand.innerHTML = ''; if (mark) navBrand.appendChild(mark); navBrand.appendChild(document.createTextNode('KC')); }
-  route('blog','/blog','Blog'); route('guide','/projects','Projects'); route('chat','/moments','Moments'); route('about','/about','About'); route('game','/room','Room'); route('letters','/letters','Letters');
-  var navList=document.querySelector('#navbar .nav-links'); if(navList){['blog','guide','chat','about','game','letters'].forEach(function(page){var link=navList.querySelector('a[data-page="'+page+'"]');if(link&&link.parentElement)navList.appendChild(link.parentElement);});}
+  route('blog','/blog','Blog'); route('guide','/projects','Projects'); route('chat','/moments','Moments'); route('memory','/timeline','Timeline'); route('about','/about','About'); route('game','/room','Room'); route('api','/search','Search'); route('letters','/letters','Letters');
+  var navList=document.querySelector('#navbar .nav-links'); if(navList){['blog','guide','chat','memory','about','game','api','letters'].forEach(function(page){var link=navList.querySelector('a[data-page="'+page+'"]');if(link&&link.parentElement)navList.appendChild(link.parentElement);});}
   var warning = document.getElementById('ib-guard-overlay'); if (warning) warning.remove();
   var observer = new MutationObserver(function() { var w = document.getElementById('ib-guard-overlay'); if (w) w.remove(); var game = document.getElementById('game-mini'); if (game && !game.dataset.continuumBound) { game.dataset.continuumBound='1'; game.onclick=function(ev){ev.preventDefault();window.parent.location.href='/room';}; } });
   observer.observe(document.body,{childList:true,subtree:true});
@@ -53,6 +53,10 @@ const PUBLIC_MOBILE_PATCH = `
   ensureTarotTile();
   function ensureCharacterTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="character"]')) return; var tarot = document.querySelector('#sec-profile-cal .sb-app[data-page="tarot"]'); if (!tarot || !tarot.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="character" data-dk="app:character"><span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M6 20a6 6 0 0 1 12 0M8.5 13.5l-2.5-2M15.5 13.5l2.5-2"/></svg></span><span class="sb-t">角色</span></button>'; tarot.parentNode.insertBefore(template.content.firstElementChild, tarot.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:character']='角色'; }
   ensureCharacterTile();
+  var timelineTile=document.getElementById('sb-calapp'); if(timelineTile){var timelineText=timelineTile.querySelector('.sb-t');if(timelineText)timelineText.textContent='时间线';if(window.DK_NAMES)window.DK_NAMES['app:calendar']='时间线';}
+  var searchTile=document.querySelector('#sec-profile-cal .sb-app[data-page="guide"]'); if(searchTile){var searchText=searchTile.querySelector('.sb-t');if(searchText)searchText.textContent='搜索';if(window.DK_NAMES)window.DK_NAMES['app:guide']='搜索';}
+  var timelineDrawer=document.querySelector('#drawer .dw-item[data-page="memory"]'); if(timelineDrawer){var timelineEn=timelineDrawer.querySelector('.dw-en'),timelineCn=timelineDrawer.querySelector('.dw-cn');if(timelineEn)timelineEn.textContent='Timeline';if(timelineCn)timelineCn.textContent='时间线';}
+  var searchDrawer=document.querySelector('#drawer .dw-item[data-page="guide"]'); if(searchDrawer){var searchEn=searchDrawer.querySelector('.dw-en'),searchCn=searchDrawer.querySelector('.dw-cn');if(searchEn)searchEn.textContent='Search';if(searchCn)searchCn.textContent='搜索';}
   if (typeof window.deskApplyLayout==='function') Promise.resolve(window.deskApplyLayout()).catch(function(){});
   function external(selector, href) { document.querySelectorAll(selector).forEach(function(el) { if (el.dataset.continuumBound) return; el.dataset.continuumBound='1'; el.addEventListener('click', function(ev) { ev.preventDefault(); ev.stopPropagation(); window.parent.location.href=href; }, true); }); }
   external('#drawer .dw-item[data-page="blog"],#sec-profile-cal .sb-app[data-page="blog"]','/blog');
@@ -65,6 +69,8 @@ const PUBLIC_MOBILE_PATCH = `
   external('#sec-profile-cal .sb-app[data-page="story"]','/story');
   external('#sec-profile-cal .sb-app[data-page="tarot"]','/tarot');
   external('#sec-profile-cal .sb-app[data-page="character"]','/character');
+  external('#drawer .dw-item[data-page="memory"],#sb-calapp','/timeline');
+  external('#drawer .dw-item[data-page="guide"],#sec-profile-cal .sb-app[data-page="guide"]','/search');
   if (new URLSearchParams(window.parent.location.search).get('openMusic') === '1') window.setTimeout(function(){ document.getElementById('sb-musicapp')?.click(); },900);
 `
 
@@ -101,9 +107,9 @@ export function SourceHomeFrame() {
   }, [mobile])
 
   return (
-    <main className="source-home-frame">
+    <section className="source-home-frame" aria-label="Continuum scene">
       {!loaded ? <div className="source-home-frame-loading">Loading Continuum…</div> : null}
       <iframe key={mobile ? 'mobile' : 'desktop'} ref={frameRef} title="Keleoz Continuum Home" src={mobile ? '/reference/internal-beyond-mobile/index.html' : '/reference/internal-beyond/InternalBeyond.html?continuum-gloss=2'} />
-    </main>
+    </section>
   )
 }
