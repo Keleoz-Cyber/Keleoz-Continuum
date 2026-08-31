@@ -30,7 +30,7 @@ function PublicNavLink({ children, className, href, reloadDocument }: {
 }
 
 export function SourcePublicNav({ current, reloadDocument = false }: {
-  current?: 'blog' | 'letters' | 'room'
+  current?: 'blog' | 'projects' | 'moments' | 'about' | 'letters' | 'room'
   reloadDocument?: boolean
 }) {
   return (
@@ -38,6 +38,9 @@ export function SourcePublicNav({ current, reloadDocument = false }: {
       <PublicNavLink className="source-public-brand" href="/" reloadDocument={reloadDocument}><PublicMark /> KC</PublicNavLink>
       <ul className="source-public-links">
         <li><PublicNavLink className={current === 'blog' ? 'active' : ''} href="/blog" reloadDocument={reloadDocument}>Blog</PublicNavLink></li>
+        <li><PublicNavLink className={current === 'projects' ? 'active' : ''} href="/projects" reloadDocument={reloadDocument}>Projects</PublicNavLink></li>
+        <li><PublicNavLink className={current === 'moments' ? 'active' : ''} href="/moments" reloadDocument={reloadDocument}>Moments</PublicNavLink></li>
+        <li><PublicNavLink className={current === 'about' ? 'active' : ''} href="/about" reloadDocument={reloadDocument}>About</PublicNavLink></li>
         <li><PublicNavLink className={current === 'room' ? 'active' : ''} href="/room" reloadDocument={reloadDocument}>Room</PublicNavLink></li>
         <li><PublicNavLink className={current === 'letters' ? 'active' : ''} href="/letters" reloadDocument={reloadDocument}>Letters</PublicNavLink></li>
       </ul>

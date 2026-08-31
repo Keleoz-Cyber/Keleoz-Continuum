@@ -14,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const article = await getCachedPublicBySlug(slug)
+  const article = await getCachedPublicBySlug('blog', slug)
   if (!article) return {}
   return {
     title: article.title,
@@ -29,7 +29,7 @@ export default async function BlogArticlePage({
 }) {
   const { slug } = await params
   const [article, list] = await Promise.all([
-    getCachedPublicBySlug(slug),
+    getCachedPublicBySlug('blog', slug),
     getCachedPublicList('blog'),
   ])
   if (!article) notFound()

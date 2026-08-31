@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
-import { createBlogDraftAction } from '@/modules/content/actions'
+import { createContentDraftAction } from '@/modules/content/actions'
+import { CONTENT_TYPE_CONFIG, studioContentPath } from '@/modules/content/routing'
 import { contentRepository } from '@/modules/content/runtime'
 import { reviewLetterAction } from '@/modules/letters/owner-actions'
 import { lettersRepository } from '@/modules/letters/runtime'
@@ -20,7 +21,7 @@ export default async function StudioOverviewPage() {
       <section className="studio-overview" aria-labelledby="drafts-title">
         <div>
           <p className="studio-kicker">Current</p>
-          <h2 id="drafts-title">Blog drafts</h2>
+          <h2 id="drafts-title">Content drafts</h2>
         </div>
         <strong>{drafts.length}</strong>
       </section>
@@ -52,17 +53,26 @@ export default async function StudioOverviewPage() {
           </div>
         )}
       </section>
-      <form action={createBlogDraftAction} className="studio-create-form">
+      <form action={createContentDraftAction} className="studio-create-form">
         <label>
-          <span>New Blog title</span>
+          <span>New content title</span>
           <input name="title" required maxLength={240} />
+        </label>
+        <label>
+          <span>Type</span>
+          <select name="type" defaultValue="blog">
+            <option value="blog">Blog</option>
+            <option value="project">Project</option>
+            <option value="moment">Moment</option>
+            <option value="page">Page</option>
+          </select>
         </label>
         <button type="submit">Create draft</button>
       </form>
       <div className="studio-draft-list">
         {drafts.map((draft) => (
-          <Link href={`/studio/blog/${draft.id}`} key={draft.id}>
-            <span>{draft.title}</span>
+          <Link href={studioContentPath(draft.id)} key={draft.id}>
+            <span>{draft.title}<small>{CONTENT_TYPE_CONFIG[draft.type].singular}</small></span>
             <small>Revision {draft.revision}</small>
           </Link>
         ))}

@@ -112,6 +112,7 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
       const rows = await database
         .select({
           id: contentEntries.id,
+          type: contentEntries.type,
           slug: contentEntries.slug,
           title: contentEntries.title,
           subtitle: contentEntries.subtitle,
@@ -213,6 +214,8 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         return {
           versionId: version.id,
           versionNumber,
+          type: entry.type,
+          slug: entry.slug,
           projection: projectPublishedVersion({
             type: entry.type,
             slug: entry.slug,
@@ -227,7 +230,7 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         }
       })
     },
-    async getPublicBySlug(slugInput: string) {
+    async getPublicBySlug(type: 'blog' | 'project' | 'moment' | 'page', slugInput: string) {
       let slug: string
       try {
         slug = normalizeSlug(slugInput)
@@ -249,7 +252,7 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         })
         .from(contentPublications)
         .innerJoin(contentVersions, eq(contentPublications.versionId, contentVersions.id))
-        .where(eq(contentVersions.slug, slug))
+        .where(and(eq(contentVersions.type, type), eq(contentVersions.slug, slug)))
         .limit(1)
 
       return version ? projectPublishedVersion(version) : null

@@ -123,7 +123,7 @@ describe('content publication', () => {
       now: new Date('2026-08-27T02:00:00.000Z'),
     })
 
-    await expect(repository.getPublicBySlug('first-light')).resolves.toEqual(
+    await expect(repository.getPublicBySlug('blog', 'first-light')).resolves.toEqual(
       expect.objectContaining({
         exposure: 'summary',
         summary: 'Public summary',
@@ -143,9 +143,14 @@ describe('content publication', () => {
         document: paragraphDocument('Never sent to guests.'),
       },
     })
-    await repository.publishDraft({ entryId: draft.id })
+    const hiddenPublication = await repository.publishDraft({ entryId: draft.id })
 
-    await expect(repository.getPublicBySlug('first-light')).resolves.toBeNull()
+    await expect(repository.getPublicBySlug('blog', 'first-light')).resolves.toBeNull()
+    expect(hiddenPublication).toEqual(expect.objectContaining({
+      type: 'blog',
+      slug: 'first-light',
+      projection: null,
+    }))
   })
 
   it('locks the slug after the first publication', async () => {
@@ -185,5 +190,39 @@ describe('content publication', () => {
       expect(item).not.toHaveProperty('document')
       expect(item).not.toHaveProperty('plainText')
     }
+  })
+
+  it('keeps Project, Moment, and Page publication queries type-safe', async () => {
+    for (const [type, slug] of [
+      ['project', 'continuum-project'],
+      ['moment', 'rain-at-dawn'],
+      ['page', 'about'],
+    ] as const) {
+      const draft = await repository.createDraft({
+        type,
+        slug,
+        title: `${type} title`,
+        subtitle: null,
+        categoryLabel: null,
+        summary: `${type} summary`,
+        exposure: 'full',
+        document: paragraphDocument(`${type} public body`),
+      })
+      await repository.publishDraft({ entryId: draft.id })
+    }
+
+    await expect(repository.listPublic('project')).resolves.toEqual([
+      expect.objectContaining({ type: 'project', slug: 'continuum-project' }),
+    ])
+    await expect(repository.listPublic('moment')).resolves.toEqual([
+      expect.objectContaining({ type: 'moment', slug: 'rain-at-dawn' }),
+    ])
+    await expect(repository.listPublic('page')).resolves.toEqual([
+      expect.objectContaining({ type: 'page', slug: 'about' }),
+    ])
+    await expect(repository.getPublicBySlug('project', 'continuum-project')).resolves.toEqual(
+      expect.objectContaining({ type: 'project', bodyHtml: expect.stringContaining('project public body') }),
+    )
+    await expect(repository.getPublicBySlug('blog', 'continuum-project')).resolves.toBeNull()
   })
 })

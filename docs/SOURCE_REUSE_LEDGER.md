@@ -337,3 +337,19 @@ Reuse classification: exact reuse for source assets, labels, state schema, anima
 Contract evidence: `tests/unit/character-mobile-state.test.ts` covers all six asset contracts, Wardrobe dialogue/selection, Sleep stages, wake projection, persisted hydration and corrupt fallback. `tests/e2e/character-mobile.spec.ts` covers Mobile Desk order/routing, six-item Wardrobe, selected portrait/idle/lie synchronization, shared version 1 `wardrobe-sleep` IndexedDB persistence, Sleep and wake at 390×667. Combined Mobile experience regression passed 12/12 and Desktop Room state bridge regression passed 4/4.
 
 Intentional differences and approved reason: Keleoz replaces the upstream private character name; Mobile crops the exact Room artwork as a noninteractive stage instead of loading the Desktop pathfinding engine. Guest Character data remains entirely browser-local, with source localStorage used only as the existing degradation fallback when IndexedDB cannot operate.
+
+## Implemented evidence: Projects, Moments, and About public skeleton
+
+Feature: Typed public Projects / Moments / About publication and presentation
+
+Upstream paths and symbols: Desktop Profile `InternalBeyond.html:3131-3306`, `:9041-9095`; Desktop InternetBeyond panel/card `:3725-3988`, `:16447-16540`; Mobile Space/Profile `index.html:2453-2479`, Circle markup `:2756-2775`, feed renderer `:14723-14820`, and styles `:16869-17022`; both ICode `projects` stores are explicitly not the public Project entity.
+
+Implemented paths and adapters: typed routing/cache/action boundaries in `src/modules/content/routing.ts`, `cache.ts`, `actions.ts`, and `repository.ts`; generic Studio editor/preview under `src/app/studio/(protected)/content/[id]/`; public routes under `src/app/projects/`, `moments/`, `about/`, and `pages/`; source-backed renderers `public-projects.tsx`, `public-moments.tsx`, `public-about.tsx`, and `guest-comment-button.tsx`; shared navigation and Mobile Desk bindings in `source-public-nav.tsx` and `source-home-frame.tsx`.
+
+Preserved behavior: Moments keeps the source Circle author/avatar/handle/time/visibility/text/comment hierarchy and mobile feed proportions. About keeps the Desktop 1.95:1 identity/bio/three-slot Profile card, switching at phone width to the Mobile Space cover/overlapping-avatar/bio/gallery stack. Projects uses source typography, glass, chronology and status vocabulary but never exposes or imitates the local ICode workspace data model.
+
+Reuse classification: new domain presentation for Projects over the already-planned server content entity; adapter reuse for Moments/Circle and About/Profile; reimplementation remains limited to public PostgreSQL persistence, immutable versions, Full/Summary/Hidden projection, stable URLs, Owner authentication, cache invalidation and SEO metadata.
+
+Contract evidence: `tests/unit/content-routing.test.ts` covers four-type route/slug parsing; `tests/integration/publish-repository.test.ts` proves type-isolated Project/Moment/Page list and detail queries; `tests/e2e/public-content-skeleton.spec.ts` covers the unified Desktop navigation and authoritative Mobile Desk routes. Manual real-browser evidence additionally covered non-empty Project/Moment/About rendering, Guest comment-to-Letters notice, and Owner login/create/autosave/publish/read flow.
+
+Intentional differences and remaining scope: V1 Guests cannot post Circle comments; the visible comment action shows the agreed Member-unavailable notice and Letters alternative. This slice publishes Owner Moments only. AI Persona Moment generation, per-Persona permissions, moderation inbox, media gallery uploads and repost/location projections remain explicit later V1 work and are not claimed complete here.

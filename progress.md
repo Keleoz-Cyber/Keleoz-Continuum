@@ -416,3 +416,20 @@
 - Manual Playwright CLI inspection at 390×667 captured the Wardrobe panel and the selected JK sleeping on the original source bed; there were no browser warnings or errors.
 - Proportional regression passed: Vitest 44 files / 157 tests; Mobile Character + Tea + Story + Tarot 12/12; Desktop Room state bridge 4/4; ESLint, TypeScript, and production build all passed. PostgreSQL remained healthy.
 - Phase 19 is complete. No independent reviewer result is claimed for this slice.
+
+### Phase 20 start: Projects, Moments, and About (2026-08-31)
+- Re-read the active plans, V1 baseline, provenance, reuse ledger, relevant Next.js/React guidance, and both upstream snapshots before product changes.
+- Confirmed the current `main` checkout is clean at `cbfa464`, PostgreSQL-backed production server still answers on port 3000, and no new branch/worktree is needed.
+- Classified the reuse boundary: Projects are a new public domain presentation over the existing content schema; Moments adapt Circle; About adapts Desktop Profile/Mobile Space.
+- Next checkpoint is focused RED coverage for generalizing the currently Blog-only creation/publication/cache boundary.
+- Repository RED/GREEN: typed Project/Moment/Page publication first failed because the Blog-only slug query treated the requested type as the slug; the corrected query filters both type and normalized slug. Routing/config tests also failed before the four-type route contract was implemented.
+- Browser RED/GREEN: Desktop pages initially had no headings/routes and Mobile Desk had no Project/Moment/About bindings; the completed routes and source-shell adapters passed the focused Desktop/Mobile browser contract.
+- Added one generic Studio content editor/preview/publish path while retaining the existing Blog compatibility route. Studio can now create Blog, Project, Moment, or Page drafts without another application or service.
+- Non-empty visual fixtures verified Project, Moment, About and the Member-unavailable comment notice at 1440×900 plus Mobile Moments/About at 390×667. Temporary fixtures remain scheduled for precise cleanup after final browser checks.
+- Real Owner browser flow passed with a temporary account: login → select Project → create generic draft → edit metadata/body → autosave to revision 5 → publish → redirect to the stable `/projects/<slug>` reader with fresh content. This also exercised the new `updateTag` cache invalidation path.
+- Deleted the three visual fixtures, the Owner-flow Project, temporary Owner, and its cascaded session by exact slug/username; database verification returned zero remaining matching rows. Advanced the cache generation once more so no QA projection can survive into the final production build.
+- Final source-order regression: adding Projects crossed the source Desk eight-icon page boundary. Removing post-pagination layout reruns restored Tea → Story → Tarot → Character global order while preserving the source page packer.
+- Build-without-database check passed after aligning Projects/Moments/About with Blog's dynamic-page plus tagged-data-cache boundary. Docker was then restored and `continuum-db` returned healthy.
+- Final checkpoint passed: Vitest 45 files / 160 tests; ESLint; TypeScript; production build; Mobile public-content + Character/Tea/Story/Tarot 13 passed / 1 intentionally skipped; Desktop public-content 1 passed / 1 intentionally skipped; `git diff --check` clean. The final production server remains open on port 3000.
+- Phase 20 public skeleton is complete. AI Persona Moment moderation, media-backed galleries, Timeline/Archive/Search and Home below-fold aggregation remain later V1 work and are not claimed here.
+- Final cache-security hardening adds type/slug identity to every publication result, so switching an already-public entry to Hidden invalidates its old list/detail cache before redirecting to the Hidden Guest Preview. The focused repository RED/GREEN test and the fresh 160-test/build checkpoint passed afterward.

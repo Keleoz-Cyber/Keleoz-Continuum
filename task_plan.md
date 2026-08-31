@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 19 complete: source-backed Mobile Character for Wardrobe and Sleep
+Phase 20 complete: public Projects, Moments, and About content skeleton
 
 ## Phases
 
@@ -152,6 +152,17 @@ Phase 19 complete: source-backed Mobile Character for Wardrobe and Sleep
 - [x] Run one proportional local checkpoint and update the source-reuse ledger
 - **Status:** complete
 
+### Phase 20: Public Projects, Moments, and About
+- [x] Capture Desktop/Mobile source contracts for Circle/Moments and Profile/About; document why ICode Projects is not the public Project entity
+- [x] Generalize the existing content publish/cache/editor boundary from Blog-only routes to typed Blog/Project/Moment/Page flows
+- [x] Add focused RED/GREEN coverage for type-safe creation, publication, route projection, and cache invalidation
+- [x] Implement source-backed Desktop public surfaces for Projects, Moments, and About without generic dashboard/card-grid redesign
+- [x] Adapt the authoritative Mobile Desk/App routing and mobile-native presentation for all three public surfaces
+- [x] Preserve Guest comment affordance as a Member-unavailable notice that routes visitors to Letters
+- [x] Verify Owner creation/publish plus Guest desktop/mobile reading in a real browser
+- [x] Run one proportional local checkpoint and update the source-reuse ledger
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -294,6 +305,17 @@ Phase 19 complete: source-backed Mobile Character for Wardrobe and Sleep
 | Drizzle migration command exited 1 for both existing dev/test databases without printing the underlying SQL error | 1 | Inspect migration journal and live schema read-only before choosing a non-destructive repair; do not rerun the same opaque command |
 | First direct migrator diagnostic used top-level await in `tsx -e` CJS output | 1 | Wrap the diagnostic in an async IIFE so the real database error can be observed |
 | First Mobile Character lint pass found a synchronous sleep-frame reset inside an effect and an over-broad state dependency | 1 | Move frame reset into the delayed source transition and persist the primitive source-state string rather than the whole React state |
+| Phase 20 visual-fixture script imported the `server-only` runtime through standalone `tsx` | 1 | Instantiate the existing repository directly with Drizzle and the loaded development database URL instead of bypassing the server-only boundary |
+| PowerShell expanded PostgreSQL `$1` inside the inline fixture-cleanup command | 1 | Use the three already-known literal fixture slugs in one exact `IN` deletion rather than interpolating or composing a broader target |
+| Second fixture-cleanup attempt nested escaped TypeScript and SQL quotes incorrectly | 2 | Stop using inline `tsx`; issue one explicit `psql` statement inside the known `continuum-db` container, then verify the exact slugs are absent |
+| Temporary Owner bootstrap used guessed `OWNER_*` variable names | 1 | Read the existing bootstrap contract and retry once with `CONTINUUM_OWNER_USERNAME` / `CONTINUUM_OWNER_PASSWORD` |
+| Combined Mobile regression found Story order detached from Tea after adding Projects | 2 | Remove five concurrent layout calls and the delayed post-pagination pass; insert all tiles synchronously, then invoke the source layout exactly once before `_dkOsFlow` redistributes the DOM |
+| PowerShell passed the regex pipe in Playwright `--grep` through to `cmd` | 1 | Run the small targeted files directly instead of composing a shell-sensitive alternation |
+| A later Playwright web server overlapped a stale Next dev process and Turbopack raced on an existing junction | 1 | Stop the retained dev session, finish with one production build/server, and run final browser checks against that single process |
+| First PowerShell port-owner inspection piped directly from a `foreach` statement | 1 | Accumulate resolved process rows first, then format the array; do not retry the malformed pipeline |
+| Docker Desktop stopped before the final checkpoint, causing 24 integration `ECONNREFUSED` failures | 1 | Separate external-runtime failure from code; keep unit/build work useful, restore Docker once, then rerun the unchanged integration suite |
+| First Phase 20 build tried to prerender `/about` and required PostgreSQL | 1 | Match the existing Blog boundary: mark public list/About routes dynamic while retaining tagged data caching, so local/CI builds remain database-independent |
+| Final action audit found Hidden publication skipped list/detail cache invalidation | 1 | Return type/slug from every publication result and invalidate both tags/paths before branching on the Guest projection |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
