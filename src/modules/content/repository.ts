@@ -1,9 +1,10 @@
-import { and, desc, eq, max, ne, or, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, max, ne, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-import { contentEntries, contentPublications, contentVersions } from '@/db/schema'
+import { contentEntries, contentMedia, contentPublications, contentVersions, mediaObjects } from '@/db/schema'
 import type * as schema from '@/db/schema'
 import { parseAndRenderDocument } from '@/modules/content/document'
+import { extractMediaReferences } from '@/modules/content/media-nodes'
 import { projectPublishedVersion } from '@/modules/content/projection'
 import type { PublicContentListItem } from '@/modules/content/dto'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
@@ -174,6 +175,15 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         }
 
         const rendered = parseAndRenderDocument(entry.draftDocument)
+        const mediaReferences = extractMediaReferences(rendered.document)
+        const mediaIds = [...new Set(mediaReferences.map((reference) => reference.mediaId))]
+        if (mediaIds.length) {
+          const readyMedia = await transaction.select({ id: mediaObjects.id }).from(mediaObjects)
+            .where(and(inArray(mediaObjects.id, mediaIds), eq(mediaObjects.state, 'ready')))
+          if (readyMedia.length !== mediaIds.length) {
+            throw new Error('Every referenced media object must be ready before publication')
+          }
+        }
         const [latestVersion] = await transaction
           .select({ versionNumber: max(contentVersions.versionNumber) })
           .from(contentVersions)
@@ -215,6 +225,20 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
           .update(contentEntries)
           .set({ status: 'published', updatedAt: publishedAt })
           .where(eq(contentEntries.id, entry.id))
+
+        await transaction.delete(contentMedia).where(eq(contentMedia.entryId, entry.id))
+        if (mediaIds.length) {
+          await transaction.insert(contentMedia).values(mediaIds.map((mediaId, position) => {
+            const reference = mediaReferences.find((candidate) => candidate.mediaId === mediaId)!
+            return {
+              entryId: entry.id,
+              mediaId,
+              position,
+              altText: reference.alt,
+              createdAt: publishedAt,
+            }
+          }))
+        }
 
         return {
           versionId: version.id,

@@ -54,6 +54,9 @@ describe('media service', () => {
     ]))
     expect(memory.objects.size).toBe(6)
     await expect(service.listReady()).resolves.toEqual([expect.objectContaining({ id: uploaded.id, variants: expect.any(Array) })])
+    await expect(repository.getReadyVariant(uploaded.id, 'large-webp')).resolves.toEqual(expect.objectContaining({
+      mimeType: 'image/webp', storageKey: expect.stringContaining('/large.webp'),
+    }))
   })
 
   it('marks a failed upload and removes every object written before the storage error', async () => {

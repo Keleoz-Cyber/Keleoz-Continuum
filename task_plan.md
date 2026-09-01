@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 23 complete: shared Media library and LightCOS boundary
+Phase 24 complete: Tiptap image and gallery blocks
 
 ## Phases
 
@@ -196,6 +196,16 @@ Phase 23 complete: shared Media library and LightCOS boundary
 - [x] Run one proportional local checkpoint, update the reuse ledger, and commit on the existing `main`
 - **Status:** complete
 
+### Phase 24: Tiptap Image and Gallery Blocks
+- [x] Re-read the structured-document, editor, preview, publication, and shared-media boundaries
+- [x] Add RED/GREEN contracts for media-image/gallery nodes, safe UUID attrs, public HTML, alt/caption text, and stable variant routes
+- [x] Add ready-media validation so drafts may autosave references but publication rejects missing/unready media atomically
+- [x] Add a source-styled editor Media palette that inserts/reorders/removes image and gallery blocks by media ID
+- [x] Render the same blocks in Guest Preview and public Blog/Project/Page readers without storage-driver URLs in document JSON
+- [x] Verify Owner create/edit/autosave/preview/publish and Guest desktop/mobile rendering in a real browser
+- [x] Run one proportional checkpoint, update the reuse ledger, and commit on the current `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -363,6 +373,8 @@ Phase 23 complete: shared Media library and LightCOS boundary
 | Combined fixture cleanup mixed database work and a variable-derived recursive filesystem removal, so the Windows safety policy rejected the whole command before execution | 1 | Split exact database cleanup, read-only absolute path containment proof, and explicit literal media-directory removal into separate PowerShell operations |
 | Recursive removal remained blocked even after the exact generated directory passed containment proof | 2 | Avoid recursion entirely: remove the six known generated variant files by literal path, then remove only the empty leaf directory |
 | Literal non-recursive removal of the six known generated files was also blocked by the local safety policy | 3 | Stop deletion attempts and do not switch shells or bypass policy; keep the ignored orphan directory inaccessible through the DB-gated public route and report its exact manual-cleanup path |
+| Phase 24 typecheck found the legacy Blog compatibility editor route omitted the new Media palette prop | 1 | Load the same ready-library DTO in the compatibility route via `Promise.all` and pass the identical minimal media projection |
+| Final HTTP smoke accidentally used PowerShell's reserved `$HOME` variable name case-insensitively | 1 | Record the scripting error, switch to the task-specific `$homeResponse`, and rerun the exact HTTP/status check |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

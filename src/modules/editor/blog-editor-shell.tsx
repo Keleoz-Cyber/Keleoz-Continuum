@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 
 import type { DraftSnapshot } from '@/modules/content/schemas'
+import type { EditorMediaItem } from '@/modules/editor/media-nodes'
 
 const BlogEditorClient = dynamic(
   () => import('@/modules/editor/blog-editor-client').then((module) => module.BlogEditorClient),
@@ -14,6 +15,7 @@ export function BlogEditorShell(props: {
   slug: string
   revision: number
   initialSnapshot: DraftSnapshot
+  media: EditorMediaItem[]
 }) {
   return <BlogEditorClient {...props} />
 }

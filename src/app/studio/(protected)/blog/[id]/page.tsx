@@ -4,6 +4,8 @@ import { BlogEditorShell } from '@/modules/editor/blog-editor-shell'
 import { publishBlogAction } from '@/modules/content/actions'
 import { contentRepository } from '@/modules/content/runtime'
 import type { DraftSnapshot } from '@/modules/content/schemas'
+import type { EditorMediaItem } from '@/modules/editor/media-nodes'
+import { mediaService } from '@/modules/media/runtime'
 
 export default async function StudioBlogEditorPage({
   params,
@@ -11,7 +13,10 @@ export default async function StudioBlogEditorPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const draft = await contentRepository.getDraftById(id)
+  const [draft, media] = await Promise.all([
+    contentRepository.getDraftById(id),
+    mediaService.listReady(),
+  ])
   if (!draft || draft.type !== 'blog') notFound()
 
   const initialSnapshot: DraftSnapshot = {
@@ -45,6 +50,7 @@ export default async function StudioBlogEditorPage({
         slug={draft.slug}
         revision={draft.revision}
         initialSnapshot={initialSnapshot}
+        media={media.map((item): EditorMediaItem => ({ id: item.id, altText: item.altText, originalName: item.originalName }))}
       />
     </main>
   )

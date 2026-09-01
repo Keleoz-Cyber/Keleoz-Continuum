@@ -5,10 +5,15 @@ import { CONTENT_TYPE_CONFIG } from '@/modules/content/routing'
 import { contentRepository } from '@/modules/content/runtime'
 import type { DraftSnapshot } from '@/modules/content/schemas'
 import { BlogEditorShell } from '@/modules/editor/blog-editor-shell'
+import type { EditorMediaItem } from '@/modules/editor/media-nodes'
+import { mediaService } from '@/modules/media/runtime'
 
 export default async function StudioContentEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const draft = await contentRepository.getDraftById(id)
+  const [draft, media] = await Promise.all([
+    contentRepository.getDraftById(id),
+    mediaService.listReady(),
+  ])
   if (!draft) notFound()
   const config = CONTENT_TYPE_CONFIG[draft.type]
   const initialSnapshot: DraftSnapshot = {
@@ -32,7 +37,13 @@ export default async function StudioContentEditorPage({ params }: { params: Prom
           </form>
         </div>
       </header>
-      <BlogEditorShell entryId={draft.id} slug={draft.slug} revision={draft.revision} initialSnapshot={initialSnapshot} />
+      <BlogEditorShell
+        entryId={draft.id}
+        slug={draft.slug}
+        revision={draft.revision}
+        initialSnapshot={initialSnapshot}
+        media={media.map((item): EditorMediaItem => ({ id: item.id, altText: item.altText, originalName: item.originalName }))}
+      />
     </main>
   )
 }

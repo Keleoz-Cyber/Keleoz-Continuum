@@ -481,3 +481,16 @@
 - Deleted every temporary database row and closed the browser; public Moments is empty and the orphan local media URL is DB-gated to 404. Six ignored variant files remain only because the local destructive-file policy blocked three exact cleanup approaches.
 - Final checkpoint passed: 54 Vitest files / 192 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, four required media/review tables, zero Phase 23 database fixtures, `git diff --check`, and all four immutable upstream hashes.
 - Phase 23 is complete. Local media is fully verified; LightCOS request construction is contract-tested but correctly remains unverified against a live cloud bucket/domain.
+
+### Phase 24 start: Tiptap image and gallery blocks (2026-09-01)
+- Re-read the active plan and the current Tiptap extension, document sanitizer, editor shell/client, autosave, preview and content publication paths.
+- Confirmed `main` is clean at `8c6bf2c`, PostgreSQL is healthy and production remains open on port 3000.
+- Locked JSON authority to media UUIDs plus presentation metadata; no storage key, local path, signed query or LightCOS hostname will enter content documents.
+- Next checkpoint is RED coverage for custom media nodes and publication-time ready-media validation before editor UI code.
+- Document RED/GREEN covers stable media-ID routes, safe image/gallery attrs, source three-image cap, sanitizer preservation and alt/caption plain text. Editor builder RED/GREEN keeps all filenames/storage URLs out of JSON.
+- Publication RED/GREEN rejects unready references without moving the pointer, accepts ready media, emits stable public HTML and atomically records `content_media` attachments.
+- Added a server-projected Media palette to both generic and compatibility Blog editors, with image size/caption, image insertion, 2–3 item gallery selection, draggable/selectable Tiptap atoms and selected-block removal.
+- Production browser flow passed: Owner login → Blog draft → wide image/caption insertion → revision 2 autosave → Guest Preview → Full publish → Desktop/Mobile public reader → Hidden revision 3 publish → public 404.
+- Deleted all Phase 24 database fixtures and closed the browser; no additional local media files were generated.
+- Final checkpoint passed: 55 Vitest files / 197 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, zero Phase 24 fixtures, `git diff --check`, and all four immutable upstream hashes.
+- Phase 24 is complete. Image/gallery blocks are production-ready; audio/video/attachment media types remain explicit later work.

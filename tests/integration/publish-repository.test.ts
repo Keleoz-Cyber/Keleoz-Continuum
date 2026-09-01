@@ -3,11 +3,13 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
 import * as schema from '@/db/schema'
 import { createContentRepository } from '@/modules/content/repository'
+import { createMediaRepository } from '@/modules/media/repository'
 import { PublishedSlugChangeError } from '@/modules/content/slug'
 import { createTestPool } from '@/test/db'
 
 const pool = createTestPool()
 const repository = createContentRepository(drizzle(pool, { schema }))
+const mediaRepository = createMediaRepository(drizzle(pool, { schema }))
 
 function paragraphDocument(text: string) {
   return {
@@ -39,6 +41,8 @@ beforeEach(async () => {
   await pool.query('delete from content_publications')
   await pool.query('delete from content_versions')
   await pool.query('delete from content_entries')
+  await pool.query('delete from media_variants')
+  await pool.query('delete from media_objects')
 })
 
 afterAll(async () => {
@@ -224,5 +228,43 @@ describe('content publication', () => {
       expect.objectContaining({ type: 'project', bodyHtml: expect.stringContaining('project public body') }),
     )
     await expect(repository.getPublicBySlug('blog', 'continuum-project')).resolves.toBeNull()
+  })
+
+  it('rejects unready media references and publishes the same draft once every media id is ready', async () => {
+    const mediaId = crypto.randomUUID()
+    await mediaRepository.createPending({
+      id: mediaId,
+      storageKey: `media/2026/09/${mediaId}/large.webp`,
+      originalName: 'window.png', mimeType: 'image/webp', byteSize: 100,
+      sha256: 'c'.repeat(64), altText: '雾窗', width: 1_200, height: 800, now: new Date(),
+    })
+    const draft = await repository.createDraft({
+      type: 'blog', slug: 'media-draft', title: 'Media draft', subtitle: null,
+      categoryLabel: null, summary: 'Summary', exposure: 'full',
+      document: {
+        type: 'doc', content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'Before image.' }] },
+          { type: 'continuumImage', attrs: { mediaId, alt: '雾窗', caption: 'Mist', size: 'wide' } },
+        ],
+      },
+    })
+
+    await expect(repository.publishDraft({ entryId: draft.id })).rejects.toThrow('ready')
+    await expect(repository.getPublicBySlug('blog', 'media-draft')).resolves.toBeNull()
+
+    await mediaRepository.markReady({
+      id: mediaId,
+      variants: [
+        { name: 'large-webp', storageKey: `media/2026/09/${mediaId}/large.webp`, mimeType: 'image/webp', byteSize: 100, width: 1_200, height: 800 },
+        { name: 'large-avif', storageKey: `media/2026/09/${mediaId}/large.avif`, mimeType: 'image/avif', byteSize: 80, width: 1_200, height: 800 },
+      ],
+      now: new Date(),
+    })
+    await repository.publishDraft({ entryId: draft.id })
+    const attachments = await pool.query('select media_id, alt_text, position from content_media where entry_id=$1', [draft.id])
+    expect(attachments.rows).toEqual([{ media_id: mediaId, alt_text: '雾窗', position: 0 }])
+    await expect(repository.getPublicBySlug('blog', 'media-draft')).resolves.toEqual(expect.objectContaining({
+      bodyHtml: expect.stringContaining(`/media/${mediaId}/large.webp`),
+    }))
   })
 })

@@ -129,5 +129,21 @@ export function createMediaRepository(database: NodePgDatabase<typeof schema>) {
         .limit(1)
       return variant ?? null
     },
+    async getReadyVariant(mediaId: string, name: string) {
+      const [variant] = await database.select({
+        storageKey: mediaVariants.storageKey,
+        mimeType: mediaVariants.mimeType,
+        byteSize: mediaVariants.byteSize,
+        width: mediaVariants.width,
+        height: mediaVariants.height,
+      }).from(mediaVariants)
+        .innerJoin(mediaObjects, eq(mediaObjects.id, mediaVariants.mediaId))
+        .where(and(
+          eq(mediaVariants.mediaId, mediaId),
+          eq(mediaVariants.name, name),
+          eq(mediaObjects.state, 'ready'),
+        )).limit(1)
+      return variant ?? null
+    },
   }
 }
