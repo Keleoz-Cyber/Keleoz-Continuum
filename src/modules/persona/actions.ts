@@ -83,6 +83,7 @@ export async function moderatePersonaReviewAction(formData: FormData): Promise<n
     reviewId: idSchema.parse(formData.get('reviewId')),
     decision: decisionSchema.parse(formData.get('decision')),
     editedContent: text(formData.get('editedContent')),
+    mediaObjectId: text(formData.get('mediaObjectId')) || null,
   })
   updateTag('moments:social')
   if (result.status === 'approved') {
@@ -94,4 +95,17 @@ export async function moderatePersonaReviewAction(formData: FormData): Promise<n
     revalidatePath('/moments')
   }
   redirect(`/studio?persona=${result.status}`)
+}
+
+export async function deleteApprovedPersonaPublicationAction(formData: FormData): Promise<never> {
+  await requireOwner()
+  const result = await personaRepository.deleteApprovedPublication(idSchema.parse(formData.get('reviewId')))
+  updateTag('moments:social')
+  updateTag('content:moment')
+  if (result.publishedSlug) {
+    updateTag(`content:moment:${result.publishedSlug}`)
+    updateTag('content:timeline')
+  }
+  revalidatePath('/moments')
+  redirect('/studio?persona=publication-deleted')
 }

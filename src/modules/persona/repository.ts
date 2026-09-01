@@ -3,8 +3,8 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { z } from 'zod'
 
 import {
-  contentEntries, contentPublications, contentVersions, momentAuthorships, momentComments,
-  momentPersonas, personaReviews,
+  contentEntries, contentMedia, contentPublications, contentVersions, mediaObjects, mediaVariants,
+  momentAuthorships, momentComments, momentPersonas, personaReviews,
 } from '@/db/schema'
 import type * as schema from '@/db/schema'
 import { parseAndRenderDocument } from '@/modules/content/document'
@@ -29,6 +29,11 @@ export type PublicMomentItem = {
   bodyHtml: string | null; publishedAt: string; author: PublicMomentAuthor
   comments: Array<{ id: string; content: string; createdAt: string; author: PublicMomentAuthor; replyToName: string | null }>
   repost: null | { slug: string; title: string; summary: string; author: PublicMomentAuthor }
+  media: Array<{
+    id: string
+    altText: string
+    variants: Array<{ name: string; mimeType: string; width: number; height: number; publicUrl: string }>
+  }>
 }
 
 const OWNER_AUTHOR: PublicMomentAuthor = { name: 'Keleoz', handle: '@KeleozContinuum', isAi: false }
@@ -45,7 +50,11 @@ function momentSlug(handle: string, reviewId: string, now: Date) {
   return `${handle}-${now.toISOString().replace(/\D/g, '').slice(0, 14)}-${reviewId.slice(0, 8)}`
 }
 
-export function createPersonaRepository(database: NodePgDatabase<typeof schema>) {
+export function createPersonaRepository(
+  database: NodePgDatabase<typeof schema>,
+  options: { mediaPublicUrl?: (key: string) => string } = {},
+) {
+  const mediaPublicUrl = options.mediaPublicUrl ?? ((key: string) => key)
   async function assertPublishedMoment(entryId: string) {
     const [target] = await database.select({ id: contentEntries.id }).from(contentEntries)
       .innerJoin(contentPublications, eq(contentPublications.entryId, contentEntries.id))
@@ -109,6 +118,39 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
       })
     }
 
+    const mediaRows = await database.select({
+      entryId: contentMedia.entryId,
+      mediaId: mediaObjects.id,
+      relationAltText: contentMedia.altText,
+      objectAltText: mediaObjects.altText,
+      name: mediaVariants.name,
+      storageKey: mediaVariants.storageKey,
+      mimeType: mediaVariants.mimeType,
+      width: mediaVariants.width,
+      height: mediaVariants.height,
+    }).from(contentMedia)
+      .innerJoin(mediaObjects, eq(mediaObjects.id, contentMedia.mediaId))
+      .innerJoin(mediaVariants, eq(mediaVariants.mediaId, mediaObjects.id))
+      .where(and(inArray(contentMedia.entryId, entryIds), eq(mediaObjects.state, 'ready')))
+      .orderBy(asc(contentMedia.position), asc(mediaVariants.name))
+    const mediaByEntry = new Map<string, PublicMomentItem['media']>()
+    for (const media of mediaRows) {
+      const list = mediaByEntry.get(media.entryId) ?? []
+      let item = list.find((candidate) => candidate.id === media.mediaId)
+      if (!item) {
+        item = { id: media.mediaId, altText: media.relationAltText || media.objectAltText, variants: [] }
+        list.push(item)
+      }
+      item.variants.push({
+        name: media.name,
+        mimeType: media.mimeType,
+        width: media.width,
+        height: media.height,
+        publicUrl: mediaPublicUrl(media.storageKey),
+      })
+      mediaByEntry.set(media.entryId, list)
+    }
+
     return rows.map((row) => ({
       entryId: row.entryId, type: 'moment' as const, slug: row.slug, title: row.title,
       subtitle: row.subtitle, categoryLabel: row.categoryLabel, summary: row.summary,
@@ -119,6 +161,7 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
         ? personaAuthor({ name: row.personaName, handle: row.personaHandle }) : OWNER_AUTHOR,
       comments: commentsByEntry.get(row.entryId) ?? [],
       repost: row.repostOfEntryId ? repostById.get(row.repostOfEntryId) ?? null : null,
+      media: mediaByEntry.get(row.entryId) ?? [],
     }))
   }
 
@@ -168,7 +211,8 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
       return database.select({
         id: personaReviews.id, action: personaReviews.action, status: personaReviews.status,
         content: personaReviews.content, reviewedContent: personaReviews.reviewedContent,
-        imagePrompt: personaReviews.imagePrompt, targetEntryId: personaReviews.targetEntryId,
+        imagePrompt: personaReviews.imagePrompt, mediaObjectId: personaReviews.mediaObjectId,
+        targetEntryId: personaReviews.targetEntryId,
         targetCommentId: personaReviews.targetCommentId, publishedEntryId: personaReviews.publishedEntryId,
         publishedCommentId: personaReviews.publishedCommentId, createdAt: personaReviews.createdAt,
         reviewedAt: personaReviews.reviewedAt, personaId: momentPersonas.id,
@@ -177,7 +221,8 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
         .orderBy(desc(personaReviews.createdAt))
     },
     async moderateReview(input: {
-      reviewId: string; decision: 'approved' | 'rejected' | 'deleted'; editedContent?: string; now?: Date
+      reviewId: string; decision: 'approved' | 'rejected' | 'deleted'; editedContent?: string
+      mediaObjectId?: string | null; now?: Date
     }) {
       const reviewId = z.uuid().parse(input.reviewId)
       const now = input.now ?? new Date()
@@ -190,9 +235,13 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
           .where(eq(momentPersonas.id, review.personaId)).limit(1).for('update')
         if (!persona) throw new Error('Persona was not found')
         const content = input.editedContent === undefined ? review.content : editedContentSchema.parse(input.editedContent)
+        const selectedMediaId = input.mediaObjectId === undefined
+          ? review.mediaObjectId
+          : input.mediaObjectId ? z.uuid().parse(input.mediaObjectId) : null
         if (input.decision !== 'approved') {
           const [closed] = await transaction.update(personaReviews).set({
-            status: input.decision, reviewedContent: input.editedContent === undefined ? null : content, reviewedAt: now,
+            status: input.decision, reviewedContent: input.editedContent === undefined ? null : content,
+            mediaObjectId: selectedMediaId, reviewedAt: now,
           }).where(eq(personaReviews.id, review.id)).returning()
           return { ...closed!, publishedSlug: null }
         }
@@ -201,6 +250,18 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
           targetEntryId: review.targetEntryId, targetCommentId: review.targetCommentId,
         })
         assertPersonaCanPropose(persona, proposal)
+        if (selectedMediaId && !persona.canUseImages) throw new Error('Persona does not have image permission')
+        if (selectedMediaId && (proposal.action === 'comment' || proposal.action === 'reply')) {
+          throw new Error('Only Persona posts and reposts can attach media')
+        }
+        let selectedMedia: { id: string; altText: string } | null = null
+        if (selectedMediaId) {
+          const [readyMedia] = await transaction.select({ id: mediaObjects.id, altText: mediaObjects.altText })
+            .from(mediaObjects)
+            .where(and(eq(mediaObjects.id, selectedMediaId), eq(mediaObjects.state, 'ready'))).limit(1)
+          if (!readyMedia) throw new Error('Selected media is not ready')
+          selectedMedia = readyMedia
+        }
         let publishedEntryId: string | null = null
         let publishedCommentId: string | null = null
         let publishedSlug: string | null = null
@@ -247,13 +308,49 @@ export function createPersonaRepository(database: NodePgDatabase<typeof schema>)
             entryId: entry.id, personaId: persona.id,
             repostOfEntryId: proposal.action === 'repost' ? proposal.targetEntryId : null, createdAt: now,
           })
+          if (selectedMedia) {
+            await transaction.insert(contentMedia).values({
+              entryId: entry.id,
+              mediaId: selectedMedia.id,
+              position: 0,
+              altText: selectedMedia.altText,
+              createdAt: now,
+            })
+          }
           publishedEntryId = entry.id
         }
         const [approved] = await transaction.update(personaReviews).set({
           status: 'approved', reviewedContent: input.editedContent === undefined ? null : content,
-          publishedEntryId, publishedCommentId, reviewedAt: now,
+          mediaObjectId: selectedMediaId, publishedEntryId, publishedCommentId, reviewedAt: now,
         }).where(eq(personaReviews.id, review.id)).returning()
         return { ...approved!, publishedSlug }
+      })
+    },
+    async deleteApprovedPublication(reviewIdInput: string) {
+      const reviewId = z.uuid().parse(reviewIdInput)
+      return database.transaction(async (transaction) => {
+        const [review] = await transaction.select().from(personaReviews)
+          .where(eq(personaReviews.id, reviewId)).limit(1).for('update')
+        if (!review || review.status !== 'approved') {
+          throw new Error('Only an approved Persona review publication can be deleted')
+        }
+        let publishedSlug: string | null = null
+        if (review.publishedEntryId) {
+          const [entry] = await transaction.select({ slug: contentEntries.slug }).from(contentEntries)
+            .where(eq(contentEntries.id, review.publishedEntryId)).limit(1)
+          publishedSlug = entry?.slug ?? null
+          await transaction.delete(contentEntries).where(eq(contentEntries.id, review.publishedEntryId))
+        }
+        if (review.publishedCommentId) {
+          await transaction.delete(momentComments).where(eq(momentComments.id, review.publishedCommentId))
+        }
+        const [deleted] = await transaction.update(personaReviews).set({
+          status: 'deleted',
+          publishedEntryId: null,
+          publishedCommentId: null,
+          reviewedAt: new Date(),
+        }).where(eq(personaReviews.id, review.id)).returning()
+        return { ...deleted!, publishedSlug }
       })
     },
     listPublicMoments,

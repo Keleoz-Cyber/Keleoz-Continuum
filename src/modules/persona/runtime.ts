@@ -6,9 +6,10 @@ import { createAiConcurrencyGate, getSharedAiConcurrencyGate } from '@/modules/a
 import { createAiQuotaRepository } from '@/modules/ai/repository'
 import { createPersonaRepository } from '@/modules/persona/repository'
 import { createPersonaGenerationService } from '@/modules/persona/service'
+import { mediaStorage } from '@/modules/media/runtime'
 import { serverEnv } from '@/shared/env'
 
-export const personaRepository = createPersonaRepository(db)
+export const personaRepository = createPersonaRepository(db, { mediaPublicUrl: (key) => mediaStorage.publicUrl(key) })
 
 const runtimeGlobal = globalThis as typeof globalThis & {
   continuumAiGate?: ReturnType<typeof createAiConcurrencyGate>

@@ -56,6 +56,10 @@ describe('parseServerEnv', () => {
       AI_PERSONA_MAX_OUTPUT_TOKENS: 500,
       AI_GLOBAL_MAX_CONCURRENCY: 2,
       AI_TIMEOUT_MS: 30_000,
+      MEDIA_LIGHTCOS_BUCKET: null,
+      MEDIA_LIGHTCOS_SECRET_ID: null,
+      MEDIA_LIGHTCOS_SECRET_KEY: null,
+      MEDIA_PUBLIC_ORIGIN: null,
     })
   })
 
@@ -77,6 +81,23 @@ describe('parseServerEnv', () => {
       AI_API_KEY: 'server-secret',
       AI_MODEL: 'model-id',
       AI_DAILY_BUDGET_MICRO_USD: 100_000,
+    })
+  })
+
+  it('requires complete server-held LightCOS configuration only for the LightCOS driver', () => {
+    expect(() => parseServerEnv({ ...validEnv, MEDIA_DRIVER: 'lightcos' })).toThrow('MEDIA_LIGHTCOS_BUCKET')
+
+    expect(parseServerEnv({
+      ...validEnv,
+      MEDIA_DRIVER: 'lightcos',
+      MEDIA_LIGHTCOS_BUCKET: 'continuum-1250000000',
+      MEDIA_LIGHTCOS_SECRET_ID: 'server-secret-id',
+      MEDIA_LIGHTCOS_SECRET_KEY: 'server-secret-key',
+      MEDIA_PUBLIC_ORIGIN: 'https://media.example.com',
+    })).toMatchObject({
+      MEDIA_DRIVER: 'lightcos',
+      MEDIA_LIGHTCOS_BUCKET: 'continuum-1250000000',
+      MEDIA_PUBLIC_ORIGIN: 'https://media.example.com',
     })
   })
 })

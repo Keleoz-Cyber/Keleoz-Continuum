@@ -3,13 +3,15 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
 import * as schema from '@/db/schema'
 import { createContentRepository } from '@/modules/content/repository'
+import { createMediaRepository } from '@/modules/media/repository'
 import { createPersonaRepository } from '@/modules/persona/repository'
 import { createTestPool } from '@/test/db'
 
 const pool = createTestPool()
 const database = drizzle(pool, { schema })
-const repository = createPersonaRepository(database)
+const repository = createPersonaRepository(database, { mediaPublicUrl: (key) => `/media-test/${key}` })
 const contentRepository = createContentRepository(database)
+const mediaRepository = createMediaRepository(database)
 
 const allPermissions = {
   enabled: true,
@@ -41,6 +43,8 @@ beforeEach(async () => {
   await pool.query('delete from content_publications')
   await pool.query('delete from content_versions')
   await pool.query('delete from content_entries')
+  await pool.query('delete from media_variants')
+  await pool.query('delete from media_objects')
 })
 
 afterAll(async () => pool.end())
@@ -139,5 +143,73 @@ describe('Persona review repository', () => {
         .resolves.toMatchObject({ status: decision })
     }
     await expect(repository.listPublicMoments()).resolves.toEqual([])
+  })
+
+  it('lets the Owner delete an already-approved Persona publication through its review audit row', async () => {
+    const persona = await repository.createPersona({
+      name: 'Morrow', handle: 'morrow', description: '', systemPrompt: '克制、具体。',
+      ...allPermissions,
+    })
+    const review = await repository.createReview({
+      personaId: persona.id,
+      proposal: { action: 'post', content: '稍后删除的公开动态。', imagePrompt: null, targetEntryId: null, targetCommentId: null },
+    })
+    await repository.moderateReview({ reviewId: review.id, decision: 'approved' })
+    await expect(repository.listPublicMoments()).resolves.toHaveLength(1)
+
+    await expect(repository.deleteApprovedPublication(review.id)).resolves.toMatchObject({ status: 'deleted' })
+    await expect(repository.listPublicMoments()).resolves.toEqual([])
+  })
+
+  it('attaches only a ready reviewed library image to an approved post', async () => {
+    const persona = await repository.createPersona({
+      name: 'Morrow', handle: 'morrow', description: '', systemPrompt: '克制、具体。',
+      ...allPermissions,
+    })
+    const mediaId = crypto.randomUUID()
+    await mediaRepository.createPending({
+      id: mediaId, storageKey: `media/2026/08/${mediaId}/large.webp`,
+      originalName: 'mist.png', mimeType: 'image/webp', byteSize: 120,
+      sha256: 'a'.repeat(64), altText: '雾窗与蝴蝶', width: 1_200, height: 800,
+      now: new Date('2026-08-31T10:00:00Z'),
+    })
+    await mediaRepository.markReady({
+      id: mediaId,
+      variants: [
+        { name: 'card-webp', storageKey: `media/2026/08/${mediaId}/card.webp`, mimeType: 'image/webp', byteSize: 80, width: 960, height: 640 },
+        { name: 'large-webp', storageKey: `media/2026/08/${mediaId}/large.webp`, mimeType: 'image/webp', byteSize: 120, width: 1_200, height: 800 },
+      ],
+      now: new Date('2026-08-31T10:00:01Z'),
+    })
+    const review = await repository.createReview({
+      personaId: persona.id,
+      proposal: { action: 'post', content: '带一张审核后的图。', imagePrompt: '雾窗', targetEntryId: null, targetCommentId: null },
+    })
+    await repository.moderateReview({ reviewId: review.id, decision: 'approved', mediaObjectId: mediaId })
+
+    await expect(repository.listPublicMoments()).resolves.toEqual([
+      expect.objectContaining({
+        media: [{
+          id: mediaId,
+          altText: '雾窗与蝴蝶',
+          variants: expect.arrayContaining([
+            expect.objectContaining({ name: 'card-webp', publicUrl: expect.stringContaining('/card.webp') }),
+            expect.objectContaining({ name: 'large-webp', publicUrl: expect.stringContaining('/large.webp') }),
+          ]),
+        }],
+      }),
+    ])
+
+    const pendingId = crypto.randomUUID()
+    await mediaRepository.createPending({
+      id: pendingId, storageKey: `media/2026/08/${pendingId}/large.webp`, originalName: 'pending.png',
+      mimeType: 'image/webp', byteSize: 1, sha256: 'b'.repeat(64), altText: '', width: 10, height: 10, now: new Date(),
+    })
+    const second = await repository.createReview({
+      personaId: persona.id,
+      proposal: { action: 'post', content: '不能带未完成图片。', imagePrompt: null, targetEntryId: null, targetCommentId: null },
+    })
+    await expect(repository.moderateReview({ reviewId: second.id, decision: 'approved', mediaObjectId: pendingId }))
+      .rejects.toThrow('ready')
   })
 })

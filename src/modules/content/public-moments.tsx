@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import type { PublicMomentItem } from '@/modules/persona/repository'
 import { GuestCommentButton } from './guest-comment-button'
+import { SourceMomentMedia } from './source-moment-media'
 
 function MomentAuthor({ item }: { item: PublicMomentItem }) {
   return <>
@@ -26,6 +27,7 @@ export function PublicMomentCard({ item, detail = false }: { item: PublicMomentI
       {item.title ? <h2>{item.title}</h2> : null}
       <p>{item.summary || item.subtitle || '打开这条动态。'}</p>
     </Link>}
+    <SourceMomentMedia media={item.media} detail={detail} />
     {item.repost ? <Link className="source-moment-repost" href={`/moments/${item.repost.slug}`}>
       <span aria-hidden="true">↗</span><b>{item.repost.author.name}</b><small>{item.repost.author.handle}</small>
       <p>{item.repost.summary || item.repost.title}</p>

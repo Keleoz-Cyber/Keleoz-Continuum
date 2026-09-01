@@ -7,6 +7,10 @@ export type ServerEnv = {
   SITE_ORIGIN: string
   MEDIA_DRIVER: 'local' | 'lightcos'
   MEDIA_LOCAL_ROOT: string
+  MEDIA_LIGHTCOS_BUCKET: string | null
+  MEDIA_LIGHTCOS_SECRET_ID: string | null
+  MEDIA_LIGHTCOS_SECRET_KEY: string | null
+  MEDIA_PUBLIC_ORIGIN: string | null
   AI_GATEWAY_ENABLED: boolean
   AI_BASE_URL: string | null
   AI_API_KEY: string | null
@@ -65,6 +69,7 @@ const databaseUrl = z.string().refine(isPostgresUrl, 'DATABASE_URL must use post
 const siteOrigin = z.string().refine(isHttpOrigin, 'SITE_ORIGIN must be an HTTP(S) origin without a path')
 const optionalString = z.string().trim().min(1).optional().transform((value) => value ?? null)
 const optionalHttpUrl = z.string().trim().refine(isHttpUrl, 'AI_BASE_URL must use HTTP(S)').optional().transform((value) => value ?? null)
+const optionalHttpOrigin = z.string().trim().refine(isHttpOrigin, 'MEDIA_PUBLIC_ORIGIN must be an HTTP(S) origin without a path').optional().transform((value) => value ?? null)
 const integer = (minimum: number, maximum: number, fallback: number) =>
   z.coerce.number().int().min(minimum).max(maximum).default(fallback)
 
@@ -75,6 +80,10 @@ const serverEnvSchema = z.object({
   SITE_ORIGIN: siteOrigin,
   MEDIA_DRIVER: z.enum(['local', 'lightcos']),
   MEDIA_LOCAL_ROOT: z.string().trim().min(1, 'MEDIA_LOCAL_ROOT is required'),
+  MEDIA_LIGHTCOS_BUCKET: optionalString,
+  MEDIA_LIGHTCOS_SECRET_ID: optionalString,
+  MEDIA_LIGHTCOS_SECRET_KEY: optionalString,
+  MEDIA_PUBLIC_ORIGIN: optionalHttpOrigin,
   AI_GATEWAY_ENABLED: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
   AI_BASE_URL: optionalHttpUrl,
   AI_API_KEY: optionalString,
@@ -101,6 +110,16 @@ const serverEnvSchema = z.object({
   AI_INPUT_MICRO_USD_PER_MILLION_TOKENS: integer(0, 2_000_000_000, 0),
   AI_OUTPUT_MICRO_USD_PER_MILLION_TOKENS: integer(0, 2_000_000_000, 0),
 }).superRefine((value, context) => {
+  if (value.MEDIA_DRIVER === 'lightcos') {
+    for (const field of [
+      'MEDIA_LIGHTCOS_BUCKET', 'MEDIA_LIGHTCOS_SECRET_ID', 'MEDIA_LIGHTCOS_SECRET_KEY', 'MEDIA_PUBLIC_ORIGIN',
+    ] as const) {
+      if (!value[field]) context.addIssue({ code: 'custom', path: [field], message: `${field} is required when MEDIA_DRIVER=lightcos` })
+    }
+    if (value.MEDIA_LIGHTCOS_BUCKET && !/^[a-z0-9][a-z0-9-]{1,62}-\d{5,}$/.test(value.MEDIA_LIGHTCOS_BUCKET)) {
+      context.addIssue({ code: 'custom', path: ['MEDIA_LIGHTCOS_BUCKET'], message: 'MEDIA_LIGHTCOS_BUCKET must include the APPID suffix' })
+    }
+  }
   if (!value.AI_GATEWAY_ENABLED) return
   for (const field of ['AI_BASE_URL', 'AI_API_KEY', 'AI_MODEL'] as const) {
     if (!value[field]) context.addIssue({ code: 'custom', path: [field], message: `${field} is required when AI is enabled` })

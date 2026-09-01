@@ -1,6 +1,7 @@
 import { boolean, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core'
 
 import { contentEntries } from './content'
+import { mediaObjects } from './media'
 
 export const personaReviewAction = pgEnum('persona_review_action', ['post', 'comment', 'reply', 'repost'])
 export const personaReviewStatus = pgEnum('persona_review_status', ['pending', 'approved', 'rejected', 'deleted'])
@@ -48,6 +49,7 @@ export const personaReviews = pgTable('persona_reviews', {
   targetCommentId: uuid('target_comment_id'),
   content: text('content').notNull(),
   imagePrompt: text('image_prompt'),
+  mediaObjectId: uuid('media_object_id').references(() => mediaObjects.id, { onDelete: 'set null' }),
   reviewedContent: text('reviewed_content'),
   publishedEntryId: uuid('published_entry_id').references(() => contentEntries.id, { onDelete: 'set null' }),
   publishedCommentId: uuid('published_comment_id'),

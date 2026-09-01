@@ -29,6 +29,13 @@
       "when": 1788183467279,
       "tag": "0003_spicy_jackpot",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788187479412,
+      "tag": "0004_panoramic_scorpion",
+      "breakpoints": true
     }
   ]
 }

@@ -463,3 +463,21 @@
 - Final checkpoint passed: ESLint, TypeScript, 51 Vitest files / 179 tests, Next production build, four new PostgreSQL tables, healthy database, zero Phase 22 fixture rows, `git diff --check`, and all four immutable upstream hashes.
 - Phase 22 is complete. Persona image prompts are permission-gated review proposals only; actual generated/uploaded media remains assigned to the later shared Media/LightCOS phase rather than being faked in Moments.
 - Post-commit HTTP smoke caught the deleted QA Moment in Next's persisted data cache despite zero database rows. Advanced the list/detail social cache generations to v2; final completion now requires a rebuilt server response with the exact test handle absent.
+
+### Phase 23 start: shared Media library and LightCOS boundary (2026-08-31)
+- Re-read the active plan, media schema, V1 deployment constraints, source Circle image surfaces, and official current Tencent Cloud LightCOS documentation.
+- Confirmed the existing `main` checkout is clean at `18c3560`, PostgreSQL is healthy, and production remains available on port 3000.
+- Locked the boundary to one shared media domain and two storage drivers: fully verifiable local storage now, server-only LightCOS upload/public-domain projection when real cloud configuration exists. No browser-held Tencent credentials and no new service/queue.
+- Next checkpoint is RED coverage for media validation, variants, storage cleanup and attachment projection before schema or upload UI implementation.
+- Media contract RED/GREEN now covers real MIME decoding, path-safe display names, SHA-256, 10 MB and 40 MP limits, six bounded WebP/AVIF variants, and ASCII-only date/UUID object keys.
+- Storage-driver RED/GREEN covers local atomic write/read/traversal rejection and server-only LightCOS upload/delete requests using `{Bucket}.light-cos.com`, COS-compatible signing credentials, immutable cache metadata, and a separate public media origin.
+- Added the v4 schema migration for media hashes/alt text, variant rows, generic content attachments, and Persona review media selection; both development databases were migrated before Docker Desktop later stopped.
+- Media service RED/GREEN covers six-object persistence, ready-only library projection, cleanup after partial storage failure, and SHA-256 deduplication.
+- Added protected Owner upload API, responsive Studio Media Library, reviewed-media selector, generic content attachment, public local media route, and source Circle image grid/lightbox projection. TypeScript, ESLint, 16 focused unit tests, and the Next production build pass without PostgreSQL.
+- PostgreSQL integration and real browser upload/approval remain pending because Docker Desktop currently shows processes but has not exposed its Linux Engine pipe after three bounded checks.
+- After the user restarted Docker, both databases were healthy and the v4 migration applied; Media service plus Persona attachment integration passed 8/8, then the added approved-publication delete contract passed 6/6.
+- Production browser flow passed: Owner login → upload source JPG → six ready variants → create image-enabled Persona → pending review with separate image prompt → select library image → edit/approve → desktop/mobile Circle image → full-screen lightbox → delete public item → empty public feed.
+- Browser QA caught and fixed the lightbox containing-block clip through a body portal. Rebuilt production output and recaptured a true full-viewport dialog.
+- Deleted every temporary database row and closed the browser; public Moments is empty and the orphan local media URL is DB-gated to 404. Six ignored variant files remain only because the local destructive-file policy blocked three exact cleanup approaches.
+- Final checkpoint passed: 54 Vitest files / 192 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, four required media/review tables, zero Phase 23 database fixtures, `git diff --check`, and all four immutable upstream hashes.
+- Phase 23 is complete. Local media is fully verified; LightCOS request construction is contract-tested but correctly remains unverified against a live cloud bucket/domain.

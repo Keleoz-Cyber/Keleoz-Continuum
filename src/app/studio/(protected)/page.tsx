@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Media Library renders pre-generated local/LightCOS variants directly. */
 import Link from 'next/link'
 
 import { createContentDraftAction } from '@/modules/content/actions'
@@ -5,8 +6,11 @@ import { CONTENT_TYPE_CONFIG, studioContentPath } from '@/modules/content/routin
 import { contentRepository } from '@/modules/content/runtime'
 import { reviewLetterAction } from '@/modules/letters/owner-actions'
 import { lettersRepository } from '@/modules/letters/runtime'
+import { MediaUploadForm } from '@/modules/media/media-upload-form'
+import { mediaService } from '@/modules/media/runtime'
 import {
   createPersonaAction,
+  deleteApprovedPersonaPublicationAction,
   generatePersonaReviewAction,
   moderatePersonaReviewAction,
   updatePersonaAction,
@@ -18,13 +22,15 @@ const personaNotices: Record<string, string> = {
   approved: '提案已批准并更新公开 Moments。', rejected: '提案已退回。', deleted: '提案已从待审队列删除。',
   'ai-disabled': 'AI 网关当前关闭；Persona 配置和已有审核项仍可管理。',
   'generation-failed': 'AI 生成失败，未产生公开内容。', 'target-missing': '目标动态或评论已不存在。',
+  'publication-deleted': '已删除这条 Persona 公开内容，媒体库原件保持不变。',
 }
 
 export default async function StudioOverviewPage({ searchParams }: { searchParams: Promise<{ persona?: string }> }) {
-  const [{ persona: personaNotice }, drafts, letters, personas, reviews, moments] = await Promise.all([
+  const [{ persona: personaNotice }, drafts, letters, media, personas, reviews, moments] = await Promise.all([
     searchParams,
     contentRepository.listStudioDrafts(),
     lettersRepository.listForOwner(),
+    mediaService.listReady(),
     personaRepository.listPersonas(),
     personaRepository.listReviews(),
     personaRepository.listPublicMoments(),
@@ -79,6 +85,15 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
           </div>
         )}
       </section>
+      <section className="studio-inbox studio-media-space" aria-labelledby="media-title">
+        <div className="studio-inbox-heading"><div><p className="studio-kicker">Space · Media</p><h2 id="media-title">Media Library</h2></div><strong>{media.length}</strong></div>
+        <p className="studio-muted">Owner 上传后在服务端验证真实图片、生成 WebP / AVIF 多尺寸变体；原始文件名不会进入对象地址。</p>
+        <MediaUploadForm />
+        {media.length ? <div className="studio-media-grid">{media.map((item) => {
+          const thumbnail = item.variants.find((variant) => variant.name === 'thumb-webp') ?? item.variants[0]
+          return <article key={item.id}>{thumbnail ? <img src={thumbnail.publicUrl} alt={item.altText} width={thumbnail.width} height={thumbnail.height} /> : null}<div><strong>{item.originalName}</strong><span>{item.width}×{item.height}</span><small>{item.altText || 'No alt text'}</small></div></article>
+        })}</div> : null}
+      </section>
       <section className="studio-inbox studio-persona-space" aria-labelledby="persona-title">
         <div className="studio-inbox-heading">
           <div><p className="studio-kicker">Space · Persona</p><h2 id="persona-title">AI Persona permissions</h2></div>
@@ -124,8 +139,9 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
             {review.status === 'pending' ? <form action={moderatePersonaReviewAction}>
               <input type="hidden" name="reviewId" value={review.id} />
               <textarea name="editedContent" defaultValue={review.content} rows={3} required maxLength={800} />
+              {(review.action === 'post' || review.action === 'repost') && media.length ? <select name="mediaObjectId" defaultValue={review.mediaObjectId ?? ''} aria-label="Reviewed library image"><option value="">No image</option>{media.map((item) => <option value={item.id} key={item.id}>{item.originalName} · {item.altText || 'No alt text'}</option>)}</select> : <input type="hidden" name="mediaObjectId" value="" />}
               <div><button type="submit" name="decision" value="approved">Approve & publish</button><button type="submit" name="decision" value="rejected">Reject</button><button type="submit" name="decision" value="deleted">Delete</button></div>
-            </form> : <p>{review.reviewedContent || review.content}</p>}
+            </form> : <div className="studio-review-closed"><p>{review.reviewedContent || review.content}</p>{review.status === 'approved' ? <form action={deleteApprovedPersonaPublicationAction}><input type="hidden" name="reviewId" value={review.id} /><button type="submit">Delete public item</button></form> : null}</div>}
           </article>)}
         </div>}
       </section>
