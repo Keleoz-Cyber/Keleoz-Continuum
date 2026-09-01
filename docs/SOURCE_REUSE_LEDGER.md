@@ -417,3 +417,19 @@ Reuse classification: adapter reuse for Tiptap authoring and server-backed media
 Contract evidence: `tests/unit/content-document.test.ts` covers safe image/gallery HTML, UUIDs, three-image limit, sanitized captions and searchable text; `editor-media-nodes.test.ts` proves JSON excludes filenames/storage URLs; `tests/integration/publish-repository.test.ts` proves unready media cannot move the publication pointer and ready media atomically updates `content_media`; `media-service.test.ts` covers stable variant resolution. Production browser evidence covered insertion, revision autosave, Guest Preview, Full publish, desktop/mobile public reading and Hidden republish to 404.
 
 Intentional differences and remaining boundary: Phase 24 covers image and gallery blocks only. Audio, video and generic attachment blocks remain later media-type work and are not shown as empty editor controls. Gallery browser layout is source-backed and contract-tested; the single available ready fixture limited the live browser insertion flow to an image block without inventing duplicate media.
+
+## Implemented evidence: Audio, video, and attachment media blocks
+
+Feature: Verified original-object media plus native public playback/download blocks
+
+Upstream paths and symbols: source Music/player glass-control language remains authoritative for the dedicated Music experience; Phase 25 reuses the quieter public reader/glass vocabulary rather than embedding or rewriting the source player. The source has no public server attachment entity, so only its spacing, borders and control hierarchy apply.
+
+Implemented paths and adapters: byte contracts and safe disposition in `src/modules/media/contracts.ts`; original-object storage/service/deletion in `storage.ts`, `service.ts`, `repository.ts`; byte-range parser `http-range.ts`; stable original route `src/app/media/[id]/[variant]/route.ts`; generalized upload/delete UI and API; audio/video/attachment nodes in `content/media-nodes.ts`, `extensions.ts` and editor builders/palette; public/editor styles in `source-public.css` and `globals.css`.
+
+Preserved behavior: existing source Music is untouched. Article media uses native accessible controls, bounded glass surfaces, captions/descriptions, stable keyboard-focusable attachment links and mobile containment. No unsupported empty buttons appear when a media kind is absent.
+
+Reuse classification: adapter reuse for the existing Media Library/UUID/publishing boundary; reimplementation required for byte signatures, safe original-object URLs, download headers, range responses and native Tiptap nodes. No separate transcoding service, FFmpeg worker or large-video subsystem is introduced.
+
+Contract evidence: `media-file-contracts.test.ts` covers WAV/MP4/PDF/text detection, executable rejection, limits, keys and disposition; `media-http-range.test.ts` covers bounded/open/suffix/invalid byte ranges; `media-storage.test.ts` covers LightCOS Content-Disposition; `media-service.test.ts` covers original-object persistence/deletion; `content-document.test.ts` and `editor-media-nodes.test.ts` cover UUID-only nodes and safe HTML; `publish-repository.test.ts` rejects node/MIME mismatches. Browser evidence covered WAV playback, Markdown download, generated WebM upload/playback/dimensions, mobile layout, 206 range responses and two-step physical deletion.
+
+Intentional differences and remaining boundary: image uploads retain the 10 MB/40 MP transform rules; audio/attachments cap at 20 MB and short video at 25 MB. Audio/video originals are not transcoded, so the Owner must choose browser-compatible formats. The real video fixture was generated locally with Canvas/MediaRecorder and is retained only under ignored browser evidence; no external media was downloaded.

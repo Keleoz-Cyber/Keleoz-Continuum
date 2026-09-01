@@ -7,6 +7,7 @@ import { contentRepository } from '@/modules/content/runtime'
 import { reviewLetterAction } from '@/modules/letters/owner-actions'
 import { lettersRepository } from '@/modules/letters/runtime'
 import { MediaUploadForm } from '@/modules/media/media-upload-form'
+import { MediaDeleteButton } from '@/modules/media/media-delete-button'
 import { mediaService } from '@/modules/media/runtime'
 import {
   createPersonaAction,
@@ -87,11 +88,11 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
       </section>
       <section className="studio-inbox studio-media-space" aria-labelledby="media-title">
         <div className="studio-inbox-heading"><div><p className="studio-kicker">Space · Media</p><h2 id="media-title">Media Library</h2></div><strong>{media.length}</strong></div>
-        <p className="studio-muted">Owner 上传后在服务端验证真实图片、生成 WebP / AVIF 多尺寸变体；原始文件名不会进入对象地址。</p>
+        <p className="studio-muted">图片会生成 WebP / AVIF 多尺寸变体；音频、短视频和附件验证真实类型后保留一个随机地址的原始对象。</p>
         <MediaUploadForm />
         {media.length ? <div className="studio-media-grid">{media.map((item) => {
-          const thumbnail = item.variants.find((variant) => variant.name === 'thumb-webp') ?? item.variants[0]
-          return <article key={item.id}>{thumbnail ? <img src={thumbnail.publicUrl} alt={item.altText} width={thumbnail.width} height={thumbnail.height} /> : null}<div><strong>{item.originalName}</strong><span>{item.width}×{item.height}</span><small>{item.altText || 'No alt text'}</small></div></article>
+          const thumbnail = item.variants.find((variant) => variant.name === 'thumb-webp')
+          return <article key={item.id}>{thumbnail ? <img src={thumbnail.publicUrl} alt={item.altText} width={thumbnail.width} height={thumbnail.height} /> : <span className={`studio-media-kind ${item.kind}`}>{item.kind === 'audio' ? 'AUDIO' : item.kind === 'video' ? 'VIDEO' : 'FILE'}</span>}<div><strong>{item.originalName}</strong><span>{item.width && item.height ? `${item.width}×${item.height}` : item.kind}</span><small>{item.altText || 'No description'}</small><MediaDeleteButton id={item.id} /></div></article>
         })}</div> : null}
       </section>
       <section className="studio-inbox studio-persona-space" aria-labelledby="persona-title">

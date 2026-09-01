@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 
+import { fileTypeFromBuffer } from 'file-type'
 import sharp, { type Metadata } from 'sharp'
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
@@ -24,6 +25,68 @@ export class MediaValidationError extends Error {
     super(message)
     this.name = 'MediaValidationError'
   }
+}
+
+const GENERIC_LIMITS = { audio: 20 * 1024 * 1024, video: 25 * 1024 * 1024, attachment: 20 * 1024 * 1024 } as const
+const AUDIO_EXTENSIONS = new Set(['mp3', 'm4a', 'wav', 'ogg', 'flac', 'opus'])
+const VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'mov'])
+const ATTACHMENT_EXTENSIONS = new Set(['pdf', 'zip'])
+
+export function safeDownloadName(value: string) {
+  const base = path.basename(value.replaceAll('\\', '/')).replace(/["\r\n\0]/g, '').trim()
+  return base.slice(0, 255) || 'download'
+}
+
+export function contentDispositionForMedia(mimeType: string, originalName: string) {
+  if (/^(image|audio|video)\//.test(mimeType)) return 'inline'
+  const encoded = encodeURIComponent(safeDownloadName(originalName)).replace(/[!'()*]/g, (character) =>
+    `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
+  return `attachment; filename*=UTF-8''${encoded}`
+}
+
+export async function inspectGenericUpload(input: {
+  bytes: Buffer
+  originalName: string
+  declaredMimeType: string
+}) {
+  if (!input.bytes.length) throw new MediaValidationError('File is empty')
+  const detected = await fileTypeFromBuffer(input.bytes.subarray(0, 8_192))
+  let kind: keyof typeof GENERIC_LIMITS
+  let mimeType: string
+  let extension: string
+  if (detected && AUDIO_EXTENSIONS.has(detected.ext)) {
+    kind = 'audio'; mimeType = detected.mime; extension = detected.ext
+  } else if (detected && VIDEO_EXTENSIONS.has(detected.ext)) {
+    kind = 'video'; mimeType = detected.mime; extension = detected.ext
+  } else if (detected && ATTACHMENT_EXTENSIONS.has(detected.ext)) {
+    kind = 'attachment'; mimeType = detected.mime; extension = detected.ext
+  } else if (!detected && /\.(txt|md)$/i.test(input.originalName) && !input.bytes.includes(0)) {
+    try {
+      new TextDecoder('utf-8', { fatal: true }).decode(input.bytes)
+    } catch {
+      throw new MediaValidationError('File type is unsupported')
+    }
+    kind = 'attachment'; mimeType = 'text/plain'; extension = 'txt'
+  } else {
+    throw new MediaValidationError('File type is unsupported')
+  }
+  const limit = GENERIC_LIMITS[kind]
+  if (input.bytes.length > limit) throw new MediaValidationError(`${kind === 'video' ? 'Video must be 25 MB' : 'File must be 20 MB'} or smaller`)
+  return {
+    kind,
+    mimeType,
+    extension,
+    originalName: safeDownloadName(input.originalName),
+    byteSize: input.bytes.length,
+    sha256: createHash('sha256').update(input.bytes).digest('hex'),
+  }
+}
+
+export function buildOriginalStorageKey(input: { mediaId: string; extension: string; now: Date }) {
+  if (!/^[a-z0-9]{1,8}$/.test(input.extension)) throw new MediaValidationError('Invalid media extension')
+  const year = input.now.getUTCFullYear()
+  const month = String(input.now.getUTCMonth() + 1).padStart(2, '0')
+  return `media/${year}/${month}/${input.mediaId}/original.${input.extension}`
 }
 
 export async function inspectImageUpload(input: {

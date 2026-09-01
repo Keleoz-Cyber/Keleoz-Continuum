@@ -326,3 +326,16 @@
 - At 390×844 the wide image contracts to the reader width with the KC/menu shell and article toolbar intact; no horizontal overflow or Desktop-only gallery geometry appears.
 - Switching the same draft to Hidden, waiting for revision 3 autosave and publishing again invalidated its public cache; the stable Blog URL returned a real 404 before any direct database cleanup.
 - Exact cleanup removed the temporary Owner, content entry, both immutable versions, attachment relation and restored media fixture. The pre-existing ignored Phase 23 variant directory remains unchanged and DB-inaccessible.
+
+## Phase 25 audio/video/attachment findings (2026-09-01)
+- The existing Media Library is image-specific: upload accepts only image MIME types, always creates six variants, ready records require width/height, and the editor palette assumes a thumbnail. Non-image support must remove these assumptions without weakening image validation.
+- The current schema can already represent non-image media without another migration: `width`/`height` are nullable and `media_variants.name` can hold a single `original` object. Media kind can be derived from the verified MIME family.
+- Phase 25 will retain original audio/video/attachment bytes under a random UUID/date key. It will not transcode with FFmpeg, generate fake waveforms/posters, or make large-video hosting a V1 dependency.
+- Public document JSON will continue to contain only media UUID plus labels/captions. Stable `/media/<uuid>/original` responses will choose inline playback or attachment download headers from the verified media kind.
+- Byte contracts now recognize WAV/audio, MP4/WebM video, PDF/ZIP and UTF-8 text/Markdown; executable/unknown data is rejected regardless of the browser-declared MIME. Audio/attachments cap at 20 MB and video at 25 MB.
+- Ready-media publication now checks both state and node/MIME family, preventing a PDF UUID from being published inside an audio node or similar cross-kind misuse.
+- Stable original routes support RFC-style single byte ranges locally. Browser-visible audio/video can seek through 206 responses; LightCOS redirects keep provider-native range support and uploaded objects carry inline/attachment Content-Disposition metadata.
+- Real browser upload and authoring passed for Windows WAV audio, repository Markdown attachment, and a 320×180 WebM generated locally with Canvas + MediaRecorder. No external sample or copyrighted fixture was downloaded.
+- Audio playback advanced to `currentTime=0.20` over a 5.57-second WAV; video playback advanced to `0.30` over a 1.18-second WebM with decoded dimensions 320×180. The video route returned `206`, exactly 100 requested bytes and a valid Content-Range.
+- Public Desktop/Mobile readers preserve the source toolbar while showing a bounded native player and a separate glass attachment card. Attachment responses use `attachment; filename*=UTF-8''...`; audio/video use inline disposition.
+- The Owner two-step Media Library delete action removed all three QA database rows and physical original objects after their Hidden publications/content attachments were removed.

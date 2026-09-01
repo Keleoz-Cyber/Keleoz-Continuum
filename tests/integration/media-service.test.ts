@@ -85,4 +85,23 @@ describe('media service', () => {
     expect(second.id).toBe(first.id)
     expect(memory.puts).toBe(6)
   })
+
+  it('stores a verified non-image file as one original object without image dimensions', async () => {
+    const memory = memoryStorage()
+    const service = createMediaService({ repository, storage: memory.storage })
+    const bytes = Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WAVEfmt '), Buffer.alloc(32)])
+    const uploaded = await service.uploadFile({
+      bytes, originalName: 'ambient.wav', declaredMimeType: 'application/octet-stream', altText: 'Rain ambience',
+      now: new Date('2026-09-01T10:00:00Z'),
+    })
+
+    expect(uploaded).toMatchObject({ kind: 'audio', mimeType: 'audio/wav', width: null, height: null })
+    expect(uploaded.variants).toEqual([
+      expect.objectContaining({ name: 'original', mimeType: 'audio/wav', publicUrl: expect.stringContaining('/original.wav') }),
+    ])
+    expect(memory.objects.size).toBe(1)
+    await service.deleteMedia(uploaded.id)
+    expect(memory.objects.size).toBe(0)
+    await expect(service.listReady()).resolves.toEqual([])
+  })
 })

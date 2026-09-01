@@ -494,3 +494,17 @@
 - Deleted all Phase 24 database fixtures and closed the browser; no additional local media files were generated.
 - Final checkpoint passed: 55 Vitest files / 197 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, zero Phase 24 fixtures, `git diff --check`, and all four immutable upstream hashes.
 - Phase 24 is complete. Image/gallery blocks are production-ready; audio/video/attachment media types remain explicit later work.
+
+### Phase 25 start: audio, video, and attachment media blocks (2026-09-01)
+- Re-read the active plan, Media Library contracts/service/repository, stable media route, Tiptap nodes/editor palette and public reader sanitization.
+- Confirmed `main` is clean at `ddfad03`, PostgreSQL is healthy and production remains open on port 3000.
+- Locked non-image persistence to one verified original object per media row, with no FFmpeg/transcoding or extra process.
+- Next checkpoint is RED coverage for real file signatures, per-kind limits, safe object extensions and download disposition before production code.
+- File-contract RED/GREEN covers audio/video/PDF/ZIP/text signatures, executable rejection, per-kind limits, safe names and random original keys. Storage contracts now preserve Content-Disposition for LightCOS.
+- Media service stores non-images as one `original` variant with nullable dimensions, supports ready-only deduplication and deletes unreferenced physical objects through a two-step Owner UI.
+- Added audio/video/attachment Tiptap nodes, MIME-family publication enforcement, stable original routes with byte ranges, editor kind cards and responsive public player/download surfaces.
+- Production browser flow passed for WAV audio, Markdown attachment and a locally generated WebM: upload → insert → autosave → publish → real playback/download headers → mobile render → Hidden publish → Media Library deletion.
+- Deleted both temporary Owners, drafts/versions/attachments, all three media rows and all three physical original objects; closed the browser. The browser-generated WebM remains only in ignored `output/playwright` evidence.
+- Final checkpoint passed: 57 Vitest files / 206 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, zero Phase 25 fixtures, `git diff --check`, and all four immutable upstream hashes.
+- Phase 25 is complete. Images, galleries, audio, short video and generic attachments now share one Media Library/document/publication boundary without adding another service.
+- Post-commit HTTP smoke caught two deleted QA Blogs in the local persistent Next Data Cache after repeated in-place builds. Advanced list/detail/Timeline generations to v7/v7/v4; final completion requires both exact URLs to return 404 after rebuild.

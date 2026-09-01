@@ -17,7 +17,7 @@ describe('media storage drivers', () => {
     temporaryRoots.push(root)
     const storage = createLocalMediaStorage({ root })
 
-    await storage.put({ key: 'media/2026/08/id/card.webp', bytes: Buffer.from('image'), mimeType: 'image/webp' })
+    await storage.put({ key: 'media/2026/08/id/card.webp', bytes: Buffer.from('image'), mimeType: 'application/pdf', contentDisposition: "attachment; filename*=UTF-8''notes.pdf" })
     await expect(storage.read('media/2026/08/id/card.webp')).resolves.toEqual(Buffer.from('image'))
     await expect(readFile(path.join(root, 'media', '2026', '08', 'id', 'card.webp'))).resolves.toEqual(Buffer.from('image'))
     await expect(storage.put({ key: '../escape.webp', bytes: Buffer.from('bad'), mimeType: 'image/webp' })).rejects.toThrow('key')
@@ -38,7 +38,7 @@ describe('media storage drivers', () => {
       Cos: FakeCos,
     })
 
-    await storage.put({ key: 'media/2026/08/id/card.webp', bytes: Buffer.from('image'), mimeType: 'image/webp' })
+    await storage.put({ key: 'media/2026/08/id/card.webp', bytes: Buffer.from('image'), mimeType: 'application/pdf', contentDisposition: "attachment; filename*=UTF-8''notes.pdf" })
     await storage.delete('media/2026/08/id/card.webp')
 
     expect(constructorOptions).toEqual([expect.objectContaining({
@@ -46,7 +46,7 @@ describe('media storage drivers', () => {
       Domain: '{Bucket}.light-cos.com', Protocol: 'https:', CompatibilityMode: true,
     })])
     expect(operations).toEqual([
-      { name: 'put', input: expect.objectContaining({ Bucket: 'continuum-1250000000', Region: 'lightcos', Key: 'media/2026/08/id/card.webp', ContentType: 'image/webp', CacheControl: 'public,max-age=31536000,immutable' }) },
+      { name: 'put', input: expect.objectContaining({ Bucket: 'continuum-1250000000', Region: 'lightcos', Key: 'media/2026/08/id/card.webp', ContentType: 'application/pdf', ContentDisposition: "attachment; filename*=UTF-8''notes.pdf", CacheControl: 'public,max-age=31536000,immutable' }) },
       { name: 'delete', input: expect.objectContaining({ Bucket: 'continuum-1250000000', Region: 'lightcos', Key: 'media/2026/08/id/card.webp' }) },
     ])
     expect(storage.publicUrl('media/2026/08/id/card.webp')).toBe('https://media.example.com/media/2026/08/id/card.webp')

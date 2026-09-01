@@ -74,6 +74,26 @@ describe('structured content document', () => {
     ] })).toThrow('gallery')
   })
 
+  it('renders safe audio, video, and attachment blocks from media ids', () => {
+    const audioId = '4415fc7c-9e85-4b17-a791-f21990c98e38'
+    const videoId = 'bd05aa1d-806a-4bc9-945d-75355495f81b'
+    const fileId = '903a0c46-a5f0-46ed-9875-80a46c5c9b31'
+    const rendered = parseAndRenderDocument({ type: 'doc', content: [
+      { type: 'continuumAudio', attrs: { mediaId: audioId, title: 'Rain room', caption: '夜雨环境声' } },
+      { type: 'continuumVideo', attrs: { mediaId: videoId, title: 'Window study', caption: '短片说明' } },
+      { type: 'continuumAttachment', attrs: { mediaId: fileId, label: 'Download notes.pdf', description: '拍摄说明' } },
+    ] })
+
+    expect(rendered.html).toContain(`<audio controls preload="metadata" src="/media/${audioId}/original"`)
+    expect(rendered.html).toContain(`<video controls preload="metadata" src="/media/${videoId}/original"`)
+    expect(rendered.html).toContain(`href="/media/${fileId}/original"`)
+    expect(rendered.html).toContain('download="Download notes.pdf"')
+    expect(rendered.html).toContain('</audio><figcaption>夜雨环境声</figcaption>')
+    expect(rendered.html).toContain('</video><figcaption>短片说明</figcaption>')
+    expect(rendered.plainText).toBe('夜雨环境声\n短片说明\nDownload notes.pdf\n拍摄说明')
+    expect(rendered.html).not.toContain('storage_key')
+  })
+
   it('normalizes a human title into a stable slug', () => {
     expect(normalizeSlug('  First Light  ')).toBe('first-light')
   })

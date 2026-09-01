@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 24 complete: Tiptap image and gallery blocks
+Phase 25 complete: audio, video, and attachment media blocks
 
 ## Phases
 
@@ -206,6 +206,16 @@ Phase 24 complete: Tiptap image and gallery blocks
 - [x] Run one proportional checkpoint, update the reuse ledger, and commit on the current `main`
 - **Status:** complete
 
+### Phase 25: Audio, Video, and Attachment Media Blocks
+- [x] Re-read shared-media storage, upload, stable-route and Tiptap block boundaries
+- [x] Add RED/GREEN contracts for byte-derived audio/video/attachment types, per-kind limits, random extensions and safe download names
+- [x] Extend Media Library upload/service projections to ready non-image originals without image variant assumptions
+- [x] Add audio, video and attachment Tiptap nodes with UUID-only JSON and safe public HTML
+- [x] Extend the editor palette and public readers with context-appropriate controls and no empty unsupported entries
+- [x] Verify Owner upload/insert/autosave/preview/publish and Guest desktop/mobile playback/download in a real browser
+- [x] Run one proportional checkpoint, update the reuse ledger, and commit on current `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -375,6 +385,9 @@ Phase 24 complete: Tiptap image and gallery blocks
 | Literal non-recursive removal of the six known generated files was also blocked by the local safety policy | 3 | Stop deletion attempts and do not switch shells or bypass policy; keep the ignored orphan directory inaccessible through the DB-gated public route and report its exact manual-cleanup path |
 | Phase 24 typecheck found the legacy Blog compatibility editor route omitted the new Media palette prop | 1 | Load the same ready-library DTO in the compatibility route via `Promise.all` and pass the identical minimal media projection |
 | Final HTTP smoke accidentally used PowerShell's reserved `$HOME` variable name case-insensitively | 1 | Record the scripting error, switch to the task-specific `$homeResponse`, and rerun the exact HTTP/status check |
+| Phase 25 focused run lost PostgreSQL when Docker Desktop stopped overnight; pure media/document/editor tests still passed | 1 | Separate the external-runtime failure, continue type/UI work, and rerun unchanged integration tests after Docker is restarted once |
+| First Phase 25 Studio snapshot still labeled the generalized submit button `Upload image` | 1 | Rename the visible action to `Upload media`; no upload behavior or accessibility contract changes |
+| Final Phase 25 restart served two deleted QA Blogs from persisted `.next` Data Cache despite zero database rows | 1 | Advance public list/detail/Timeline cache generations, rebuild/restart, and require both exact fixture URLs to return 404 before completion |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

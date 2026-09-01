@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import COS from 'cos-nodejs-sdk-v5'
 
-export type MediaStoragePut = { key: string; bytes: Buffer; mimeType: string }
+export type MediaStoragePut = { key: string; bytes: Buffer; mimeType: string; contentDisposition?: string }
 export type MediaStorage = {
   put(input: MediaStoragePut): Promise<void>
   delete(key: string): Promise<void>
@@ -85,6 +85,7 @@ export function createLightCosMediaStorage(config: {
         Body: input.bytes,
         ContentLength: input.bytes.length,
         ContentType: input.mimeType,
+        ...(input.contentDisposition ? { ContentDisposition: input.contentDisposition } : {}),
         CacheControl: 'public,max-age=31536000,immutable',
       })
     },

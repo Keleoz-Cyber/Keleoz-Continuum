@@ -11,7 +11,7 @@ export function MediaUploadForm() {
     event.preventDefault()
     const form = event.currentTarget
     setUploading(true)
-    setStatus('Uploading and creating WebP / AVIF variants…')
+    setStatus('Validating and preparing media…')
     try {
       const response = await fetch('/api/studio/media', { method: 'POST', body: new FormData(form) })
       const result = await response.json() as { error?: string }
@@ -25,9 +25,9 @@ export function MediaUploadForm() {
       setUploading(false)
     }
   }}>
-    <label><span>Image</span><input type="file" name="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required /></label>
+    <label><span>Media file</span><input type="file" name="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif,audio/mpeg,audio/wav,audio/ogg,audio/mp4,video/mp4,video/webm,application/pdf,application/zip,text/plain,.md" required /></label>
     <label><span>Alt text</span><input name="altText" maxLength={2_000} placeholder="描述画面内容；公开展示时用于可访问性" /></label>
-    <button type="submit" disabled={uploading}>{uploading ? 'Processing…' : 'Upload image'}</button>
+    <button type="submit" disabled={uploading}>{uploading ? 'Processing…' : 'Upload media'}</button>
     <p role="status" aria-live="polite">{status}</p>
   </form>
 }

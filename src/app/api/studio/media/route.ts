@@ -1,20 +1,21 @@
 import { MediaValidationError } from '@/modules/media/contracts'
 import { mediaService } from '@/modules/media/runtime'
 import { requireOwner } from '@/modules/auth/dal'
+import { z } from 'zod'
 
-const MAX_FORM_BYTES = 11 * 1024 * 1024
+const MAX_FORM_BYTES = 26 * 1024 * 1024
 
 export async function POST(request: Request) {
   await requireOwner()
   const declaredLength = Number(request.headers.get('content-length') ?? 0)
   if (Number.isFinite(declaredLength) && declaredLength > MAX_FORM_BYTES) {
-    return Response.json({ error: 'Upload must be 10 MB or smaller.' }, { status: 413 })
+    return Response.json({ error: 'Upload exceeds the V1 media size limit.' }, { status: 413 })
   }
   try {
     const formData = await request.formData()
     const file = formData.get('file')
     if (!(file instanceof File)) return Response.json({ error: 'Choose an image file.' }, { status: 400 })
-    const uploaded = await mediaService.uploadImage({
+    const uploaded = await mediaService.uploadFile({
       bytes: Buffer.from(await file.arrayBuffer()),
       originalName: file.name,
       declaredMimeType: file.type,
@@ -26,5 +27,17 @@ export async function POST(request: Request) {
       return Response.json({ error: error.message }, { status: 400 })
     }
     return Response.json({ error: 'Media upload failed.' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  await requireOwner()
+  const id = z.uuid().safeParse(new URL(request.url).searchParams.get('id'))
+  if (!id.success) return Response.json({ error: 'Invalid media id.' }, { status: 400 })
+  try {
+    await mediaService.deleteMedia(id.data)
+    return new Response(null, { status: 204 })
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : 'Media delete failed.' }, { status: 409 })
   }
 }

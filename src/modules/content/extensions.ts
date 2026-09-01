@@ -2,7 +2,13 @@ import { Extension, Node } from '@tiptap/core'
 import type { DOMOutputSpec } from '@tiptap/pm/model'
 import StarterKit from '@tiptap/starter-kit'
 
-import { continuumGalleryAttrsSchema, continuumImageAttrsSchema } from '@/modules/content/media-nodes'
+import {
+  continuumAttachmentAttrsSchema,
+  continuumAudioAttrsSchema,
+  continuumGalleryAttrsSchema,
+  continuumImageAttrsSchema,
+  continuumVideoAttrsSchema,
+} from '@/modules/content/media-nodes'
 
 const blockTypes = [
   'paragraph',
@@ -85,6 +91,50 @@ const ContinuumGallery = Node.create({
   },
 })
 
+const ContinuumAudio = Node.create({
+  name: 'continuumAudio', group: 'block', atom: true, selectable: true, draggable: true,
+  addAttributes() { return { mediaId: { default: null }, title: { default: '' }, caption: { default: '' } } },
+  parseHTML() { return [{ tag: 'figure[data-continuum-audio]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumAudioAttrsSchema.parse(HTMLAttributes)
+    const children: DOMOutputSpec[] = []
+    if (attrs.title) children.push(['strong', {}, attrs.title])
+    children.push(['audio', { controls: '', preload: 'metadata', src: `/media/${attrs.mediaId}/original` }, ''])
+    if (attrs.caption) children.push(['figcaption', {}, attrs.caption])
+    return ['figure', { class: 'continuum-audio', 'data-continuum-audio': '', 'data-media-id': attrs.mediaId }, ...children]
+  },
+})
+
+const ContinuumVideo = Node.create({
+  name: 'continuumVideo', group: 'block', atom: true, selectable: true, draggable: true,
+  addAttributes() { return { mediaId: { default: null }, title: { default: '' }, caption: { default: '' } } },
+  parseHTML() { return [{ tag: 'figure[data-continuum-video]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumVideoAttrsSchema.parse(HTMLAttributes)
+    const children: DOMOutputSpec[] = []
+    if (attrs.title) children.push(['strong', {}, attrs.title])
+    children.push(['video', { controls: '', preload: 'metadata', src: `/media/${attrs.mediaId}/original` }, ''])
+    if (attrs.caption) children.push(['figcaption', {}, attrs.caption])
+    return ['figure', { class: 'continuum-video', 'data-continuum-video': '', 'data-media-id': attrs.mediaId }, ...children]
+  },
+})
+
+const ContinuumAttachment = Node.create({
+  name: 'continuumAttachment', group: 'block', atom: true, selectable: true, draggable: true,
+  addAttributes() { return { mediaId: { default: null }, label: { default: 'Download file' }, description: { default: '' } } },
+  parseHTML() { return [{ tag: 'a[data-continuum-attachment]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumAttachmentAttrsSchema.parse(HTMLAttributes)
+    return ['a', {
+      class: 'continuum-attachment',
+      'data-continuum-attachment': '',
+      'data-media-id': attrs.mediaId,
+      href: `/media/${attrs.mediaId}/original`,
+      download: attrs.label,
+    }, ['strong', {}, attrs.label], attrs.description ? ['span', {}, attrs.description] : ['span', {}, '']]
+  },
+})
+
 export function getContinuumExtensions() {
   return [
     StarterKit.configure({
@@ -98,5 +148,8 @@ export function getContinuumExtensions() {
     ContinuumBlockId,
     ContinuumImage,
     ContinuumGallery,
+    ContinuumAudio,
+    ContinuumVideo,
+    ContinuumAttachment,
   ]
 }

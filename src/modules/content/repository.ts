@@ -178,10 +178,20 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
         const mediaReferences = extractMediaReferences(rendered.document)
         const mediaIds = [...new Set(mediaReferences.map((reference) => reference.mediaId))]
         if (mediaIds.length) {
-          const readyMedia = await transaction.select({ id: mediaObjects.id }).from(mediaObjects)
+          const readyMedia = await transaction.select({ id: mediaObjects.id, mimeType: mediaObjects.mimeType }).from(mediaObjects)
             .where(and(inArray(mediaObjects.id, mediaIds), eq(mediaObjects.state, 'ready')))
           if (readyMedia.length !== mediaIds.length) {
             throw new Error('Every referenced media object must be ready before publication')
+          }
+          const mimeById = new Map(readyMedia.map((media) => [media.id, media.mimeType]))
+          for (const reference of mediaReferences) {
+            const mimeType = mimeById.get(reference.mediaId)!
+            const actualKind = mimeType.startsWith('image/') ? 'image'
+              : mimeType.startsWith('audio/') ? 'audio'
+                : mimeType.startsWith('video/') ? 'video' : 'attachment'
+            if (actualKind !== reference.kind) {
+              throw new Error(`Referenced media kind does not match the ${reference.kind} document block`)
+            }
           }
         }
         const [latestVersion] = await transaction

@@ -267,4 +267,27 @@ describe('content publication', () => {
       bodyHtml: expect.stringContaining(`/media/${mediaId}/large.webp`),
     }))
   })
+
+  it('rejects a ready media id when the document node kind does not match its verified MIME family', async () => {
+    const mediaId = crypto.randomUUID()
+    await mediaRepository.createPending({
+      id: mediaId, storageKey: `media/2026/09/${mediaId}/original.pdf`, originalName: 'notes.pdf',
+      mimeType: 'application/pdf', byteSize: 20, sha256: 'd'.repeat(64), altText: 'Notes',
+      width: null, height: null, now: new Date(),
+    })
+    await mediaRepository.markReady({
+      id: mediaId,
+      variants: [{ name: 'original', storageKey: `media/2026/09/${mediaId}/original.pdf`, mimeType: 'application/pdf', byteSize: 20, width: 0, height: 0 }],
+      now: new Date(),
+    })
+    const draft = await repository.createDraft({
+      type: 'blog', slug: 'wrong-media-kind', title: 'Wrong kind', subtitle: null,
+      categoryLabel: null, summary: '', exposure: 'full',
+      document: { type: 'doc', content: [
+        { type: 'continuumAudio', attrs: { mediaId, title: 'Not audio', caption: '' } },
+      ] },
+    })
+
+    await expect(repository.publishDraft({ entryId: draft.id })).rejects.toThrow('kind')
+  })
 })

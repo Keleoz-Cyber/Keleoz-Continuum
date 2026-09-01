@@ -42,7 +42,7 @@ export default async function StudioContentEditorPage({ params }: { params: Prom
         slug={draft.slug}
         revision={draft.revision}
         initialSnapshot={initialSnapshot}
-        media={media.map((item): EditorMediaItem => ({ id: item.id, altText: item.altText, originalName: item.originalName }))}
+        media={media.map((item): EditorMediaItem => ({ id: item.id, altText: item.altText, originalName: item.originalName, kind: item.kind }))}
       />
     </main>
   )

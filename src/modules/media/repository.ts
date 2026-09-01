@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-import { mediaObjects, mediaVariants } from '@/db/schema'
+import { contentMedia, mediaObjects, mediaVariants } from '@/db/schema'
 import type * as schema from '@/db/schema'
 
 export type MediaVariantRecord = {
@@ -22,8 +22,8 @@ export type ReadyMediaRecord = {
   sha256: string
   altText: string
   state: 'ready'
-  width: number
-  height: number
+  width: number | null
+  height: number | null
   createdAt: Date
   updatedAt: Date
   variants: MediaVariantRecord[]
@@ -69,8 +69,8 @@ export function createMediaRepository(database: NodePgDatabase<typeof schema>) {
         ? eq(mediaObjects.sha256, whereHash)
         : eq(mediaObjects.state, 'ready'))
       .orderBy(desc(mediaObjects.createdAt))
-    const ready = rows.flatMap((row) => row.state === 'ready' && row.width && row.height
-      ? [{ ...row, state: 'ready' as const, width: row.width, height: row.height }]
+    const ready = rows.flatMap((row) => row.state === 'ready'
+      ? [{ ...row, state: 'ready' as const }]
       : [])
     return recordsWithVariants(ready)
   }
@@ -79,7 +79,7 @@ export function createMediaRepository(database: NodePgDatabase<typeof schema>) {
     async findReadyByHash(sha256: string) { return (await listReady(sha256))[0] ?? null },
     async createPending(input: {
       id: string; storageKey: string; originalName: string; mimeType: string; byteSize: number
-      sha256: string; altText: string; width: number; height: number; now: Date
+      sha256: string; altText: string; width: number | null; height: number | null; now: Date
     }) {
       const [record] = await database.insert(mediaObjects).values({
         id: input.id,
@@ -136,6 +136,7 @@ export function createMediaRepository(database: NodePgDatabase<typeof schema>) {
         byteSize: mediaVariants.byteSize,
         width: mediaVariants.width,
         height: mediaVariants.height,
+        originalName: mediaObjects.originalName,
       }).from(mediaVariants)
         .innerJoin(mediaObjects, eq(mediaObjects.id, mediaVariants.mediaId))
         .where(and(
@@ -144,6 +145,18 @@ export function createMediaRepository(database: NodePgDatabase<typeof schema>) {
           eq(mediaObjects.state, 'ready'),
         )).limit(1)
       return variant ?? null
+    },
+    async prepareDelete(id: string) {
+      const [attachment] = await database.select({ entryId: contentMedia.entryId }).from(contentMedia)
+        .where(eq(contentMedia.mediaId, id)).limit(1)
+      if (attachment) throw new Error('Media is attached to published content')
+      const records = await listReady()
+      const record = records.find((candidate) => candidate.id === id)
+      if (!record) throw new Error('Ready media was not found')
+      return record
+    },
+    async deleteRecord(id: string) {
+      await database.delete(mediaObjects).where(eq(mediaObjects.id, id))
     },
   }
 }
