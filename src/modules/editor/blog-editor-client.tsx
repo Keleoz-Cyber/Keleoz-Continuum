@@ -7,6 +7,7 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import { getContinuumExtensions } from '@/modules/content/extensions'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
 import { useDraftAutosave } from '@/modules/editor/use-draft-autosave'
+import { ContentVersionHistory, type EditorContentVersion } from '@/modules/editor/content-version-history'
 import {
   buildCalloutNode,
   buildCollapseNode,
@@ -34,6 +35,7 @@ export function BlogEditorClient(props: {
   initialSnapshot: DraftSnapshot
   media: EditorMediaItem[]
   references: EditorContentReference[]
+  versions: EditorContentVersion[]
 }) {
   const [title, setTitle] = useState(props.initialSnapshot.title)
   const [subtitle, setSubtitle] = useState(props.initialSnapshot.subtitle ?? '')
@@ -183,6 +185,7 @@ export function BlogEditorClient(props: {
           </button>
         ) : null}
       </div>
+      <ContentVersionHistory entryId={props.entryId} draftRevision={autosave.revision} versions={props.versions} />
     </section>
   )
 }

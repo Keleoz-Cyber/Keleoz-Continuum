@@ -159,6 +159,97 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
 
       return entry ?? null
     },
+    async listVersions(entryId: string) {
+      const [versions, publication] = await Promise.all([
+        database
+          .select({
+            id: contentVersions.id,
+            versionNumber: contentVersions.versionNumber,
+            title: contentVersions.title,
+            subtitle: contentVersions.subtitle,
+            categoryLabel: contentVersions.categoryLabel,
+            summary: contentVersions.summary,
+            exposure: contentVersions.exposure,
+            createdAt: contentVersions.createdAt,
+          })
+          .from(contentVersions)
+          .where(eq(contentVersions.entryId, entryId))
+          .orderBy(desc(contentVersions.versionNumber)),
+        database
+          .select({ versionId: contentPublications.versionId })
+          .from(contentPublications)
+          .where(eq(contentPublications.entryId, entryId))
+          .limit(1),
+      ])
+      const currentVersionId = publication[0]?.versionId ?? null
+      return versions.map((version) => ({ ...version, isPublished: version.id === currentVersionId }))
+    },
+    async getVersionById(input: { entryId: string; versionId: string }) {
+      const [version] = await database
+        .select({
+          id: contentVersions.id,
+          entryId: contentVersions.entryId,
+          versionNumber: contentVersions.versionNumber,
+          slug: contentVersions.slug,
+          type: contentVersions.type,
+          title: contentVersions.title,
+          subtitle: contentVersions.subtitle,
+          categoryLabel: contentVersions.categoryLabel,
+          summary: contentVersions.summary,
+          exposure: contentVersions.exposure,
+          document: contentVersions.document,
+          renderedHtml: contentVersions.renderedHtml,
+          plainText: contentVersions.plainText,
+          createdAt: contentVersions.createdAt,
+        })
+        .from(contentVersions)
+        .where(and(eq(contentVersions.entryId, input.entryId), eq(contentVersions.id, input.versionId)))
+        .limit(1)
+      return version ?? null
+    },
+    async restoreVersionToDraft(input: {
+      entryId: string
+      versionId: string
+      expectedRevision: number
+      now?: Date
+    }) {
+      return database.transaction(async (transaction) => {
+        const [entry] = await transaction
+          .select({ revision: contentEntries.draftRevision })
+          .from(contentEntries)
+          .where(eq(contentEntries.id, input.entryId))
+          .limit(1)
+          .for('update')
+        if (!entry) throw new ContentNotFoundError()
+        if (entry.revision !== input.expectedRevision) throw new DraftConflictError(entry.revision)
+
+        const [version] = await transaction
+          .select()
+          .from(contentVersions)
+          .where(and(eq(contentVersions.entryId, input.entryId), eq(contentVersions.id, input.versionId)))
+          .limit(1)
+        if (!version) throw new ContentNotFoundError()
+
+        const [restored] = await transaction
+          .update(contentEntries)
+          .set({
+            title: version.title,
+            subtitle: version.subtitle,
+            categoryLabel: version.categoryLabel,
+            summary: version.summary,
+            exposure: version.exposure,
+            draftDocument: version.document,
+            draftHtml: version.renderedHtml,
+            draftPlainText: version.plainText,
+            draftRevision: sql`${contentEntries.draftRevision} + 1`,
+            updatedAt: input.now ?? new Date(),
+          })
+          .where(and(eq(contentEntries.id, input.entryId), eq(contentEntries.draftRevision, input.expectedRevision)))
+          .returning({ revision: contentEntries.draftRevision })
+        if (!restored) throw new DraftConflictError(entry.revision)
+        return { revision: restored.revision, restoredVersionNumber: version.versionNumber }
+      })
+    },
     async publishDraft(input: { entryId: string; now?: Date }) {
       const publishedAt = input.now ?? new Date()
 

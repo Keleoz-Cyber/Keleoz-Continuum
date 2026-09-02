@@ -523,3 +523,30 @@
 - The cache-generation rebuild resolved the stale fixture: fresh production HTTP now returns Home 200 and both exact deleted Phase 26 Blog/Project URLs 404.
 - Final checkpoint passed: 59 Vitest files / 210 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, zero Phase 26 database fixtures, `git diff --check`, all four immutable upstream hashes, and a fresh port-3000 production restart.
 - Phase 26 is complete. Advanced structured blocks and formatting remain inside the existing Tiptap/autosave/publication architecture; no second editor, service or private upstream data path was added.
+
+### Phase 27 start: immutable publication history and restore-to-draft (2026-09-02)
+- Re-read the active planning files and V1 content/Owner requirements, then audited Studio, content schema, repository, Credits, backup/export and AI-quota surfaces.
+- Chose publication history as the next bounded slice because immutable versions already exist and the missing work is one Owner-only repository/UI flow, not another service or public redesign.
+- Next checkpoint is a failing integration contract for ordering, exact lookup, atomic restore and unchanged publication pointer before any production implementation.
+- Discovery command noted that this repository has no `tests/helpers` directory; integration fixtures consistently use `src/test/db.ts` through the `@/test/db` alias, so Phase 27 will follow that existing setup.
+- One source read missed the `[id]` preview page because PowerShell interpreted brackets as a wildcard; all subsequent App Router reads use `-LiteralPath`.
+- Phase 27 RED failed only on missing history methods. The first GREEN run reached the intended stale-revision conflict but the test omitted its `DraftConflictError` import; corrected the test import before rerunning.
+- Repository GREEN now passes 10/10 publication tests: newest-first summaries/current marker, entry-scoped exact lookup, historical copy into draft, revision increment/conflict, immutable history retention, and unchanged public pointer.
+- The first broad UI patch missed the exact multiline `editor-status` context and applied no files. Switched to small exact patches; repository/test changes remain intact.
+- Added one shared client history panel fed by four parallel Server Component reads, so both generic and compatibility Blog editors use the live autosave revision in restore forms. Added one protected canonical version-preview route and no new public endpoint.
+- Focused repository suite passes 10/10; TypeScript and ESLint both pass after the UI/action integration.
+- Production build includes the new protected version route. Browser QA will create one exact temporary Owner through the existing bootstrap script using process-scoped credentials, then remove it and its cascaded session after the flow.
+- Fresh headed production browser opened at the unchanged Owner login boundary; the temporary `phase27_owner` exists only for this bounded version-history flow.
+- Logged in and created exact Blog fixture `7cb7d6de-b7e2-437d-8269-242f9e562ce3` at slug `phase-27-version-history-6b7e9018`; initial draft is revision 1 with zero publication versions.
+- Entered `Version one body.`, observed autosave revision 2, and published Version 1 through the real editor; the stable public Blog route renders that first body in the existing source reader.
+- Changed title and body through two autosaves (live revision 4) and published Version 2; the same stable public URL now renders the revised title and `Version two body.`.
+- Reloaded the editor with two newest-first history rows, then opened the exact protected Version 1 preview and confirmed it renders the original `Version one body.` while Version 2 remains marked current.
+- Restored Version 1 through the protected preview form. Canonical editor now shows original title/body at revision 5 and still marks Version 2 as `Current public`.
+- Before republishing, exact public HTML remained Version 2. Edited the restored body, observed revision 6 autosave, then explicitly published Version 3; the stable public reader now shows `Version one restored then edited.`.
+- Reloaded Studio after Version 3: history shows three immutable rows, only Version 3 is current, and the editor draft remains revision 6. Captured the 390×844 history layout at `output/playwright/phase27-version-history-mobile.png` for visual inspection.
+- Scrolled to the actual mobile history surface and captured `output/playwright/phase27-version-history-mobile-bottom.png`; visual inspection confirms the three rows and actions fit without horizontal overflow.
+- Cleanup acceptance changed the draft to Hidden at revision 7 and published Version 4. The protected preview shows the Hidden notice and the exact public Blog URL returns HTTP 404 before direct database cleanup.
+- Closed the browser and deleted only content entry `7cb7d6de-b7e2-437d-8269-242f9e562ce3` plus `phase27_owner`; cascades removed all four versions/session and verification returned content/version/owner counts `0/0/0`.
+- Full checkpoint passed: 59 Vitest files / 212 tests, ESLint and TypeScript. The earlier fresh production build includes the protected version route and was exercised end-to-end on port 3000.
+- Phase 27 is complete. Version history stays inside the single existing Studio/editor/publication architecture; no public history endpoint, duplicate editor or pointer rollback was added.
+- Final code review attached the protected historical body to the existing Studio `editor-surface` style scope so advanced/media blocks retain their established dark-editor presentation.

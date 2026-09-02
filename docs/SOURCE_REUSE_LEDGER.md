@@ -449,3 +449,19 @@ Reuse classification: adapter reuse for the established Tiptap/autosave/publicat
 Contract evidence: `content-advanced-blocks.test.ts` covers nested text, safe HTML, stable/deduplicated anchors, regenerated H2/H3 TOC entries and references; `editor-advanced-nodes.test.ts` covers insertion JSON; full regression passed 59 files / 210 tests. Production browser evidence covered H2 formatting, revision 9 autosave/reload, published Project-only reference projection before self-publication, Guest Preview, Desktop/Mobile public reading, TOC fragment binding, native disclosure interaction and revision 10 Hidden republish to a real 404.
 
 Intentional differences and remaining boundary: reference cards target only currently published Full/Summary Blog, Project, Moment and Page routes; Hidden drafts never enter the client projection. TOC entries are regenerated from authoritative headings on save/render instead of being manually edited. Advanced blocks are complete for V1 authoring; backlinks, arbitrary embeds and collaborative editing remain outside this phase.
+
+## Implemented evidence: Immutable publication history and restore-to-draft
+
+Feature: Owner publication-version history, historical preview and safe draft restoration
+
+Upstream paths and symbols: Desktop Blog editor/reader surfaces `InternalBeyond.html:2694-2709`, `:2803-2845`, `:5490-5546`, `:8390-8705`; Mobile Blog editor/reader flow `index.html:3792-3820`, `:12125-12320`, `:12587-12620`. Both snapshots remain visual/interaction references; neither provides the public server's immutable-version pointer or optimistic multi-request draft contract.
+
+Implemented paths and adapters: ordered list/detail/restore transactions in `src/modules/content/repository.ts`; authenticated restore action in `content/actions.ts`; shared live-revision panel in `src/modules/editor/content-version-history.tsx` and the existing editor client/shell; canonical protected preview under `/studio/content/[id]/versions/[versionId]`; source-dark responsive styling in `globals.css`.
+
+Preserved behavior: the existing Blog/Project/Moment/Page editor, source typography, dark glass hierarchy, autosave state and public readers remain unchanged. Generic and legacy Blog editor routes share the same history component; public routes receive no history API or unpublished document data.
+
+Reuse classification: adapter reuse for the established Tiptap/autosave/Studio presentation; reimplementation required for PostgreSQL immutable versions, entry-scoped lookup, current-pointer marking, optimistic restore and Owner authorization. Restore copies one version into the mutable draft and never emulates a public pointer rollback.
+
+Contract evidence: `publish-repository.test.ts` covers newest-first lightweight rows, current marking, entry-scoped detail, atomic draft copy, revision conflict, immutable retention and unchanged publication pointer. Full regression passed 59 files / 212 tests. Production browser evidence covered Version 1/2 publication, protected Version 1 preview, revision 5 restore, unchanged Version 2 public HTML, revision 6 autosave continuation, explicit Version 3 republish, responsive 390×844 history, Hidden Version 4 cleanup and exact public 404.
+
+Intentional differences and remaining boundary: published versions cannot be edited or deleted from this UI. Restore does not publish automatically and stale revision forms fail rather than overwrite a newer autosave. Historical missing-media references may return to a draft, but the existing ready-media publication check prevents them from becoming a broken public version.

@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
 import * as schema from '@/db/schema'
-import { createContentRepository } from '@/modules/content/repository'
+import { createContentRepository, DraftConflictError } from '@/modules/content/repository'
 import { createMediaRepository } from '@/modules/media/repository'
 import { PublishedSlugChangeError } from '@/modules/content/slug'
 import { createTestPool } from '@/test/db'
@@ -97,6 +97,79 @@ describe('content publication', () => {
       [draft.id],
     )
     expect(pointer.rows[0]?.version_id).toBe(second.versionId)
+  })
+
+  it('lists newest publication versions with the current pointer and scopes exact history lookup to one entry', async () => {
+    const draft = await createDraft('full')
+    const first = await repository.publishDraft({
+      entryId: draft.id,
+      now: new Date('2026-09-02T01:00:00.000Z'),
+    })
+    await repository.saveDraft({
+      entryId: draft.id,
+      expectedRevision: 1,
+      snapshot: {
+        title: 'First Light, revised', subtitle: 'Second edition', categoryLabel: 'Notes',
+        summary: 'Second summary', exposure: 'summary', document: paragraphDocument('Version two body.'),
+      },
+    })
+    const second = await repository.publishDraft({
+      entryId: draft.id,
+      now: new Date('2026-09-02T02:00:00.000Z'),
+    })
+
+    await expect(repository.listVersions(draft.id)).resolves.toEqual([
+      expect.objectContaining({ id: second.versionId, versionNumber: 2, title: 'First Light, revised', exposure: 'summary', isPublished: true }),
+      expect.objectContaining({ id: first.versionId, versionNumber: 1, title: 'First Light', exposure: 'full', isPublished: false }),
+    ])
+    const history = await repository.listVersions(draft.id)
+    expect(history[0]).not.toHaveProperty('document')
+    expect(history[0]).not.toHaveProperty('renderedHtml')
+    await expect(repository.getVersionById({ entryId: draft.id, versionId: first.versionId })).resolves.toEqual(
+      expect.objectContaining({ versionNumber: 1, document: paragraphDocument('Version one body.'), renderedHtml: expect.stringContaining('Version one body.') }),
+    )
+
+    const other = await repository.createDraft({
+      type: 'project', slug: 'other-entry', title: 'Other', subtitle: null, categoryLabel: null,
+      summary: '', exposure: 'full', document: paragraphDocument('Other body.'),
+    })
+    await expect(repository.getVersionById({ entryId: other.id, versionId: first.versionId })).resolves.toBeNull()
+  })
+
+  it('restores one immutable version into the draft without moving the public pointer', async () => {
+    const draft = await createDraft('full')
+    const first = await repository.publishDraft({ entryId: draft.id })
+    await repository.saveDraft({
+      entryId: draft.id,
+      expectedRevision: 1,
+      snapshot: {
+        title: 'First Light, revised', subtitle: 'Second edition', categoryLabel: 'Revisions',
+        summary: 'Second summary', exposure: 'summary', document: paragraphDocument('Version two body.'),
+      },
+    })
+    const second = await repository.publishDraft({ entryId: draft.id })
+
+    await expect(repository.restoreVersionToDraft({
+      entryId: draft.id, versionId: first.versionId, expectedRevision: 2,
+      now: new Date('2026-09-02T03:00:00.000Z'),
+    })).resolves.toEqual({ revision: 3, restoredVersionNumber: 1 })
+
+    await expect(repository.getDraftById(draft.id)).resolves.toEqual(expect.objectContaining({
+      title: 'First Light', subtitle: null, categoryLabel: 'Notes', summary: 'Public summary',
+      exposure: 'full', revision: 3, html: expect.stringContaining('Version one body.'),
+    }))
+    const pointer = await pool.query<{ version_id: string }>(
+      'select version_id from content_publications where entry_id = $1',
+      [draft.id],
+    )
+    expect(pointer.rows[0]?.version_id).toBe(second.versionId)
+
+    await expect(repository.restoreVersionToDraft({
+      entryId: draft.id, versionId: first.versionId, expectedRevision: 2,
+    })).rejects.toBeInstanceOf(DraftConflictError)
+    await expect(repository.getVersionById({ entryId: draft.id, versionId: first.versionId })).resolves.toEqual(
+      expect.objectContaining({ id: first.versionId, versionNumber: 1 }),
+    )
   })
 
   it('keeps the previous publication when the new draft cannot render', async () => {

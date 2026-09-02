@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 26 complete: advanced editor blocks and formatting tools
+Phase 27 complete: immutable publication history and restore-to-draft
 
 ## Phases
 
@@ -59,9 +59,9 @@ Phase 26 complete: advanced editor blocks and formatting tools
 - [x] Build final Home/Desktop/Mobile shells while preserving the current public content core
 - [x] Adapt Letters submission, public wall, Owner review, and reply in a focused slice
 - [x] Adapt source-exact Music and Desktop Room, including Wardrobe and Sleep
-- [ ] Adapt Desktop/Mobile Tea, Story, Tarot, and Moments in focused slices
-- [ ] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
-- **Status:** in_progress
+- [x] Adapt Desktop/Mobile Tea, Story, Tarot, and Moments in focused slices
+- [x] Keep one local checkpoint suite per usable milestone; defer full release matrix until launch preparation
+- **Status:** complete
 
 ### Phase 10: Source-exact Frontend Recovery
 - [x] Preserve a single rollback tag without creating another branch
@@ -224,6 +224,16 @@ Phase 26 complete: advanced editor blocks and formatting tools
 - [x] Project published Blog/Project/Moment/Page metadata into reference choices without exposing Hidden content
 - [x] Verify autosave, Preview, public Desktop/Mobile rendering, collapsible interaction and TOC navigation in a real browser
 - [x] Run one proportional checkpoint, update reuse ledger, and commit on current `main`
+- **Status:** complete
+
+### Phase 27: Immutable Publication History and Restore-to-Draft
+- [x] Audit V1 Owner gaps and choose the smallest editor-adjacent vertical slice
+- [x] Add RED/GREEN repository contracts for ordered immutable versions, exact version lookup, and atomic restore-to-draft
+- [x] Ensure restore increments draft revision, restores metadata/document rendering, and never moves the current public pointer
+- [x] Add an Owner-only source-styled version history surface and exact version preview
+- [x] Support both generic content and legacy Blog compatibility editor routes without duplicating the feature
+- [x] Verify publish-twice, preview-old-version, restore, autosave continuation, unchanged public version, and republish in a real browser
+- [x] Clean exact fixtures, run one proportional checkpoint, update reuse evidence, and commit on current `main`
 - **Status:** complete
 
 ## Key Questions
@@ -402,6 +412,10 @@ Phase 26 complete: advanced editor blocks and formatting tools
 | First Phase 26 fixture SQL lost JSON quoting through nested PowerShell/psql argument parsing | 1 | Keep the failed transaction empty and use PostgreSQL `jsonb_build_object/jsonb_build_array` expressions instead of escaped inline JSON |
 | Phase 26 browser resume found no globally installed `playwright-cli` | 1 | Use the required `npx --package @playwright/cli` wrapper; the existing browser session and product state were unaffected |
 | Final Phase 26 restart served the deleted reference Project from persisted `.next` Data Cache | 1 | Advance public list/detail/Timeline generations to v8/v8/v5, rebuild/restart, and require the exact deleted Project URL to return 404 |
+| Phase 27 repository search included a nonexistent `tests/helpers` path | 1 | Keep the valid integration-test results from the same read, drop that path, and use the existing `@/test/db` helper directly |
+| PowerShell treated `[id]` in a Studio preview path as a wildcard pattern | 1 | Use `Get-Content -LiteralPath` for App Router paths containing square brackets |
+| First Phase 27 GREEN run referenced `DraftConflictError` without importing it in the test | 1 | Import the real repository error class and rerun; production restore behavior had already reached the intended conflict branch |
+| First combined Phase 27 UI patch targeted an inexact editor-status context | 1 | Confirmed the patch was atomic and changed nothing, then split actions/component/pages/client/CSS into focused patches using exact surrounding lines |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

@@ -17,6 +17,7 @@ import {
 
 const titleSchema = z.string().trim().min(1).max(240)
 const entryIdSchema = z.uuid()
+const revisionSchema = z.coerce.number().int().positive()
 
 export async function createBlogDraftAction(formData: FormData): Promise<never> {
   formData.set('type', 'blog')
@@ -67,4 +68,14 @@ export async function publishContentAction(formData: FormData): Promise<never> {
   revalidatePath(published.type === 'page' ? '/about' : path.slice(0, path.lastIndexOf('/')) || path)
   if (projection) redirect(path)
   redirect(`${studioContentPath(entryId)}/preview`)
+}
+
+export async function restoreContentVersionAction(formData: FormData): Promise<never> {
+  await requireOwner()
+  const entryId = entryIdSchema.parse(formData.get('entryId'))
+  const versionId = entryIdSchema.parse(formData.get('versionId'))
+  const expectedRevision = revisionSchema.parse(formData.get('expectedRevision'))
+  await contentRepository.restoreVersionToDraft({ entryId, versionId, expectedRevision })
+  revalidatePath(studioContentPath(entryId))
+  redirect(studioContentPath(entryId))
 }
