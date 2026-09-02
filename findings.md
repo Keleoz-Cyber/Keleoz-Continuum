@@ -339,3 +339,17 @@
 - Audio playback advanced to `currentTime=0.20` over a 5.57-second WAV; video playback advanced to `0.30` over a 1.18-second WebM with decoded dimensions 320×180. The video route returned `206`, exactly 100 requested bytes and a valid Content-Range.
 - Public Desktop/Mobile readers preserve the source toolbar while showing a bounded native player and a separate glass attachment card. Attachment responses use `attachment; filename*=UTF-8''...`; audio/video use inline disposition.
 - The Owner two-step Media Library delete action removed all three QA database rows and physical original objects after their Hidden publications/content attachments were removed.
+
+## Phase 26 advanced editor findings (2026-09-02)
+- StarterKit already supplies paragraphs, headings, bold/italic/strike, blockquotes, bullet/ordered lists, code blocks and links, but the Studio currently exposes no formatting toolbar.
+- Callouts and collapsibles should be content-bearing Tiptap nodes rather than atom placeholders so their nested paragraphs remain editable, searchable and sanitized.
+- Automatic TOC requires derived state: heading IDs and entries must be recomputed from the authoritative document on every save/render. Storage should keep the TOC marker and normalized heading IDs, not a manually maintained duplicate outline.
+- Public content references can safely target only published Full/Summary Blog/Project/Moment/Page projections. Hidden content must not appear in the Server Component choices or reference HTML.
+- Docker stopped again after the Phase 25 checkpoint; Phase 26 pure document/editor work can continue, while reference-query integration/browser validation will wait for one later engine restart.
+- Document implementation now normalizes/uniquifies heading IDs, injects matching HTML `id` attributes, derives TOC entries on every save/render, validates safe references and preserves nested callout/collapse text in plain-text search.
+- The real editor exposed one published Project reference and no Hidden records. Formatting H2 converted the active paragraph, advanced insertions autosaved to revision 9, and a reload showed the server-derived TOC entry rather than the original empty marker.
+- Public Desktop/Mobile visual QA confirms the source reader remains dominant while TOC, tip callout, native details disclosure and Project reference use quiet bounded glass surfaces. No dashboard/admin styling leaked into the article.
+- TOC click updated the URL fragment to the normalized heading ID; the target heading owns the same HTML `id`. Details toggled to `open=true` through native interaction.
+- Cleanup acceptance used the same Owner UI rather than direct mutation: Exposure autosaved as Hidden at revision 10, Publish redirected to the Hidden preview notice, and the exact public Blog URL returned a real browser/HTTP 404 while the referenced public Project remained 200.
+- After exact database cleanup, a fresh production restart still served the deleted reference Project from the persisted Next Data Cache. This is the same local in-place-build cache-generation boundary seen in Phase 25, so public list/detail/Timeline cache keys must advance before final acceptance.
+- Advancing those generations to v8/v8/v5 and rebuilding cleared the stale Project; the final production restart returns 404 for both deleted exact fixture URLs with zero matching database rows.

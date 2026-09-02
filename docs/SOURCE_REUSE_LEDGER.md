@@ -433,3 +433,19 @@ Reuse classification: adapter reuse for the existing Media Library/UUID/publishi
 Contract evidence: `media-file-contracts.test.ts` covers WAV/MP4/PDF/text detection, executable rejection, limits, keys and disposition; `media-http-range.test.ts` covers bounded/open/suffix/invalid byte ranges; `media-storage.test.ts` covers LightCOS Content-Disposition; `media-service.test.ts` covers original-object persistence/deletion; `content-document.test.ts` and `editor-media-nodes.test.ts` cover UUID-only nodes and safe HTML; `publish-repository.test.ts` rejects node/MIME mismatches. Browser evidence covered WAV playback, Markdown download, generated WebM upload/playback/dimensions, mobile layout, 206 range responses and two-step physical deletion.
 
 Intentional differences and remaining boundary: image uploads retain the 10 MB/40 MP transform rules; audio/attachments cap at 20 MB and short video at 25 MB. Audio/video originals are not transcoded, so the Owner must choose browser-compatible formats. The real video fixture was generated locally with Canvas/MediaRecorder and is retained only under ignored browser evidence; no external media was downloaded.
+
+## Implemented evidence: Advanced editor blocks and formatting tools
+
+Feature: Structured callout, collapsible, automatic TOC and public-content reference blocks
+
+Upstream paths and symbols: Desktop Blog editor/reader surfaces `InternalBeyond.html:2694-2709`, `:2803-2845`, `:5490-5546`, `:8390-8705`; Desktop Guide TOC/collapse styling `:1295-1314`; Mobile Blog editor/reader flow `index.html:3792-3820`, `:12125-12320`, `:12587-12620`. Neither snapshot provides a public server-backed structured-document or stable cross-content reference entity.
+
+Implemented paths and adapters: document normalization and validation in `src/modules/content/advanced-nodes.ts` and `document.ts`; custom Tiptap nodes in `extensions.ts`; editor builders and source-styled controls in `src/modules/editor/advanced-nodes.ts` and `blog-editor-client.tsx`; server-projected public choices in the protected editor pages; responsive public/editor styling in `source-public.css` and `globals.css`.
+
+Preserved behavior: the existing source reader shell, typography, glass hierarchy and Mobile containment remain unchanged. Collapsibles use native disclosure behavior; TOC links resolve to stable heading IDs; formatting exposes the StarterKit capabilities already present in the editor rather than introducing another editor system.
+
+Reuse classification: adapter reuse for the established Tiptap/autosave/publication boundary and source visual language; reimplementation required for safe nested nodes, heading-ID normalization, derived TOC state and published-only cross-content projections. No upstream private local record is exposed or copied into public choices.
+
+Contract evidence: `content-advanced-blocks.test.ts` covers nested text, safe HTML, stable/deduplicated anchors, regenerated H2/H3 TOC entries and references; `editor-advanced-nodes.test.ts` covers insertion JSON; full regression passed 59 files / 210 tests. Production browser evidence covered H2 formatting, revision 9 autosave/reload, published Project-only reference projection before self-publication, Guest Preview, Desktop/Mobile public reading, TOC fragment binding, native disclosure interaction and revision 10 Hidden republish to a real 404.
+
+Intentional differences and remaining boundary: reference cards target only currently published Full/Summary Blog, Project, Moment and Page routes; Hidden drafts never enter the client projection. TOC entries are regenerated from authoritative headings on save/render instead of being manually edited. Advanced blocks are complete for V1 authoring; backlinks, arbitrary embeds and collaborative editing remain outside this phase.

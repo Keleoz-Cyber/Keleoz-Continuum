@@ -3,6 +3,13 @@ import type { DOMOutputSpec } from '@tiptap/pm/model'
 import StarterKit from '@tiptap/starter-kit'
 
 import {
+  continuumCalloutAttrsSchema,
+  continuumCollapseAttrsSchema,
+  continuumReferenceAttrsSchema,
+  continuumTocAttrsSchema,
+  publicReferencePath,
+} from '@/modules/content/advanced-nodes'
+import {
   continuumAttachmentAttrsSchema,
   continuumAudioAttrsSchema,
   continuumGalleryAttrsSchema,
@@ -32,7 +39,7 @@ const ContinuumBlockId = Extension.create({
             parseHTML: (element) => element.getAttribute('data-block-id'),
             renderHTML: (attributes) =>
               typeof attributes.blockId === 'string' && attributes.blockId
-                ? { 'data-block-id': attributes.blockId }
+                ? { 'data-block-id': attributes.blockId, id: attributes.blockId }
                 : {},
           },
         },
@@ -135,6 +142,57 @@ const ContinuumAttachment = Node.create({
   },
 })
 
+const ContinuumCallout = Node.create({
+  name: 'continuumCallout', group: 'block', content: 'block+', defining: true,
+  addAttributes() { return { tone: { default: 'note' }, title: { default: 'Note' } } },
+  parseHTML() { return [{ tag: 'aside[data-continuum-callout]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumCalloutAttrsSchema.parse(HTMLAttributes)
+    return ['aside', { class: `continuum-callout tone-${attrs.tone}`, 'data-continuum-callout': '' },
+      ['strong', {}, attrs.title], ['div', { class: 'continuum-callout-body' }, 0]]
+  },
+})
+
+const ContinuumCollapse = Node.create({
+  name: 'continuumCollapse', group: 'block', content: 'block+', defining: true,
+  addAttributes() { return { summary: { default: 'Read more' }, open: { default: false } } },
+  parseHTML() { return [{ tag: 'details[data-continuum-collapse]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumCollapseAttrsSchema.parse(HTMLAttributes)
+    return ['details', {
+      class: 'continuum-collapse', 'data-continuum-collapse': '', ...(attrs.open ? { open: '' } : {}),
+    }, ['summary', {}, attrs.summary], ['div', { class: 'continuum-collapse-body' }, 0]]
+  },
+})
+
+const ContinuumReference = Node.create({
+  name: 'continuumReference', group: 'block', atom: true, selectable: true, draggable: true,
+  addAttributes() {
+    return { contentType: { default: 'blog' }, slug: { default: null }, title: { default: 'Reference' }, summary: { default: '' } }
+  },
+  parseHTML() { return [{ tag: 'a[data-continuum-reference]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumReferenceAttrsSchema.parse(HTMLAttributes)
+    return ['a', {
+      class: `continuum-reference type-${attrs.contentType}`,
+      'data-continuum-reference': '',
+      href: publicReferencePath(attrs.contentType, attrs.slug),
+    }, ['small', {}, attrs.contentType], ['strong', {}, attrs.title], ['span', {}, attrs.summary]]
+  },
+})
+
+const ContinuumToc = Node.create({
+  name: 'continuumToc', group: 'block', atom: true, selectable: true,
+  addAttributes() { return { title: { default: 'On this page' }, entries: { default: [] } } },
+  parseHTML() { return [{ tag: 'nav[data-continuum-toc]' }] },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = continuumTocAttrsSchema.parse(HTMLAttributes)
+    return ['nav', { class: 'continuum-toc', 'data-continuum-toc': '', 'aria-label': attrs.title },
+      ['strong', {}, attrs.title], ['ol', {}, ...attrs.entries.map((entry): DOMOutputSpec =>
+        ['li', { class: `level-${entry.level}` }, ['a', { href: `#${entry.id}` }, entry.title]])]]
+  },
+})
+
 export function getContinuumExtensions() {
   return [
     StarterKit.configure({
@@ -151,5 +209,9 @@ export function getContinuumExtensions() {
     ContinuumAudio,
     ContinuumVideo,
     ContinuumAttachment,
+    ContinuumCallout,
+    ContinuumCollapse,
+    ContinuumReference,
+    ContinuumToc,
   ]
 }

@@ -9,7 +9,7 @@ import { personaRepository } from '@/modules/persona/runtime'
 export function getCachedPublicList(type: ContentType) {
   return unstable_cache(
     () => contentRepository.listPublic(type),
-    ['public-content-list-v7', type],
+    ['public-content-list-v8', type],
     { tags: [`content:${type}`], revalidate: 3_600 },
   )()
 }
@@ -17,7 +17,7 @@ export function getCachedPublicList(type: ContentType) {
 export function getCachedPublicBySlug(type: ContentType, slug: string) {
   return unstable_cache(
     () => contentRepository.getPublicBySlug(type, slug),
-    ['public-content-detail-v7', type, slug],
+    ['public-content-detail-v8', type, slug],
     { tags: [`content:${type}`, `content:${type}:${slug}`], revalidate: 3_600 },
   )()
 }
@@ -25,7 +25,7 @@ export function getCachedPublicBySlug(type: ContentType, slug: string) {
 export function getCachedPublicTimeline() {
   return unstable_cache(
     () => contentRepository.listTimeline(),
-    ['public-content-timeline-v4'],
+    ['public-content-timeline-v5'],
     { tags: ['content:timeline'], revalidate: 3_600 },
   )()
 }

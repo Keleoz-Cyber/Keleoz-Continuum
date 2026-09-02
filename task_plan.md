@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 25 complete: audio, video, and attachment media blocks
+Phase 26 complete: advanced editor blocks and formatting tools
 
 ## Phases
 
@@ -216,6 +216,16 @@ Phase 25 complete: audio, video, and attachment media blocks
 - [x] Run one proportional checkpoint, update the reuse ledger, and commit on current `main`
 - **Status:** complete
 
+### Phase 26: Advanced Editor Blocks and Formatting Tools
+- [x] Re-read editor, structured document, public content routing and reader boundaries
+- [x] Add RED/GREEN contracts for callouts, collapsibles, content references, heading anchors and derived TOC entries
+- [x] Add custom Tiptap nodes plus sanitizer/plain-text/public CSS contracts
+- [x] Add source-styled inline/block formatting controls and advanced-block insertion tools
+- [x] Project published Blog/Project/Moment/Page metadata into reference choices without exposing Hidden content
+- [x] Verify autosave, Preview, public Desktop/Mobile rendering, collapsible interaction and TOC navigation in a real browser
+- [x] Run one proportional checkpoint, update reuse ledger, and commit on current `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -388,6 +398,10 @@ Phase 25 complete: audio, video, and attachment media blocks
 | Phase 25 focused run lost PostgreSQL when Docker Desktop stopped overnight; pure media/document/editor tests still passed | 1 | Separate the external-runtime failure, continue type/UI work, and rerun unchanged integration tests after Docker is restarted once |
 | First Phase 25 Studio snapshot still labeled the generalized submit button `Upload image` | 1 | Rename the visible action to `Upload media`; no upload behavior or accessibility contract changes |
 | Final Phase 25 restart served two deleted QA Blogs from persisted `.next` Data Cache despite zero database rows | 1 | Advance public list/detail/Timeline cache generations, rebuild/restart, and require both exact fixture URLs to return 404 before completion |
+| Phase 26 bounded Docker Desktop start did not expose the Linux Engine pipe | 1 | Stop polling after the single bounded attempt; complete pure/build verification and wait for the user's Docker restart before DB/reference/browser acceptance |
+| First Phase 26 fixture SQL lost JSON quoting through nested PowerShell/psql argument parsing | 1 | Keep the failed transaction empty and use PostgreSQL `jsonb_build_object/jsonb_build_array` expressions instead of escaped inline JSON |
+| Phase 26 browser resume found no globally installed `playwright-cli` | 1 | Use the required `npx --package @playwright/cli` wrapper; the existing browser session and product state were unaffected |
+| Final Phase 26 restart served the deleted reference Project from persisted `.next` Data Cache | 1 | Advance public list/detail/Timeline generations to v8/v8/v5, rebuild/restart, and require the exact deleted Project URL to return 404 |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

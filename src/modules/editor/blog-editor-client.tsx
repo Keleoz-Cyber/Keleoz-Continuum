@@ -8,6 +8,13 @@ import { getContinuumExtensions } from '@/modules/content/extensions'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
 import { useDraftAutosave } from '@/modules/editor/use-draft-autosave'
 import {
+  buildCalloutNode,
+  buildCollapseNode,
+  buildContentReferenceNode,
+  buildTocNode,
+  type EditorContentReference,
+} from '@/modules/editor/advanced-nodes'
+import {
   buildEditorAttachmentNode,
   buildEditorAudioNode,
   buildEditorGalleryNode,
@@ -16,12 +23,17 @@ import {
   type EditorMediaItem,
 } from '@/modules/editor/media-nodes'
 
+function FormatButton(props: { label: string; active?: boolean; disabled?: boolean; onClick: () => void }) {
+  return <button type="button" aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</button>
+}
+
 export function BlogEditorClient(props: {
   entryId: string
   slug: string
   revision: number
   initialSnapshot: DraftSnapshot
   media: EditorMediaItem[]
+  references: EditorContentReference[]
 }) {
   const [title, setTitle] = useState(props.initialSnapshot.title)
   const [subtitle, setSubtitle] = useState(props.initialSnapshot.subtitle ?? '')
@@ -32,6 +44,11 @@ export function BlogEditorClient(props: {
   const [mediaCaption, setMediaCaption] = useState('')
   const [mediaSize, setMediaSize] = useState<'compact' | 'content' | 'wide'>('content')
   const [galleryIds, setGalleryIds] = useState<string[]>([])
+  const [calloutTone, setCalloutTone] = useState<'note' | 'tip' | 'warning'>('note')
+  const [calloutTitle, setCalloutTitle] = useState('Note')
+  const [collapseSummary, setCollapseSummary] = useState('Read more')
+  const [tocTitle, setTocTitle] = useState('On this page')
+  const [referenceKey, setReferenceKey] = useState(() => props.references[0] ? `${props.references[0].type}:${props.references[0].slug}` : '')
   const extensions = useMemo(() => getContinuumExtensions(), [])
   const editor = useEditor({
     extensions,
@@ -83,6 +100,9 @@ export function BlogEditorClient(props: {
     editor.chain().focus().insertContent([node, { type: 'paragraph' }]).run()
     setMediaCaption('')
   }
+  const insertAdvanced = (node: ReturnType<typeof buildCalloutNode>) => {
+    editor?.chain().focus().insertContent([node, { type: 'paragraph' }]).run()
+  }
 
   return (
     <section className="blog-editor">
@@ -117,6 +137,28 @@ export function BlogEditorClient(props: {
       </label>
       <div className="editor-slug">/{props.slug}</div>
       <div className="editor-surface">
+        <div className="editor-format-toolbar" aria-label="Formatting tools">
+          <FormatButton label="P" active={editor?.isActive('paragraph')} onClick={() => editor?.chain().focus().setParagraph().run()} />
+          <FormatButton label="H2" active={editor?.isActive('heading', { level: 2 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} />
+          <FormatButton label="H3" active={editor?.isActive('heading', { level: 3 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} />
+          <FormatButton label="Bold" active={editor?.isActive('bold')} onClick={() => editor?.chain().focus().toggleBold().run()} />
+          <FormatButton label="Italic" active={editor?.isActive('italic')} onClick={() => editor?.chain().focus().toggleItalic().run()} />
+          <FormatButton label="Quote" active={editor?.isActive('blockquote')} onClick={() => editor?.chain().focus().toggleBlockquote().run()} />
+          <FormatButton label="• List" active={editor?.isActive('bulletList')} onClick={() => editor?.chain().focus().toggleBulletList().run()} />
+          <FormatButton label="1. List" active={editor?.isActive('orderedList')} onClick={() => editor?.chain().focus().toggleOrderedList().run()} />
+          <FormatButton label="Code" active={editor?.isActive('codeBlock')} onClick={() => editor?.chain().focus().toggleCodeBlock().run()} />
+          <FormatButton label="Undo" disabled={!editor?.can().undo()} onClick={() => editor?.chain().focus().undo().run()} />
+          <FormatButton label="Redo" disabled={!editor?.can().redo()} onClick={() => editor?.chain().focus().redo().run()} />
+        </div>
+        <aside className="editor-advanced-palette" aria-label="Advanced blocks">
+          <header><span>Advanced blocks</span><small>提示、折叠、引用与自动目录</small></header>
+          <div className="editor-advanced-grid">
+            <div><select aria-label="Callout tone" value={calloutTone} onChange={(event) => setCalloutTone(event.target.value as typeof calloutTone)}><option value="note">Note</option><option value="tip">Tip</option><option value="warning">Warning</option></select><input aria-label="Callout title" value={calloutTitle} maxLength={240} onChange={(event) => setCalloutTitle(event.target.value)} /><button type="button" onClick={() => insertAdvanced(buildCalloutNode(calloutTone, calloutTitle))}>Insert callout</button></div>
+            <div><input aria-label="Collapse summary" value={collapseSummary} maxLength={240} onChange={(event) => setCollapseSummary(event.target.value)} /><button type="button" onClick={() => insertAdvanced(buildCollapseNode(collapseSummary))}>Insert collapse</button></div>
+            <div><input aria-label="TOC title" value={tocTitle} maxLength={240} onChange={(event) => setTocTitle(event.target.value)} /><button type="button" onClick={() => insertAdvanced(buildTocNode(tocTitle))}>Insert automatic TOC</button></div>
+            <div><select aria-label="Public content reference" value={referenceKey} disabled={!props.references.length} onChange={(event) => setReferenceKey(event.target.value)}>{props.references.map((reference) => <option value={`${reference.type}:${reference.slug}`} key={`${reference.type}:${reference.slug}`}>{reference.type} · {reference.title}</option>)}</select><button type="button" disabled={!referenceKey} onClick={() => { const reference = props.references.find((item) => `${item.type}:${item.slug}` === referenceKey); if (reference) insertAdvanced(buildContentReferenceNode(reference)) }}>Insert reference</button></div>
+          </div>
+        </aside>
         <aside className="editor-media-palette" aria-label="Media blocks">
           <header><div><span>Media blocks</span><small>正文只保存媒体 ID</small></div><a href="/studio#media-title">Manage library</a></header>
           {props.media.length ? <>

@@ -508,3 +508,18 @@
 - Final checkpoint passed: 57 Vitest files / 206 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, zero Phase 25 fixtures, `git diff --check`, and all four immutable upstream hashes.
 - Phase 25 is complete. Images, galleries, audio, short video and generic attachments now share one Media Library/document/publication boundary without adding another service.
 - Post-commit HTTP smoke caught two deleted QA Blogs in the local persistent Next Data Cache after repeated in-place builds. Advanced list/detail/Timeline generations to v7/v7/v4; final completion requires both exact URLs to return 404 after rebuild.
+
+### Phase 26 start: advanced editor blocks and formatting tools (2026-09-02)
+- Re-read the active plan, StarterKit extension boundary, static renderer/sanitizer, editor client, public routing and content projections.
+- Confirmed `main` is clean at `163129e`; production port remains available, while Docker/PostgreSQL stopped after the prior final checkpoint.
+- Locked callout/collapsible as editable nested block nodes, TOC as a derived marker, and public references as published-projection metadata only.
+- Next checkpoint is RED coverage for document normalization/rendering before UI code.
+- Document RED/GREEN now covers editable callouts/collapsibles, safe published references, derived heading anchors, duplicate anchor suffixes and regenerated TOC entries.
+- Editor builder RED/GREEN covers callout/collapse/TOC/reference JSON; added a source-styled StarterKit toolbar and responsive advanced-block palette fed by published public projections.
+- TypeScript, ESLint and 11 focused pure tests pass. Docker did not become ready in one bounded attempt, so reference-query integration and browser acceptance remain pending.
+- Playwright resume note: `playwright-cli` was not globally available even though `npx` is installed; switched back to the skill's `npx --package @playwright/cli` wrapper path instead of treating it as an application failure.
+- Docker recovered after the user's restart. Production browser QA completed formatting, advanced insertion, revision 9 autosave/reload, Desktop/Mobile public rendering, TOC hash binding, native disclosure interaction, and a revision 10 Hidden publication with exact public 404.
+- Final restart caught the deleted reference Project still at 200 from persisted `.next` Data Cache despite zero database rows. Advanced public list/detail/Timeline cache generations to v8/v8/v5; completion remains gated on a fresh-build exact 404.
+- The cache-generation rebuild resolved the stale fixture: fresh production HTTP now returns Home 200 and both exact deleted Phase 26 Blog/Project URLs 404.
+- Final checkpoint passed: 59 Vitest files / 210 tests, ESLint, TypeScript, Next production build, healthy PostgreSQL, zero Phase 26 database fixtures, `git diff --check`, all four immutable upstream hashes, and a fresh port-3000 production restart.
+- Phase 26 is complete. Advanced structured blocks and formatting remain inside the existing Tiptap/autosave/publication architecture; no second editor, service or private upstream data path was added.
