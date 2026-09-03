@@ -2,7 +2,11 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
 import * as schema from '@/db/schema'
-import { createContentRepository, DraftConflictError } from '@/modules/content/repository'
+import {
+  ContentMustBeArchivedError,
+  createContentRepository,
+  DraftConflictError,
+} from '@/modules/content/repository'
 import { createTestPool } from '@/test/db'
 
 const pool = createTestPool()
@@ -127,5 +131,67 @@ describe('draft repository', () => {
     await expect(
       repository.getDraftById('00000000-0000-0000-0000-000000000000'),
     ).resolves.toBeNull()
+  })
+
+  it('filters the lightweight Studio catalog by query, type, and lifecycle status', async () => {
+    const alpha = await repository.createDraft({
+      type: 'blog', slug: 'alpha-note', title: 'Alpha Note', subtitle: null,
+      categoryLabel: 'Journal', summary: '', exposure: 'full', document: firstDocument,
+    })
+    const beta = await repository.createDraft({
+      type: 'project', slug: 'beta-project', title: 'Beta Project', subtitle: null,
+      categoryLabel: 'Build', summary: '', exposure: 'full', document: firstDocument,
+    })
+    await repository.publishDraft({ entryId: beta.id })
+    await repository.archiveContent({ entryId: alpha.id })
+
+    await expect(repository.listStudioContent({ query: 'alpha' })).resolves.toEqual([
+      expect.objectContaining({ id: alpha.id, status: 'archived', isPublic: false }),
+    ])
+    await expect(repository.listStudioContent({ type: 'project' })).resolves.toEqual([
+      expect.objectContaining({ id: beta.id, status: 'published', isPublic: true }),
+    ])
+    await expect(repository.listStudioContent({ status: 'archived' })).resolves.toEqual([
+      expect.objectContaining({ id: alpha.id }),
+    ])
+    const [item] = await repository.listStudioContent({})
+    expect(item).not.toHaveProperty('document')
+    expect(item).not.toHaveProperty('html')
+  })
+
+  it('archives a publication to 404 while preserving versions and restores only the draft lifecycle', async () => {
+    const draft = await repository.createDraft({
+      type: 'blog', slug: 'archive-me', title: 'Archive me', subtitle: null,
+      categoryLabel: null, summary: '', exposure: 'full', document: firstDocument,
+    })
+    await repository.publishDraft({ entryId: draft.id })
+
+    await expect(repository.archiveContent({ entryId: draft.id })).resolves.toEqual(
+      expect.objectContaining({ id: draft.id, type: 'blog', slug: 'archive-me', hadPublication: true }),
+    )
+    await expect(repository.getPublicBySlug('blog', 'archive-me')).resolves.toBeNull()
+    await expect(repository.getDraftById(draft.id)).resolves.toEqual(expect.objectContaining({ status: 'archived' }))
+    expect((await pool.query('select 1 from content_versions where entry_id=$1', [draft.id])).rows).toHaveLength(1)
+
+    await expect(repository.restoreArchivedContent({ entryId: draft.id })).resolves.toEqual(
+      expect.objectContaining({ id: draft.id, status: 'draft' }),
+    )
+    await expect(repository.getPublicBySlug('blog', 'archive-me')).resolves.toBeNull()
+  })
+
+  it('permanently deletes only an archived entry and its immutable versions', async () => {
+    const draft = await repository.createDraft({
+      type: 'page', slug: 'temporary-page', title: 'Temporary page', subtitle: null,
+      categoryLabel: null, summary: '', exposure: 'hidden', document: firstDocument,
+    })
+    await repository.publishDraft({ entryId: draft.id })
+    await expect(repository.deleteArchivedContent({ entryId: draft.id })).rejects.toBeInstanceOf(ContentMustBeArchivedError)
+
+    await repository.archiveContent({ entryId: draft.id })
+    await expect(repository.deleteArchivedContent({ entryId: draft.id })).resolves.toEqual(
+      expect.objectContaining({ id: draft.id, type: 'page', slug: 'temporary-page' }),
+    )
+    await expect(repository.getDraftById(draft.id)).resolves.toBeNull()
+    expect((await pool.query('select 1 from content_versions where entry_id=$1', [draft.id])).rows).toHaveLength(0)
   })
 })

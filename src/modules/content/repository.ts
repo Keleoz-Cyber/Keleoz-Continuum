@@ -29,6 +29,13 @@ export class ContentNotFoundError extends Error {
   }
 }
 
+export class ContentMustBeArchivedError extends Error {
+  constructor() {
+    super('Content must be archived first')
+    this.name = 'ContentMustBeArchivedError'
+  }
+}
+
 export type CreateDraftInput = DraftSnapshot & {
   type: 'blog' | 'project' | 'moment' | 'page'
   slug: string
@@ -36,6 +43,45 @@ export type CreateDraftInput = DraftSnapshot & {
 }
 
 export function createContentRepository(database: NodePgDatabase<typeof schema>) {
+  async function listStudioContent(input: {
+    query?: string
+    type?: 'blog' | 'project' | 'moment' | 'page'
+    status?: 'draft' | 'published' | 'archived'
+  } = {}) {
+    const predicates = []
+    if (input.type) predicates.push(eq(contentEntries.type, input.type))
+    if (input.status) predicates.push(eq(contentEntries.status, input.status))
+    const query = input.query?.trim().toLocaleLowerCase().slice(0, 160)
+    if (query) {
+      predicates.push(or(
+        sql`position(${query} in lower(coalesce(${contentEntries.title}, ''))) > 0`,
+        sql`position(${query} in lower(coalesce(${contentEntries.subtitle}, ''))) > 0`,
+        sql`position(${query} in lower(coalesce(${contentEntries.categoryLabel}, ''))) > 0`,
+        sql`position(${query} in lower(coalesce(${contentEntries.slug}, ''))) > 0`,
+      )!)
+    }
+    const rows = await database
+      .select({
+        id: contentEntries.id,
+        type: contentEntries.type,
+        slug: contentEntries.slug,
+        title: contentEntries.title,
+        subtitle: contentEntries.subtitle,
+        categoryLabel: contentEntries.categoryLabel,
+        summary: contentEntries.summary,
+        exposure: contentEntries.exposure,
+        status: contentEntries.status,
+        revision: contentEntries.draftRevision,
+        updatedAt: contentEntries.updatedAt,
+        publicationVersionId: contentPublications.versionId,
+      })
+      .from(contentEntries)
+      .leftJoin(contentPublications, eq(contentPublications.entryId, contentEntries.id))
+      .where(predicates.length ? and(...predicates) : undefined)
+      .orderBy(desc(contentEntries.updatedAt))
+    return rows.map(({ publicationVersionId, ...entry }) => ({ ...entry, isPublic: Boolean(publicationVersionId) }))
+  }
+
   return {
     async createDraft(input: CreateDraftInput) {
       const rendered = parseAndRenderDocument(input.document)
@@ -114,25 +160,60 @@ export function createContentRepository(database: NodePgDatabase<typeof schema>)
 
       throw new DraftConflictError(current.revision)
     },
-    async listStudioDrafts() {
-      const rows = await database
-        .select({
-          id: contentEntries.id,
-          type: contentEntries.type,
-          slug: contentEntries.slug,
-          title: contentEntries.title,
-          subtitle: contentEntries.subtitle,
-          categoryLabel: contentEntries.categoryLabel,
-          summary: contentEntries.summary,
-          exposure: contentEntries.exposure,
-          status: contentEntries.status,
-          revision: contentEntries.draftRevision,
-          updatedAt: contentEntries.updatedAt,
-        })
-        .from(contentEntries)
-        .orderBy(desc(contentEntries.updatedAt))
-
-      return rows
+    listStudioContent,
+    async listStudioDrafts() { return listStudioContent() },
+    async archiveContent(input: { entryId: string; now?: Date }) {
+      return database.transaction(async (transaction) => {
+        const [entry] = await transaction
+          .select({ id: contentEntries.id, type: contentEntries.type, slug: contentEntries.slug })
+          .from(contentEntries)
+          .where(eq(contentEntries.id, input.entryId))
+          .limit(1)
+          .for('update')
+        if (!entry) throw new ContentNotFoundError()
+        const [publication] = await transaction
+          .delete(contentPublications)
+          .where(eq(contentPublications.entryId, entry.id))
+          .returning({ versionId: contentPublications.versionId })
+        await transaction.delete(contentMedia).where(eq(contentMedia.entryId, entry.id))
+        await transaction
+          .update(contentEntries)
+          .set({ status: 'archived', updatedAt: input.now ?? new Date() })
+          .where(eq(contentEntries.id, entry.id))
+        return { ...entry, hadPublication: Boolean(publication) }
+      })
+    },
+    async restoreArchivedContent(input: { entryId: string; now?: Date }) {
+      return database.transaction(async (transaction) => {
+        const [entry] = await transaction
+          .select({ id: contentEntries.id, type: contentEntries.type, slug: contentEntries.slug, status: contentEntries.status })
+          .from(contentEntries)
+          .where(eq(contentEntries.id, input.entryId))
+          .limit(1)
+          .for('update')
+        if (!entry) throw new ContentNotFoundError()
+        if (entry.status !== 'archived') throw new ContentMustBeArchivedError()
+        const [restored] = await transaction
+          .update(contentEntries)
+          .set({ status: 'draft', updatedAt: input.now ?? new Date() })
+          .where(eq(contentEntries.id, entry.id))
+          .returning({ status: contentEntries.status })
+        return { id: entry.id, type: entry.type, slug: entry.slug, status: restored!.status }
+      })
+    },
+    async deleteArchivedContent(input: { entryId: string }) {
+      return database.transaction(async (transaction) => {
+        const [entry] = await transaction
+          .select({ id: contentEntries.id, type: contentEntries.type, slug: contentEntries.slug, status: contentEntries.status })
+          .from(contentEntries)
+          .where(eq(contentEntries.id, input.entryId))
+          .limit(1)
+          .for('update')
+        if (!entry) throw new ContentNotFoundError()
+        if (entry.status !== 'archived') throw new ContentMustBeArchivedError()
+        await transaction.delete(contentEntries).where(eq(contentEntries.id, entry.id))
+        return { id: entry.id, type: entry.type, slug: entry.slug }
+      })
     },
     async getDraftById(entryId: string) {
       const [entry] = await database

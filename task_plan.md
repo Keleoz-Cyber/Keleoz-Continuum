@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 28 complete: complete V1 basic editor formatting
+Phase 29 complete: Studio lifecycle management and block ordering
 
 ## Phases
 
@@ -246,6 +246,17 @@ Phase 28 complete: complete V1 basic editor formatting
 - [x] Clean exact fixtures, run one proportional checkpoint, update reuse evidence, and commit on current `main`
 - **Status:** complete
 
+### Phase 29: Studio Lifecycle Management and Block Ordering
+- [x] Re-read Studio, auth, content/publication and editor boundaries; lock reversible archive semantics
+- [x] Add RED/GREEN repository contracts for catalog filters, withdraw/archive, restore and archived-only deletion
+- [x] Add RED/GREEN document contracts for moving selected top-level blocks without changing nested content
+- [x] Add authenticated lifecycle actions; require fresh Owner password for permanent deletion
+- [x] Replace the flat draft list with search/type/status filters and clear publish/archive state
+- [x] Add accessible Move up/Move down controls to the existing editor for desktop and mobile
+- [x] Verify filter, publish, archive-to-404, restore, reorder/autosave and password deletion in a real browser
+- [x] Run one combined checkpoint, update reuse evidence, clean fixtures and commit once on `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -433,6 +444,11 @@ Phase 28 complete: complete V1 basic editor formatting
 | Playwright browser session also expired across the host/date transition | 1 | Reopen a fresh headed session and authenticate with the still-scoped Phase 28 Owner; do not reuse stale element references |
 | Stored selection was valid but Link was applied to text carrying the exclusive inline-code mark | 1 | Expose the incompatible mark state, disable Link Apply with a clear hint, and verify Link on separate plain text instead of silently no-oping |
 | First Phase 28 completion patch matched an earlier reordered progress line incorrectly | 1 | Confirmed the atomic patch changed nothing and split plan, ledger and progress updates into independent exact patches |
+| Phase 29 Tiptap declaration search passed a wildcard path that Windows `rg` cannot resolve | 1 | Use the already-found direct `node_modules/@tiptap/core/dist/index.d.ts` path and read its exact declaration range |
+| Real block-move fixture exposed duplicated paragraph `blockId` values after Enter split | 1 | Disable block-ID inheritance on split and normalize legacy duplicate non-heading IDs before render/save; add regression coverage before publishing fixture |
+| First duplicate-ID GREEN patch combined two files with a malformed hunk boundary | 1 | Confirmed no changes applied, reread exact ranges and split normalization from extension metadata patches |
+| Follow-up extension patch had a local JavaScript variable typo before tool invocation | 1 | No file operation ran; correct the wrapper variable and apply the same exact one-line patch once |
+| Client navigation Reset refreshed catalog results but retained stale uncontrolled filter values | 1 | Key only the filter form by normalized query/type/status so route changes remount inputs without converting the whole Studio page to a client component |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

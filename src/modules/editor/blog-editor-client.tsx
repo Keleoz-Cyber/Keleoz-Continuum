@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
+import type { Editor } from '@tiptap/core'
 
 import { getContinuumExtensions } from '@/modules/content/extensions'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
@@ -13,6 +14,7 @@ import {
   type EditorTextSelectionRange,
 } from '@/modules/editor/formatting'
 import { useDraftAutosave } from '@/modules/editor/use-draft-autosave'
+import { moveTopLevelDocumentBlock, topLevelBlockIndexAtPosition } from '@/modules/editor/block-order'
 import { ContentVersionHistory, type EditorContentVersion } from '@/modules/editor/content-version-history'
 import {
   buildCalloutNode,
@@ -32,6 +34,12 @@ import {
 
 function FormatButton(props: { label: string; active?: boolean; disabled?: boolean; onClick: () => void }) {
   return <button type="button" aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</button>
+}
+
+function selectedTopLevelBlockIndex(editor: Editor) {
+  const blocks: Array<{ offset: number; nodeSize: number }> = []
+  editor.state.doc.forEach((node, offset) => blocks.push({ offset, nodeSize: node.nodeSize }))
+  return topLevelBlockIndexAtPosition(blocks, editor.state.selection.from)
 }
 
 export function BlogEditorClient(props: {
@@ -60,13 +68,17 @@ export function BlogEditorClient(props: {
   const [linkUrl, setLinkUrl] = useState('')
   const [linkSelection, setLinkSelection] = useState<EditorTextSelectionRange | null>(null)
   const [linkSelectionHasCode, setLinkSelectionHasCode] = useState(false)
+  const [selectedBlockIndex, setSelectedBlockIndex] = useState<number | null>(null)
   const extensions = useMemo(() => getContinuumExtensions(), [])
   const editor = useEditor({
     extensions,
     content: props.initialSnapshot.document,
     immediatelyRender: false,
+    onCreate: ({ editor: currentEditor }) => setSelectedBlockIndex(selectedTopLevelBlockIndex(currentEditor)),
+    onSelectionUpdate: ({ editor: currentEditor }) => setSelectedBlockIndex(selectedTopLevelBlockIndex(currentEditor)),
     onUpdate: ({ editor: currentEditor }) => {
       setDocument(currentEditor.getJSON() as TiptapDocument)
+      setSelectedBlockIndex(selectedTopLevelBlockIndex(currentEditor))
     },
   })
   const snapshot = useMemo<DraftSnapshot>(
@@ -124,6 +136,15 @@ export function BlogEditorClient(props: {
   const removeLink = () => {
     if (!editor || !linkSelection) return
     editor.chain().focus().setTextSelection(linkSelection).unsetLink().run()
+  }
+  const blockCount = document.content?.length ?? 0
+  const moveSelectedBlock = (direction: -1 | 1) => {
+    if (!editor || selectedBlockIndex === null) return
+    const moved = moveTopLevelDocumentBlock(document, selectedBlockIndex, direction)
+    if (moved === document) return
+    editor.commands.setContent(moved, { emitUpdate: false })
+    setDocument(moved)
+    setSelectedBlockIndex(selectedBlockIndex + direction)
   }
 
   return (
@@ -183,6 +204,11 @@ export function BlogEditorClient(props: {
             {normalizedLink && !linkSelection ? <small role="status">Select text before focusing the link field.</small> : null}
             {normalizedLink && linkSelection && linkSelectionHasCode ? <small role="status">Inline code and Link cannot be combined.</small> : null}
           </div>
+        </div>
+        <div className="editor-block-order-controls" aria-label="Block ordering">
+          <span>{selectedBlockIndex === null ? 'Select a block' : `Block ${selectedBlockIndex + 1} of ${blockCount}`}</span>
+          <button type="button" disabled={selectedBlockIndex === null || selectedBlockIndex === 0} onClick={() => moveSelectedBlock(-1)}>Move up</button>
+          <button type="button" disabled={selectedBlockIndex === null || selectedBlockIndex >= blockCount - 1} onClick={() => moveSelectedBlock(1)}>Move down</button>
         </div>
         <aside className="editor-advanced-palette" aria-label="Advanced blocks">
           <header><span>Advanced blocks</span><small>提示、折叠、引用与自动目录</small></header>

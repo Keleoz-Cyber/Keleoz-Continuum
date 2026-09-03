@@ -114,6 +114,17 @@ describe('structured content document', () => {
     expect(rendered.plainText).toBe('Finished item\nPending item')
   })
 
+  it('removes inherited duplicate block ids before saving or rendering', () => {
+    const rendered = parseAndRenderDocument({ type: 'doc', content: [
+      { type: 'paragraph', attrs: { blockId: 'shared-id' }, content: [{ type: 'text', text: 'First' }] },
+      { type: 'paragraph', attrs: { blockId: 'shared-id' }, content: [{ type: 'text', text: 'Second' }] },
+    ] })
+
+    expect(rendered.document.content?.[0]?.attrs?.blockId).toBe('shared-id')
+    expect(rendered.document.content?.[1]?.attrs?.blockId).toBeNull()
+    expect(rendered.html.match(/\sid="shared-id"/g)).toHaveLength(1)
+  })
+
   it('normalizes a human title into a stable slug', () => {
     expect(normalizeSlug('  First Light  ')).toBe('first-light')
   })

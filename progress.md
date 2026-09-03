@@ -580,3 +580,32 @@
 - Rebuilt and reopened the persisted revision 8 fixture with checked/unchecked tasks and inline-code text intact; continuing browser regression against the new compatibility guard.
 - Closed the browser and deleted only content entry `74deb322-55f9-473b-8f6f-11d5740672f5` plus `phase28_owner`; cascades removed both versions/session and verification returned content/version/owner counts `0/0/0`.
 - Final checkpoint passed: 60 Vitest files / 217 tests, ESLint, TypeScript and the latest Next production build. Phase 28 is complete without changing either immutable upstream snapshot.
+
+### Phase 29 start: Studio lifecycle management and block ordering (2026-09-03)
+- Re-read active plans, Studio overview, content repository/actions, Owner authentication and draft/publication tests. Main is clean at `3318dc2`; production remains open on port 3000.
+- Locked one larger batch: searchable/filterable catalog, reversible public withdrawal/archive, restore-to-draft, archived-only password-confirmed delete, and accessible top-level block move controls.
+- Next checkpoint is combined RED coverage for lifecycle transactions/filter isolation and pure block ordering before production actions or UI.
+- Phase 29 RED is exact: three lifecycle cases fail only on missing repository methods, block-order suite fails only on the missing module, and the three existing draft tests remain green.
+- Repository/pure GREEN now passes 9/9 focused tests for bounded filters, archive-to-404, restore, archived-only cascade delete and immutable top-level block movement. UI/action integration is next.
+- Added authenticated archive/restore/delete actions, current-password delete confirmation, a top-of-Studio searchable/type/status-filtered catalog with explicit public state, and responsive lifecycle controls.
+- Added selected top-level block detection plus Move up/down controls to the existing editor. Focused 9 tests, TypeScript and ESLint pass after integration.
+- Production browser created Blog fixture `358036c7-afc3-4180-83a2-8579e4121c61`, entered two blocks and moved the second up. UI, draft order and revision 5 all agree; duplicate split IDs were caught for a regression fix before publish.
+- Duplicate-ID RED fails because the second paragraph retains `shared-id`. The first GREEN patch had malformed multi-file syntax and applied nothing; continuing with two exact patches.
+- Normalization patch applied. The one-line `keepOnSplit` wrapper then failed before invoking the file tool due to a local variable typo; no filesystem state changed.
+- Duplicate-ID regression and the combined lifecycle/order suite now pass 20/20; TypeScript and ESLint also pass for the full actions/catalog/editor integration.
+- Rebuilt production, reloaded the moved Blog fixture, and triggered revision 6 autosave. Draft JSON now preserves only the first block ID and clears the inherited duplicate while keeping order `Second block / First block`.
+- Published the reordered Blog and confirmed the public reader preserves `Second block / First block`. Studio catalog then reports `published`, `public`, revision 6 and exposes `Archive & withdraw`.
+- Created a second Project draft `13ac1801-38ce-4ff5-8528-8f312e4aa7fa`. Unfiltered Studio correctly lists Project as `draft / not public` and Blog as `published / public` with distinct lifecycle actions.
+- Production catalog filter `?q=beta&type=project&status=draft` returns exactly the Beta Project and excludes the published Alpha Blog.
+- Browser caught stale filter control values after Reset despite correct two-row results. Added a route-filter key to remount only the filter form; rebuild/recheck precedes lifecycle mutation.
+- Rebuilt Reset visual state now matches `/studio`. Archived the published Alpha Blog; Studio notice/state updated and exact public URL returned 404 immediately.
+- Restored Alpha from archive. It returned to editable draft at revision 6, retained version history, and its public URL correctly remained 404 until an explicit future publish.
+- Archived the never-published Beta Project and opened its bounded permanent-delete panel; the panel names the exact item, states media are retained, and requires Owner password.
+- Submitted a wrong password; Studio kept both catalog rows and displayed `Owner 密码不正确，内容未删除。` inside the same disclosure.
+- Submitted the correct Owner password; Beta disappeared, count fell to one, deletion notice rendered and direct database count returned zero.
+- Captured `output/playwright/phase29-studio-mobile.png`; mobile Studio is bounded and readable. Added the shared dark form style to the previously native-looking create Type select before final rebuild.
+- Archived restored Alpha for fixture cleanup and captured `output/playwright/phase29-delete-mobile.png`; the password-delete panel is fully reachable and bounded at 390×844.
+- Password-deleted Alpha from the mobile layout, closed the browser, removed only `phase29_owner`, and verified both fixture IDs, all versions and the Owner are `0/0/0`.
+- Final checkpoint passed: 61 Vitest files / 224 tests, ESLint, TypeScript and a fresh Next production build containing the final responsive select fix.
+- Phase 29 is complete as one combined batch: catalog filters/reset, clear lifecycle state, archive-to-404, restore-to-draft, password-confirmed delete, block ordering and duplicate-ID hardening.
+- Production build passed. Fresh headed Owner login shows the content catalog directly below the Studio heading with search, type/status filters, reset, create form and empty-state before unrelated inbox/media sections.

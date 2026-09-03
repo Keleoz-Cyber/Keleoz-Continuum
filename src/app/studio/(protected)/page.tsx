@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createContentDraftAction } from '@/modules/content/actions'
 import { CONTENT_TYPE_CONFIG, studioContentPath } from '@/modules/content/routing'
 import { contentRepository } from '@/modules/content/runtime'
+import { StudioContentControls } from '@/modules/content/studio-content-controls'
 import { reviewLetterAction } from '@/modules/letters/owner-actions'
 import { lettersRepository } from '@/modules/letters/runtime'
 import { MediaUploadForm } from '@/modules/media/media-upload-form'
@@ -26,10 +27,29 @@ const personaNotices: Record<string, string> = {
   'publication-deleted': '已删除这条 Persona 公开内容，媒体库原件保持不变。',
 }
 
-export default async function StudioOverviewPage({ searchParams }: { searchParams: Promise<{ persona?: string }> }) {
-  const [{ persona: personaNotice }, drafts, letters, media, personas, reviews, moments] = await Promise.all([
-    searchParams,
-    contentRepository.listStudioDrafts(),
+const contentNotices: Record<string, string> = {
+  archived: '内容已归档并从公开页面撤回，草稿与版本历史仍保留。',
+  restored: '归档内容已恢复到草稿，可继续编辑或重新发布。',
+  deleted: '归档内容及其版本已永久删除，媒体库原件保持不变。',
+}
+
+const contentStatuses = ['draft', 'published', 'archived'] as const
+
+export default async function StudioOverviewPage({ searchParams }: { searchParams: Promise<{
+  persona?: string
+  content?: string
+  q?: string
+  type?: string
+  status?: string
+}> }) {
+  const params = await searchParams
+  const query = params.q?.trim().slice(0, 160) ?? ''
+  const type = params.type && params.type in CONTENT_TYPE_CONFIG
+    ? params.type as keyof typeof CONTENT_TYPE_CONFIG
+    : undefined
+  const status = contentStatuses.find((candidate) => candidate === params.status)
+  const [drafts, letters, media, personas, reviews, moments] = await Promise.all([
+    contentRepository.listStudioContent({ query, type, status }),
     lettersRepository.listForOwner(),
     mediaService.listReady(),
     personaRepository.listPersonas(),
@@ -50,13 +70,47 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
         <h1>Studio</h1>
         <p>草稿与发布工具将在这里保持克制地展开。</p>
       </header>
-      {personaNotice && personaNotices[personaNotice] ? <p className="studio-notice">{personaNotices[personaNotice]}</p> : null}
+      {params.persona && personaNotices[params.persona] ? <p className="studio-notice">{personaNotices[params.persona]}</p> : null}
+      {params.content && contentNotices[params.content] ? <p className="studio-notice">{contentNotices[params.content]}</p> : null}
       <section className="studio-overview" aria-labelledby="drafts-title">
         <div>
           <p className="studio-kicker">Current</p>
-          <h2 id="drafts-title">Content drafts</h2>
+          <h2 id="drafts-title">Content library</h2>
         </div>
         <strong>{drafts.length}</strong>
+      </section>
+      <section className="studio-content-catalog" aria-label="Content management">
+        <form className="studio-content-filters" action="/studio" key={`${query}|${type ?? ''}|${status ?? ''}`}>
+          <input name="q" defaultValue={query} maxLength={160} placeholder="Search title, category or slug" aria-label="Search content" />
+          <select name="type" defaultValue={type ?? ''} aria-label="Filter by type">
+            <option value="">All types</option>
+            {Object.entries(CONTENT_TYPE_CONFIG).map(([value, config]) => <option value={value} key={value}>{config.singular}</option>)}
+          </select>
+          <select name="status" defaultValue={status ?? ''} aria-label="Filter by status">
+            <option value="">All states</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="archived">Archived</option>
+          </select>
+          <button type="submit">Filter</button>
+          <Link href="/studio">Reset</Link>
+        </form>
+        <form action={createContentDraftAction} className="studio-create-form">
+          <label><span>New content title</span><input name="title" required maxLength={240} /></label>
+          <label><span>Type</span><select name="type" defaultValue="blog"><option value="blog">Blog</option><option value="project">Project</option><option value="moment">Moment</option><option value="page">Page</option></select></label>
+          <button type="submit">Create draft</button>
+        </form>
+        <div className="studio-draft-list">
+          {drafts.length ? drafts.map((draft) => (
+            <article className="studio-content-row" key={draft.id}>
+              <Link href={studioContentPath(draft.id)}>
+                <span><strong>{draft.title}</strong><small>{CONTENT_TYPE_CONFIG[draft.type].singular} · {draft.slug}</small></span>
+                <span className="studio-content-badges"><em>{draft.status}</em><em>{draft.isPublic && draft.exposure !== 'hidden' ? 'public' : draft.isPublic ? 'hidden release' : 'not public'}</em><small>Revision {draft.revision} · {draft.updatedAt.toLocaleDateString('zh-CN')}</small></span>
+              </Link>
+              <StudioContentControls entryId={draft.id} title={draft.title} status={draft.status} isPublic={draft.isPublic} />
+            </article>
+          )) : <p className="studio-muted">没有符合当前筛选条件的内容。</p>}
+        </div>
       </section>
       <section className="studio-inbox" aria-labelledby="letters-inbox-title">
         <div className="studio-inbox-heading">
@@ -146,30 +200,6 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
           </article>)}
         </div>}
       </section>
-      <form action={createContentDraftAction} className="studio-create-form">
-        <label>
-          <span>New content title</span>
-          <input name="title" required maxLength={240} />
-        </label>
-        <label>
-          <span>Type</span>
-          <select name="type" defaultValue="blog">
-            <option value="blog">Blog</option>
-            <option value="project">Project</option>
-            <option value="moment">Moment</option>
-            <option value="page">Page</option>
-          </select>
-        </label>
-        <button type="submit">Create draft</button>
-      </form>
-      <div className="studio-draft-list">
-        {drafts.map((draft) => (
-          <Link href={studioContentPath(draft.id)} key={draft.id}>
-            <span>{draft.title}<small>{CONTENT_TYPE_CONFIG[draft.type].singular}</small></span>
-            <small>Revision {draft.revision}</small>
-          </Link>
-        ))}
-      </div>
     </main>
   )
 }

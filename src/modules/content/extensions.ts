@@ -40,6 +40,7 @@ const ContinuumBlockId = Extension.create({
         attributes: {
           blockId: {
             default: null,
+            keepOnSplit: false,
             parseHTML: (element) => element.getAttribute('data-block-id'),
             renderHTML: (attributes) =>
               typeof attributes.blockId === 'string' && attributes.blockId

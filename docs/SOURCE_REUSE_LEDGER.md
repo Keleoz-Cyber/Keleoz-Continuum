@@ -481,3 +481,19 @@ Reuse classification: exact interaction reuse for the Desktop formatting vocabul
 Contract evidence: `content-document.test.ts` covers checked/unchecked task HTML, disabled inputs and searchable line separation; `editor-formatting.test.ts` covers safe schemes, hostile/credentialed URL rejection, non-collapsed range retention and inline-code incompatibility. Full regression passed 60 files / 217 tests. Production browser evidence covered invalid Link rejection, task creation/checking, inline code, safe internal Link, Divider, revision autosave, Guest Preview, Full publish, 390×844 public layout, Hidden republish and exact 404.
 
 Intentional differences and remaining boundary: the source Desktop toolbar uses Markdown insertion while Continuum invokes equivalent Tiptap commands. Task lists are added because the approved V1 block list requires them. Inline code and Link are mutually exclusive and the UI now says so instead of silently failing. Drag handles/block reordering remain a separate interaction enhancement.
+
+## Implemented evidence: Studio lifecycle management and block ordering
+
+Feature: Filterable Owner content catalog, reversible withdrawal/archive, password-confirmed deletion and top-level block ordering
+
+Upstream paths and symbols: Desktop Blog list/editor `InternalBeyond.html:5490-5600`, `:8390-8705`; Mobile Blog editor/list flow `index.html:3792-3820`, `:12125-12620`. Their local-record controls inform labels and compact hierarchy, while public PostgreSQL lifecycle/auth cannot be copied from browser-local source stores.
+
+Implemented paths and adapters: filtered catalog and lifecycle transactions in `src/modules/content/repository.ts`; authenticated cache-invalidating actions in `content/actions.ts`; bounded password form in `studio-content-controls.tsx`; top-of-Studio catalog in the protected Studio page; pure ordering in `src/modules/editor/block-order.ts` and live controls in the existing editor client; responsive Studio styling in `globals.css`.
+
+Preserved behavior: existing source-derived public readers, editor formatting/media/advanced blocks, immutable versions, Letters, Media and Persona sections remain unchanged. Ordering moves the selected top-level JSON node as a whole, so nested callout/task/gallery content is not reauthored.
+
+Reuse classification: adapter reuse for source visual vocabulary and the existing Tiptap/Studio shell; reimplementation required for server-side filters, publication withdrawal, Owner reauthentication, PostgreSQL cascade boundaries and cache invalidation. No client catalog API, drag library or extra service was introduced.
+
+Contract evidence: `draft-repository.test.ts` covers bounded filters, archive-to-404, version preservation, restore-without-republish and archived-only delete; `editor-block-order.test.ts` covers immutable boundary movement and selection-position mapping; `content-document.test.ts` covers duplicate split-ID normalization. Full regression passed 61 files / 224 tests. Production browser evidence covered two content types/states, combined filters/reset, block reorder plus autosave, Full publish, archive 404, restore, wrong/correct password deletion, and 390×844 catalog/delete layouts.
+
+Intentional differences and remaining boundary: Studio Archive is an Owner shelving/withdrawal state and removes public visibility; public `/timeline?view=archive` remains the separate derived long-term reading view. Restore returns to draft and never republishes. Permanent delete requires archive plus current password. Ordering uses explicit Move controls for keyboard/mobile reliability rather than a pointer-only drag handle.

@@ -18,6 +18,7 @@ export const continuumReferenceAttrsSchema = z.object({
   summary: z.string().trim().max(2_000).default(''),
 }).strict()
 const tocEntrySchema = z.object({ id: z.string(), title: z.string(), level: z.number().int().min(1).max(6) })
+const blockIdPattern = /^[a-z0-9][a-z0-9_-]*$/
 export const continuumTocAttrsSchema = z.object({
   title: shortText.default('On this page'),
   entries: z.array(tocEntrySchema).default([]),
@@ -34,7 +35,7 @@ function headingBase(value: string, index: number) {
 }
 
 export function prepareAdvancedDocument(document: TiptapDocument): TiptapDocument {
-  const seen = new Map<string, number>()
+  const seenBlockIds = new Set<string>()
   const entries: Array<{ id: string; title: string; level: number }> = []
   let headingIndex = 0
   function normalize(node: TiptapNode): TiptapNode {
@@ -42,15 +43,25 @@ export function prepareAdvancedDocument(document: TiptapDocument): TiptapDocumen
     if (node.type === 'heading') {
       headingIndex += 1
       const title = textOf(node).trim() || `Section ${headingIndex}`
-      const requested = typeof attrs?.blockId === 'string' && /^[a-z0-9][a-z0-9_-]*$/.test(attrs.blockId)
+      const requested = typeof attrs?.blockId === 'string' && blockIdPattern.test(attrs.blockId)
         ? attrs.blockId
         : headingBase(title, headingIndex)
-      const count = (seen.get(requested) ?? 0) + 1
-      seen.set(requested, count)
-      const id = count === 1 ? requested : `${requested}-${count}`
+      let id = requested
+      let suffix = 1
+      while (seenBlockIds.has(id)) {
+        suffix += 1
+        id = `${requested}-${suffix}`
+      }
+      seenBlockIds.add(id)
       attrs = { ...attrs, blockId: id }
       const level = typeof attrs.level === 'number' ? attrs.level : 2
       if (level >= 2 && level <= 3) entries.push({ id, title, level })
+    } else if (typeof attrs?.blockId === 'string') {
+      if (!blockIdPattern.test(attrs.blockId) || seenBlockIds.has(attrs.blockId)) {
+        attrs = { ...attrs, blockId: null }
+      } else {
+        seenBlockIds.add(attrs.blockId)
+      }
     }
     if (node.type === 'continuumCallout') {
       const parsed = continuumCalloutAttrsSchema.safeParse(attrs)

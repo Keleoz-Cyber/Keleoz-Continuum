@@ -388,3 +388,29 @@
 - Full publication renders the same four structures inside the unchanged source Blog reader; public task checkboxes remain disabled and the internal Link remains root-relative.
 - At 390×844 the source mobile reader keeps the task list, monospace inline code, underlined Link and Divider inside the content column with no horizontal overflow or oversized editor controls leaking into public UI.
 - Hidden republish removes the entire rich-block article at the server boundary; task/link markup is not shipped and the stable URL returns 404 before direct cleanup.
+
+## Phase 29 Studio lifecycle and block-ordering findings (2026-09-03)
+- `content_status` already has draft/published/archived, but only publish changes it; Studio currently fetches every entry, exposes no filter/state controls, and offers no archive/restore/delete operations.
+- Archive will be a reversible Owner shelving operation: remove the publication pointer and public media attachment projection, set status archived, preserve draft plus every immutable version, and invalidate all public caches. Restore returns it to draft without publishing.
+- Permanent deletion will be allowed only after archive and after verifying the current Owner password. Shared Media Library objects remain independent; only entry/version/publication/attachment rows cascade.
+- Studio catalog filters can remain one bounded PostgreSQL query over title/subtitle/category/slug plus type/status. No search service or client fetch is justified for a single-Owner 4C4G deployment.
+- Block ordering will operate on the selected top-level Tiptap node with explicit Move up/down controls. This is accessible on keyboard/mobile and avoids adding a drag library; nested callout/task/gallery contents move atomically with their parent block.
+- Existing Owner crypto already has direct Argon2 verify coverage. Permanent-delete reauthentication can reuse `verifyPassword` against the authenticated single Owner record without creating another login session.
+- Studio currently places content creation/listing after all Letters, Media and Persona sections. The catalog should move directly beneath the Studio heading so routine writing management no longer requires scrolling past unrelated operations.
+- Lifecycle implementation keeps public cache invalidation in the authenticated action boundary. Archive removes the publication and content-media projection in one transaction; restore never republishes; delete reuses Argon2 verification and refuses non-archived rows.
+- The catalog remains server-rendered and queries filters directly in PostgreSQL. Only the small delete form and existing editor hydrate on the client; no catalog API or client data-fetch loop was added.
+- Real Move up changed `First block / Second block` to `Second block / First block`, updated the selected index from 2 to 1 and autosaved revision 5. Nested-content movement is already covered by the pure contract.
+- The same draft JSON exposed an older editor invariant gap: Enter inherited the paragraph `blockId`, producing duplicate IDs. New splits must not inherit IDs, and normalization must remove legacy duplicates before HTML publication.
+- Duplicate-ID GREEN now disables `blockId` inheritance on split, preserves the first valid ID, clears repeated/invalid non-heading IDs, and keeps the existing unique heading-anchor suffix behavior.
+- Production autosave normalized the legacy fixture exactly as contracted: first paragraph keeps its UUID, second duplicate becomes null, and no content/order data changes.
+- Catalog status distinguishes database lifecycle from actual guest visibility: the published Full Blog shows both `published` and `public`, while later archived/hidden states will not be mislabeled as publicly readable.
+- Empty-state production UI confirms the catalog relocation: routine content creation/filtering is now immediately visible after login, while Letters, Media and Persona retain their existing order and styling below it.
+- Combined query/type/status filter (`beta` + Project + Draft) returns only the intended Project and keeps filter values in the URL/form, proving the catalog does not merely hide rows client-side.
+- Reset navigation restored both catalog rows but Next reused the uncontrolled filter DOM with stale Project/Draft values. Keying only that form by normalized route filters preserves server rendering and makes visual state follow the URL.
+- Rebuilt Reset now clears all three visible controls and restores both rows. Archiving the Full Blog atomically changes it to `archived / not public`, exposes Restore/Delete controls, preserves revision/history and makes the exact public URL return 404.
+- Restore changes the archived Blog back to `draft / not public` while the public route stays 404; it does not silently reattach the preserved publication version.
+- Permanent delete remains hidden behind archive plus a bounded disclosure. A wrong Owner password keeps the archived Project row intact and returns an inline alert without ending the authenticated session.
+- Correct current password permanently deletes the archived Project, cascades its content row, and returns a one-row catalog plus explicit notice; direct DB count is zero. The restored Blog remains untouched.
+- At 390×844 the catalog/filter/create stack is single-column and bounded with no horizontal overflow. Visual review also caught the legacy create-form Type select missing the shared dark input styling; it now joins the existing form control selector.
+- Mobile permanent-delete disclosure becomes a bounded fixed-bottom panel, keeping the exact title, password field and destructive action reachable without widening or pushing the catalog. The final rebuild will include the corrected dark Type select styling.
+- Mobile cleanup successfully archived and password-deleted the restored Blog, proving the destructive flow remains reachable after responsive reflow and leaves an empty catalog.
