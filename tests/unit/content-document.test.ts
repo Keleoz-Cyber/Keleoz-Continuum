@@ -94,6 +94,26 @@ describe('structured content document', () => {
     expect(rendered.html).not.toContain('storage_key')
   })
 
+  it('renders task-list state and keeps each task in searchable plain text', () => {
+    const rendered = parseAndRenderDocument({ type: 'doc', content: [
+      { type: 'taskList', content: [
+        { type: 'taskItem', attrs: { checked: true }, content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'Finished item' }] },
+        ] },
+        { type: 'taskItem', attrs: { checked: false }, content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'Pending item' }] },
+        ] },
+      ] },
+    ] })
+
+    expect(rendered.html).toContain('class="continuum-task-list"')
+    expect(rendered.html).toContain('data-checked="true"')
+    expect(rendered.html).toContain('data-checked="false"')
+    expect(rendered.html).toContain('type="checkbox"')
+    expect(rendered.html).toContain('disabled')
+    expect(rendered.plainText).toBe('Finished item\nPending item')
+  })
+
   it('normalizes a human title into a stable slug', () => {
     expect(normalizeSlug('  First Light  ')).toBe('first-light')
   })

@@ -550,3 +550,33 @@
 - Full checkpoint passed: 59 Vitest files / 212 tests, ESLint and TypeScript. The earlier fresh production build includes the protected version route and was exercised end-to-end on port 3000.
 - Phase 27 is complete. Version history stays inside the single existing Studio/editor/publication architecture; no public history endpoint, duplicate editor or pointer rollback was added.
 - Final code review attached the protected historical body to the existing Studio `editor-surface` style scope so advanced/media blocks retain their established dark-editor presentation.
+
+### Phase 28 start: complete V1 basic editor formatting (2026-09-02)
+- Re-read the active plan, V1 block requirements, installed Tiptap stack and both upstream Blog editors. Main is clean at `52f621b`; production remains open on port 3000.
+- Confirmed Desktop source parity requires visible inline-code/link/horizontal-rule controls, while task lists are a V1 addition absent from both StarterKit and installed dependencies.
+- Next checkpoint is RED coverage for task-list document rendering and safe link normalization before adding extensions or toolbar code.
+- Phase 28 RED is exact: task rendering fails on unknown `taskItem`, link contracts fail because `editor/formatting` does not exist, and the seven pre-existing document tests remain green.
+- Added only official task-list/task-item 3.30.3 packages to match the pinned Tiptap stack. Their published packages omit `src/`, so API inspection continues against shipped declarations/runtime.
+- First combined GREEN patch missed the already-present safe StarterKit Link configuration and applied no source changes. Kept that configuration and switched to focused patches for new imports/nodes, link normalization and sanitizer support.
+- Phase 28 GREEN passes 10 focused tests plus TypeScript and ESLint. Added source-compatible inline code/link/divider controls, strike, task toggle, official task nodes, safe link input/apply/remove, and responsive editor/public task styling.
+- Fresh production build passed and headed browser opened at the unchanged Owner login boundary using exact temporary account `phase28_owner`.
+- Logged in and created exact Blog fixture `74deb322-55f9-473b-8f6f-11d5740672f5` at slug `phase-28-editor-basics-027a6408`. Fresh editor exposes all new controls and begins at revision 1.
+- Real editor rejected a `javascript:` link before command execution, then converted `Finished item` into an accessible task item and autosaved to revision 3.
+- Checked the first task, created a second `Pending item` with Enter, and observed revision 6 saved with both accessible checkbox states.
+- Applied inline code to `Visit Continuum` and attempted a safe internal link. Draft JSON confirmed inline code persisted at revision 8 but the link mark did not; Phase 28 remains open for a stored-selection fix before public verification.
+- Stored-selection regression test failed on the missing range helper, then passed after the editor began capturing a non-collapsed ProseMirror range on URL-field focus and restoring it for Apply/Remove. Focused suite is now 11/11; TypeScript and ESLint pass.
+- The retained production session id expired across the host/date transition; no repeated stdin attempt will be made. Port/process health is checked directly before the fresh build.
+- Fresh build and production restart passed. The Playwright browser session had also expired, so Phase 28 browser verification resumes in a new headed session with fresh references.
+- Reopened and reauthenticated successfully; the existing Phase 28 draft remains at revision 8, confirming the browser/session restart did not affect persisted editor state.
+- Stored-range build enabled Apply/Remove after selecting `Visit Continuum`, but DB JSON correctly remained code-only because inline code excludes Link. Adding an explicit incompatible-state guard before continuing with a plain-text Link fixture.
+- Fresh production guard shows `Inline code and Link cannot be combined` with Apply disabled. A new paragraph inherited the active code mark across Enter, so the browser flow will explicitly toggle that mark off before Link verification.
+- Toggled code off on `Project link`, reselected it, applied `/projects/continuum`, and confirmed both the editor accessibility tree and revision 12 draft JSON contain the Link mark while `Visit Continuum` remains inline code.
+- Inserted the source-equivalent Divider after the Link; editor shows a semantic separator, keeps a following paragraph, and autosaves revision 14.
+- Protected Guest Preview matches the saved document: two disabled task checkboxes, inline code, internal Link and semantic Divider all render through the shared sanitizer/static-renderer path.
+- Published through the real Owner action. Public Blog renders the same checked/unchecked disabled tasks, inline code, `/projects/continuum` Link and Divider in the existing source reader.
+- Captured and visually inspected `output/playwright/phase28-editor-basics-mobile.png`; all four structures remain legible and bounded at 390×844.
+- Cleanup acceptance autosaved Hidden at revision 15, published a second immutable version, redirected to the Hidden preview notice, and returned a real HTTP 404 for the exact public Blog URL.
+- Inline-code/Link compatibility RED failed on the missing availability guard, then passed after Link Apply became disabled with a clear message for code-marked selections. Focused formatting tests are 4/4; TypeScript and ESLint pass.
+- Rebuilt and reopened the persisted revision 8 fixture with checked/unchecked tasks and inline-code text intact; continuing browser regression against the new compatibility guard.
+- Closed the browser and deleted only content entry `74deb322-55f9-473b-8f6f-11d5740672f5` plus `phase28_owner`; cascades removed both versions/session and verification returned content/version/owner counts `0/0/0`.
+- Final checkpoint passed: 60 Vitest files / 217 tests, ESLint, TypeScript and the latest Next production build. Phase 28 is complete without changing either immutable upstream snapshot.

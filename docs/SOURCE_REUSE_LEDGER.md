@@ -465,3 +465,19 @@ Reuse classification: adapter reuse for the established Tiptap/autosave/Studio p
 Contract evidence: `publish-repository.test.ts` covers newest-first lightweight rows, current marking, entry-scoped detail, atomic draft copy, revision conflict, immutable retention and unchanged publication pointer. Full regression passed 59 files / 212 tests. Production browser evidence covered Version 1/2 publication, protected Version 1 preview, revision 5 restore, unchanged Version 2 public HTML, revision 6 autosave continuation, explicit Version 3 republish, responsive 390×844 history, Hidden Version 4 cleanup and exact public 404.
 
 Intentional differences and remaining boundary: published versions cannot be edited or deleted from this UI. Restore does not publish automatically and stale revision forms fail rather than overwrite a newer autosave. Historical missing-media references may return to a draft, but the existing ready-media publication check prevents them from becoming a broken public version.
+
+## Implemented evidence: Complete V1 basic editor formatting
+
+Feature: Task lists plus complete source-backed inline/block formatting controls
+
+Upstream paths and symbols: Desktop Blog Markdown toolbar `InternalBeyond.html:5570-5594` exposes headings, bold, italic, inline code, quote, unordered/ordered lists, code block, horizontal rule and Link; Mobile Blog editor `index.html:3792-3820` intentionally remains a simpler text/Markdown surface. Task lists are a V1 structured-editor addition rather than an upstream feature.
+
+Implemented paths and adapters: official Tiptap task-list/task-item 3.30.3 extensions in `package.json` and `src/modules/content/extensions.ts`; searchable/sanitized static rendering in `document.ts`; safe Link/range contracts in `src/modules/editor/formatting.ts`; controls in the existing `blog-editor-client.tsx`; dark editor and source-reader styles in `globals.css` and `source-public.css`.
+
+Preserved behavior: inline code, Link and Divider map directly to the Desktop toolbar concepts and stay inside the existing dynamically loaded Studio editor. Public Blog typography/navigation are unchanged. Task checkboxes are interactive only while editing and forced disabled in Preview/public HTML.
+
+Reuse classification: exact interaction reuse for the Desktop formatting vocabulary; adapter reuse through the existing Tiptap/autosave/sanitizer/publication pipeline; minimal new implementation for V1 task nodes and safe delayed Link selection. No second editor, renderer or public script was introduced.
+
+Contract evidence: `content-document.test.ts` covers checked/unchecked task HTML, disabled inputs and searchable line separation; `editor-formatting.test.ts` covers safe schemes, hostile/credentialed URL rejection, non-collapsed range retention and inline-code incompatibility. Full regression passed 60 files / 217 tests. Production browser evidence covered invalid Link rejection, task creation/checking, inline code, safe internal Link, Divider, revision autosave, Guest Preview, Full publish, 390×844 public layout, Hidden republish and exact 404.
+
+Intentional differences and remaining boundary: the source Desktop toolbar uses Markdown insertion while Continuum invokes equivalent Tiptap commands. Task lists are added because the approved V1 block list requires them. Inline code and Link are mutually exclusive and the UI now says so instead of silently failing. Drag handles/block reordering remain a separate interaction enhancement.

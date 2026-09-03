@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 27 complete: immutable publication history and restore-to-draft
+Phase 28 complete: complete V1 basic editor formatting
 
 ## Phases
 
@@ -236,6 +236,16 @@ Phase 27 complete: immutable publication history and restore-to-draft
 - [x] Clean exact fixtures, run one proportional checkpoint, update reuse evidence, and commit on current `main`
 - **Status:** complete
 
+### Phase 28: Complete V1 Basic Editor Formatting
+- [x] Re-read the V1 block list, current Tiptap extension set, and authoritative Desktop/Mobile Blog editor controls
+- [x] Add RED/GREEN contracts for task-list rendering/plain text and safe editor link normalization
+- [x] Add official Tiptap task-list/task-item extensions pinned to the existing 3.30.3 stack
+- [x] Expose source-backed inline code, strike, horizontal rule and link apply/remove controls without a second editor
+- [x] Add responsive editor/public task-list styling while preserving source reader typography
+- [x] Verify autosave, Guest Preview, public Desktop/Mobile rendering and link safety in a real browser
+- [x] Clean exact fixtures, run one proportional checkpoint, update reuse evidence, and commit on current `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -416,6 +426,13 @@ Phase 27 complete: immutable publication history and restore-to-draft
 | PowerShell treated `[id]` in a Studio preview path as a wildcard pattern | 1 | Use `Get-Content -LiteralPath` for App Router paths containing square brackets |
 | First Phase 27 GREEN run referenced `DraftConflictError` without importing it in the test | 1 | Import the real repository error class and rerun; production restore behavior had already reached the intended conflict branch |
 | First combined Phase 27 UI patch targeted an inexact editor-status context | 1 | Confirmed the patch was atomic and changed nothing, then split actions/component/pages/client/CSS into focused patches using exact surrounding lines |
+| Installed task extensions do not ship their TypeScript `src/` trees | 1 | Read the package `dist` declarations/runtime instead of assuming source files are included |
+| First Phase 28 GREEN patch assumed StarterKit had no existing Link configuration | 1 | Confirmed the atomic patch changed nothing, preserved the existing safe Link settings, and split formatting/task/sanitizer edits into exact patches |
+| Real editor lost the text selection when the separate Link URL field received focus | 1 | Preserve a validated non-collapsed ProseMirror range on link-field focus, restore that range before apply/remove, and lock the range contract with RED/GREEN coverage |
+| Phase 28 retained production session id expired before restart | 1 | Check port ownership/readiness instead of retrying the stale session id, then rebuild and start one fresh production process |
+| Playwright browser session also expired across the host/date transition | 1 | Reopen a fresh headed session and authenticate with the still-scoped Phase 28 Owner; do not reuse stale element references |
+| Stored selection was valid but Link was applied to text carrying the exclusive inline-code mark | 1 | Expose the incompatible mark state, disable Link Apply with a clear hint, and verify Link on separate plain text instead of silently no-oping |
+| First Phase 28 completion patch matched an earlier reordered progress line incorrectly | 1 | Confirmed the atomic patch changed nothing and split plan, ledger and progress updates into independent exact patches |
 
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.

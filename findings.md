@@ -369,3 +369,22 @@
 - At 390×844 the history becomes a vertical source-dark glass card: each version keeps title/exposure/date legible, Preview and Restore become full-width controls, the current badge stays bounded, and no horizontal overflow appears.
 - Final diff review kept historical rich blocks inside the existing dark Studio block-style scope (`editor-surface`), avoiding a second set of callout/media/gallery parameters or the light public-reader colors.
 - Cleanup itself also exercises history continuity: after three visible versions, a Hidden fourth publication invalidates the stable public route to 404 without deleting any immutable version prematurely.
+
+## Phase 28 basic-editor-formatting findings (2026-09-02)
+- Desktop source Blog Markdown toolbar explicitly exposes H1/H2/H3, bold, italic, inline code, quote, unordered/ordered lists, code block, horizontal rule and link. Mobile source keeps a simpler text/Markdown editor without an equivalent toolbar.
+- Current StarterKit 3.30.3 already brings inline code, strike, underline, horizontal rule and Link. The missing product work for those features is toolbar/validation/UI rather than another rendering system.
+- Task list/task item are not installed or included by StarterKit. V1 requires them, so Phase 28 will add only the official `@tiptap/extension-task-list` and `@tiptap/extension-task-item` packages at the same pinned 3.30.3 version.
+- Block drag handles remain a separate interaction enhancement; this slice closes the explicit V1 basic-block list without coupling drag/drop mechanics to link and task semantics.
+- Static task rendering uses the official extension shape but the sanitizer forces every published checkbox to `disabled`; editor NodeViews remain interactive and autosavable, while Guests cannot create a misleading local-only checked state.
+- Link normalization accepts http(s), mailto, root-relative paths and in-document anchors, upgrades bare domains to HTTPS, and rejects script schemes, protocol-relative URLs and credential-bearing URLs before Tiptap receives them.
+- Production toolbar marks `javascript:` input invalid, disables Apply, and shows the allowed schemes. Converting the active paragraph to Tasks produces the official accessible checkbox NodeView and autosaves the structural change.
+- Editor interaction confirms task state is real document state: the first checkbox toggles checked, Enter creates a second unchecked task item, and both operations autosave through the existing revision path.
+- Browser/DB comparison caught a real link-toolbar gap: `Visit Continuum` persisted with only the inline-code mark. Moving focus to the separate URL input lost the applicable text range, so Apply did not add a link mark despite the URL being valid.
+- After the stored-range fix, Link controls correctly enabled for the selection. The remaining no-op was a different contract: Tiptap's inline-code mark excludes Link. The toolbar must surface this incompatibility and test Link on plain text rather than imply the two marks can coexist.
+- Production guard now disables Apply and states the incompatibility when the stored range carries inline code. Tiptap intentionally carries the code mark across Enter, so the separate Link fixture must explicitly toggle code off before applying the link.
+- After toggling code off on a separate paragraph, the same stored-range flow adds a sanitized `/projects/continuum` Link mark and autosaves revision 12. Draft JSON contains only the safe href plus Tiptap's ordinary link attributes.
+- Divider inserts the existing StarterKit horizontal-rule node and leaves a following paragraph, matching the source toolbar behavior without a custom separator implementation.
+- Guest Preview renders checked/unchecked task state with both checkboxes disabled, preserves inline code, emits the safe internal Link, and exposes the horizontal rule as a semantic separator.
+- Full publication renders the same four structures inside the unchanged source Blog reader; public task checkboxes remain disabled and the internal Link remains root-relative.
+- At 390×844 the source mobile reader keeps the task list, monospace inline code, underlined Link and Divider inside the content column with no horizontal overflow or oversized editor controls leaking into public UI.
+- Hidden republish removes the entire rich-block article at the server boundary; task/link markup is not shipped and the stable URL returns 404 before direct cleanup.

@@ -6,6 +6,12 @@ import { EditorContent, useEditor } from '@tiptap/react'
 
 import { getContinuumExtensions } from '@/modules/content/extensions'
 import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
+import {
+  canApplyEditorLink,
+  editorTextSelectionRange,
+  normalizeEditorLink,
+  type EditorTextSelectionRange,
+} from '@/modules/editor/formatting'
 import { useDraftAutosave } from '@/modules/editor/use-draft-autosave'
 import { ContentVersionHistory, type EditorContentVersion } from '@/modules/editor/content-version-history'
 import {
@@ -51,6 +57,9 @@ export function BlogEditorClient(props: {
   const [collapseSummary, setCollapseSummary] = useState('Read more')
   const [tocTitle, setTocTitle] = useState('On this page')
   const [referenceKey, setReferenceKey] = useState(() => props.references[0] ? `${props.references[0].type}:${props.references[0].slug}` : '')
+  const [linkUrl, setLinkUrl] = useState('')
+  const [linkSelection, setLinkSelection] = useState<EditorTextSelectionRange | null>(null)
+  const [linkSelectionHasCode, setLinkSelectionHasCode] = useState(false)
   const extensions = useMemo(() => getContinuumExtensions(), [])
   const editor = useEditor({
     extensions,
@@ -105,6 +114,17 @@ export function BlogEditorClient(props: {
   const insertAdvanced = (node: ReturnType<typeof buildCalloutNode>) => {
     editor?.chain().focus().insertContent([node, { type: 'paragraph' }]).run()
   }
+  const normalizedLink = normalizeEditorLink(linkUrl)
+  const canApplyLink = canApplyEditorLink(normalizedLink, linkSelection, linkSelectionHasCode)
+  const applyLink = () => {
+    if (!editor || !normalizedLink || !linkSelection || !canApplyLink) return
+    editor.chain().focus().setTextSelection(linkSelection).setLink({ href: normalizedLink }).run()
+    setLinkUrl(normalizedLink)
+  }
+  const removeLink = () => {
+    if (!editor || !linkSelection) return
+    editor.chain().focus().setTextSelection(linkSelection).unsetLink().run()
+  }
 
   return (
     <section className="blog-editor">
@@ -145,12 +165,24 @@ export function BlogEditorClient(props: {
           <FormatButton label="H3" active={editor?.isActive('heading', { level: 3 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} />
           <FormatButton label="Bold" active={editor?.isActive('bold')} onClick={() => editor?.chain().focus().toggleBold().run()} />
           <FormatButton label="Italic" active={editor?.isActive('italic')} onClick={() => editor?.chain().focus().toggleItalic().run()} />
+          <FormatButton label="Strike" active={editor?.isActive('strike')} onClick={() => editor?.chain().focus().toggleStrike().run()} />
+          <FormatButton label="Inline code" active={editor?.isActive('code')} onClick={() => editor?.chain().focus().toggleCode().run()} />
           <FormatButton label="Quote" active={editor?.isActive('blockquote')} onClick={() => editor?.chain().focus().toggleBlockquote().run()} />
           <FormatButton label="• List" active={editor?.isActive('bulletList')} onClick={() => editor?.chain().focus().toggleBulletList().run()} />
           <FormatButton label="1. List" active={editor?.isActive('orderedList')} onClick={() => editor?.chain().focus().toggleOrderedList().run()} />
-          <FormatButton label="Code" active={editor?.isActive('codeBlock')} onClick={() => editor?.chain().focus().toggleCodeBlock().run()} />
+          <FormatButton label="☑ Tasks" active={editor?.isActive('taskList')} onClick={() => editor?.chain().focus().toggleTaskList().run()} />
+          <FormatButton label="Code block" active={editor?.isActive('codeBlock')} onClick={() => editor?.chain().focus().toggleCodeBlock().run()} />
+          <FormatButton label="Divider" onClick={() => editor?.chain().focus().setHorizontalRule().run()} />
           <FormatButton label="Undo" disabled={!editor?.can().undo()} onClick={() => editor?.chain().focus().undo().run()} />
           <FormatButton label="Redo" disabled={!editor?.can().redo()} onClick={() => editor?.chain().focus().redo().run()} />
+          <div className="editor-link-controls">
+            <input aria-label="Link URL" aria-invalid={Boolean(linkUrl && !normalizedLink)} value={linkUrl} onFocus={() => { setLinkSelection(editor ? editorTextSelectionRange(editor.state.selection) : null); setLinkSelectionHasCode(Boolean(editor?.isActive('code'))) }} onChange={(event) => setLinkUrl(event.target.value)} placeholder="https://… or /path" />
+            <button type="button" disabled={!canApplyLink} onClick={applyLink}>Apply link</button>
+            <button type="button" disabled={!linkSelection} onClick={removeLink}>Remove link</button>
+            {linkUrl && !normalizedLink ? <small role="status">Use http(s), mailto, /path or #anchor.</small> : null}
+            {normalizedLink && !linkSelection ? <small role="status">Select text before focusing the link field.</small> : null}
+            {normalizedLink && linkSelection && linkSelectionHasCode ? <small role="status">Inline code and Link cannot be combined.</small> : null}
+          </div>
         </div>
         <aside className="editor-advanced-palette" aria-label="Advanced blocks">
           <header><span>Advanced blocks</span><small>提示、折叠、引用与自动目录</small></header>

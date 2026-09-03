@@ -26,7 +26,7 @@ function nodeText(node: TiptapNode): string {
     return [advancedText, childText].filter(Boolean).join('\n')
   }
 
-  const separator = node.type === 'doc' || node.type === 'bulletList' || node.type === 'orderedList' ? '\n' : ''
+  const separator = node.type === 'doc' || node.type === 'bulletList' || node.type === 'orderedList' || node.type === 'taskList' ? '\n' : ''
   return (node.content ?? []).map(nodeText).filter(Boolean).join(separator)
 }
 
@@ -72,15 +72,21 @@ export function parseAndRenderDocument(input: unknown): RenderedDocument {
       'details',
       'summary',
       'nav',
+      'label',
+      'input',
     ],
     allowedAttributes: {
-      '*': ['id', 'data-block-id', 'data-continuum-image', 'data-continuum-gallery', 'data-continuum-audio', 'data-continuum-video', 'data-continuum-attachment', 'data-continuum-callout', 'data-continuum-collapse', 'data-continuum-reference', 'data-continuum-toc', 'data-media-id', 'class', 'aria-label'],
+      '*': ['id', 'data-block-id', 'data-continuum-image', 'data-continuum-gallery', 'data-continuum-audio', 'data-continuum-video', 'data-continuum-attachment', 'data-continuum-callout', 'data-continuum-collapse', 'data-continuum-reference', 'data-continuum-toc', 'data-media-id', 'data-type', 'data-checked', 'class', 'aria-label'],
       a: ['href', 'target', 'rel', 'download'],
       source: ['srcset', 'type'],
       img: ['src', 'alt', 'loading', 'decoding'],
       audio: ['src', 'controls', 'preload'],
       video: ['src', 'controls', 'preload'],
       details: ['open'],
+      input: ['type', 'checked', 'disabled', 'aria-label'],
+    },
+    transformTags: {
+      input: (_tagName, attribs) => ({ tagName: 'input', attribs: { ...attribs, type: 'checkbox', disabled: '' } }),
     },
     allowedSchemes: ['http', 'https', 'mailto'],
     allowProtocolRelative: false,

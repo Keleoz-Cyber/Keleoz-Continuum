@@ -1,5 +1,7 @@
 import { Extension, Node } from '@tiptap/core'
 import type { DOMOutputSpec } from '@tiptap/pm/model'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
 import StarterKit from '@tiptap/starter-kit'
 
 import {
@@ -24,6 +26,8 @@ const blockTypes = [
   'bulletList',
   'orderedList',
   'listItem',
+  'taskList',
+  'taskItem',
   'codeBlock',
 ]
 
@@ -203,6 +207,8 @@ export function getContinuumExtensions() {
         HTMLAttributes: { rel: 'noopener noreferrer' },
       },
     }),
+    TaskList.configure({ HTMLAttributes: { class: 'continuum-task-list' } }),
+    TaskItem.configure({ nested: true, HTMLAttributes: { class: 'continuum-task-item' } }),
     ContinuumBlockId,
     ContinuumImage,
     ContinuumGallery,
