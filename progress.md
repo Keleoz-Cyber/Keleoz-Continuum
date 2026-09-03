@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-09-03 — Phase 30 operations console (in progress)
+- Added failing-first contracts for Guest AI pause, daily AI aggregation, portable export safety, backup retention/manifest safety, and the authenticated export HTTP boundary.
+- Added the singleton `operation_settings` schema plus migration `0005_spotty_lady_mastermind.sql`; applied it to both local development and test databases.
+- GREEN checkpoint: 5 targeted files / 11 tests pass. Guest AI pause remains separate from Owner Persona AI, and exported JSON excludes fingerprints/auth/session/raw-AI secrets.
+- Added `/studio/operations`, the authenticated `/api/studio/export` download, shared Studio/Operations navigation, responsive source-dark controls, environment/provider status without secrets, and daily request/cost/source projections.
+- Added compressed PostgreSQL backup creation, 7/4/6 cadence retention, isolated temporary-database restore verification, monthly independent-export recording, and a read-only backup-status surface.
+- Current code checkpoint: TypeScript passes; 5 targeted files / 12 tests pass.
+- Real backup checkpoint: daily/weekly/monthly custom-format dumps created (43,893 bytes each); isolated restore passed with 16 public tables and left zero temporary restore databases.
+- First full `pnpm check` completed ESLint and TypeScript, then hit a Windows Vitest infrastructure failure (`spawn EBUSY`) after 26 files / 100 passing tests; no test assertion failed. The retry will use the thread pool rather than repeating the failed fork pool.
+- Full alternative verification passes with the same suite under the worker-thread pool: 66 files / 236 tests. Production build passes and exposes `/studio/operations` plus `/api/studio/export`.
+- Browser caught and TDD-fixed one backup-status copy bug; the focused contract now passes and the rebuilt page shows actual size/checksum.
+- Production browser QA passed login/navigation, pause/resume persistence, authenticated 481-byte JSON download, unauthenticated 401, real backup/restore status, and 390×844 responsive layout with no horizontal overflow or console messages.
+- QA cleanup removed the exact temporary Owner, its sessions, singleton runtime-settings row and downloaded export. Main database counts for the temporary Owner/settings/AI events are all zero; the real backup/restore manifest remains available for inspection.
+- Closed the weekly-readable-export gap with RED/GREEN coverage, four-export retention, backward-compatible manifest parsing, automatic weekly generation and Owner-visible status. Targeted 3 files / 11 tests and TypeScript pass.
+- Re-ran real backup/restore after the change: a 469-byte readable export was generated and the latest compressed dump restored successfully with 16 tables.
+- Rebuilt production and verified the weekly snapshot timestamp/retention on the actual Owner page, then removed the exact second temporary Owner and its session.
+- Final checkpoint: 66 files / 239 tests pass, ESLint passes, production build passes, diff check is clean, upstream hashes remain exact, QA rows/temp databases are zero, and port 3000 returns 200.
+
 ## Session: 2026-08-26
 
 ### Phase 1: Requirements & Discovery

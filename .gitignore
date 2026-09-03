@@ -12,6 +12,8 @@ output/playwright/
 .playwright-cli/
 var/media/*
 !var/media/.gitkeep
+var/backups/*
+!var/backups/.gitkeep
 *.log
 *.tsbuildinfo
 .DS_Store

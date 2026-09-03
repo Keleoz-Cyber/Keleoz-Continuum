@@ -1,7 +1,7 @@
 import { and, eq, gte, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-import { aiUsageEvents } from '@/db/schema'
+import { aiUsageEvents, operationSettings } from '@/db/schema'
 import type * as schema from '@/db/schema'
 import {
   calculateAiReservationMicroUsd,
@@ -43,6 +43,14 @@ export function createAiQuotaRepository(database: NodePgDatabase<typeof schema>)
     async reserve(input: ReserveInput) {
       return database.transaction(async (transaction) => {
         await transaction.execute(sql`select pg_advisory_xact_lock(hashtext('continuum-ai-quota'))`)
+        if (input.feature !== 'persona') {
+          const [settings] = await transaction
+            .select({ guestAiEnabled: operationSettings.guestAiEnabled })
+            .from(operationSettings)
+            .where(eq(operationSettings.id, 'primary'))
+            .limit(1)
+          if (settings?.guestAiEnabled === false) throw new AiQuotaError('disabled')
+        }
         const dayStart = utcDayStart(input.now)
 
         const [sourceUsage] = await transaction

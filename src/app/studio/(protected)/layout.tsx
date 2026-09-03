@@ -11,7 +11,10 @@ export default async function ProtectedStudioLayout({
   return (
     <div className="studio-shell">
       <header className="studio-header">
-        <Link href="/studio">Keleoz Continuum</Link>
+        <div className="studio-header-links">
+          <Link href="/studio">Keleoz Continuum</Link>
+          <nav aria-label="Studio navigation"><Link href="/studio">Studio</Link><Link href="/studio/operations">Operations</Link></nav>
+        </div>
         <div className="studio-owner">
           <span>{owner.username}</span>
           <form action={logoutAction}>
