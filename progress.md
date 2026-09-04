@@ -1,5 +1,25 @@
 # Progress Log
 
+## 2026-09-04 — Phase 31 local production deployment pack (in progress)
+- Restored the clean `main` context at `07c6092`; the branch is 42 commits ahead of remote and port 3000 remains the current local inspection service.
+- Locked this batch to one local deployment stack and one final commit: no new branch, no remote CI, and no server purchase required.
+- Added failing-first health and PostgreSQL-maintenance contracts, then implemented `/api/health`, Docker/direct maintenance invocation adapters and credential redaction. Focused GREEN checkpoint: 2 files / 9 tests.
+- Added standalone multi-stage Node 24 images, an isolated production Compose stack, Nginx reverse proxy, environment template and daily/weekly systemd timer units. Compose config validation passes for all five services without exposing a database port.
+- First image builds exposed two external registry failures; after pinning Node 24 Alpine 3.22/PostgreSQL 17 and adding a lockfile-protected build registry override, the tooling and app images built successfully.
+- Runner-image inspection: non-root UID 1001, 75 upstream files, 4 public files, zero backups and zero env files.
+- First isolated stack start passed database health and migrations but app readiness failed on blank optional provider variables. Added a RED/GREEN env contract and normalized disabled optional values; focused env suite passes 10/10.
+- Rebuilt and restarted the isolated stack: db healthy, migration exited 0, app healthy, Nginx running on 127.0.0.1:18080, and proxied database-aware health returns 200.
+- Embedded the pnpm Corepack payload in builder/tooling images; fresh migrations run without npm access.
+- Production maintenance profile passed real direct-mode backup and restore verification: 43,893-byte dump, 16 restored tables.
+- Validated and mounted a one-worker Nginx main config, removed duplicate immutable caching and reduced the proxy from 33 to 2 PIDs while keeping root/static responses at 200.
+- Production browser/source recovery: added tested compatibility for the upstream-missing optional JPG/script, used a relative no-cache redirect, and reached zero console errors in a fresh context.
+- 3 Mbps dominant-asset transfer passed in 16.32s; all 15 public/health routes return 200 through the isolated production proxy.
+- Added an HTTPS/domain config template while excluding real certs and env files from Git/image context.
+- TDD-fixed forwarded host/port handling after a real Server Action 500. Final Nginx login and Operations backup-status flow pass with zero console errors; temporary Owner removed.
+- Added and verified streaming for ordinary/media responses, eliminating Nginx temporary-file buffering of the 6.3 MB Home background.
+- Final checkpoint: 69 test files / 253 tests, ESLint, TypeScript and production build pass; 100 mixed requests returned 200; final image and local standalone contain no backup/env/media leakage.
+- Smoke cleanup removed the exact Owner/session/temp restore database while leaving the healthy isolated production stack on 127.0.0.1:18080 for user inspection.
+
 ## 2026-09-03 — Phase 30 operations console (in progress)
 - Added failing-first contracts for Guest AI pause, daily AI aggregation, portable export safety, backup retention/manifest safety, and the authenticated export HTTP boundary.
 - Added the singleton `operation_settings` schema plus migration `0005_spotty_lady_mastermind.sql`; applied it to both local development and test databases.

@@ -1,0 +1,9 @@
+[Unit]
+Description=Keleoz Continuum daily database backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/keleoz-continuum
+ExecStart=/usr/bin/docker compose --env-file deploy/production.env -f compose.prod.yml --profile maintenance run --rm --no-deps backup

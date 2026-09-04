@@ -9,12 +9,11 @@ import { Pool } from 'pg'
 import * as schema from '../src/db/schema/index'
 import { planBackupRetention, planPortableExportRetention, type BackupKind, type BackupRecord, type PortableExportRecord } from '../src/modules/operations/contracts'
 import { readBackupManifest, resolveBackupFile, writeBackupManifest } from '../src/modules/operations/backup-store'
+import { parsePostgresToolConfig, pgDumpInvocation } from '../src/modules/operations/postgres-tools'
 import { createOperationsRepository } from '../src/modules/operations/repository'
 
 const root = process.env.CONTINUUM_BACKUP_ROOT?.trim() || join(process.cwd(), 'var', 'backups')
-const container = process.env.CONTINUUM_BACKUP_CONTAINER?.trim() || 'continuum-db'
-const database = process.env.CONTINUUM_BACKUP_DB?.trim() || 'continuum'
-const databaseUser = process.env.CONTINUUM_BACKUP_USER?.trim() || 'continuum'
+const postgres = parsePostgresToolConfig(process.env)
 const now = new Date()
 const stamp = now.toISOString().replaceAll(/[-:.]/g, '').replace('000Z', 'Z')
 const allCadences = process.argv.includes('--all-cadences')
@@ -26,14 +25,8 @@ function selectedKinds(): BackupKind[] {
   return kinds
 }
 
-const dump = execFileSync('docker', [
-  'exec', container, 'pg_dump',
-  '--username', databaseUser,
-  '--dbname', database,
-  '--format=custom',
-  '--no-owner',
-  '--no-privileges',
-], { encoding: 'buffer', maxBuffer: 512 * 1024 * 1024 })
+const dumpCommand = pgDumpInvocation(postgres)
+const dump = execFileSync(dumpCommand.command, dumpCommand.args, { encoding: 'buffer', maxBuffer: 512 * 1024 * 1024 })
 
 const created: BackupRecord[] = []
 const kinds = selectedKinds()

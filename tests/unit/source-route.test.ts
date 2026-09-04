@@ -45,4 +45,28 @@ describe('Desktop source route', () => {
 
     expect(response.status).toBe(404)
   })
+
+  it('redirects the source optional JPG probe to the exact configured PNG', async () => {
+    const response = await requestSource(
+      'http://continuum.test/reference/internal-beyond/bg-canvas.jpg',
+      ['bg-canvas.jpg'],
+    )
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get('location')).toBe('/reference/internal-beyond/bg-canvas.png')
+    expect(response.headers.get('cache-control')).toBe('no-cache')
+    expect(response.headers.get('x-content-adapter')).toBe('Continuum optional source asset compatibility')
+  })
+
+  it('serves a no-op script only for the absent optional upstream signs file', async () => {
+    const response = await requestSource(
+      'http://continuum.test/reference/internal-beyond/signs.js',
+      ['signs.js'],
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe('text/javascript; charset=utf-8')
+    expect(response.headers.get('x-content-adapter')).toBe('Continuum optional source asset compatibility')
+    expect(await response.text()).toBe('')
+  })
 })

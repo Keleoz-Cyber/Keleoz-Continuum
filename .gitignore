@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+deploy/production.env
+deploy/smoke.env
+deploy/certs/
 node_modules/
 .next/
 dist/

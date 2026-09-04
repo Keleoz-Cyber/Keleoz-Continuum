@@ -1,0 +1,9 @@
+[Unit]
+Description=Verify the latest Keleoz Continuum backup in an isolated database
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/keleoz-continuum
+ExecStart=/usr/bin/docker compose --env-file deploy/production.env -f compose.prod.yml --profile maintenance run --rm --no-deps backup pnpm backup:verify

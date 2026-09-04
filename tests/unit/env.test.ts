@@ -63,6 +63,27 @@ describe('parseServerEnv', () => {
     })
   })
 
+  it('normalizes blank optional provider fields from Compose env files to null', () => {
+    expect(parseServerEnv({
+      ...validEnv,
+      MEDIA_LIGHTCOS_BUCKET: '',
+      MEDIA_LIGHTCOS_SECRET_ID: '   ',
+      MEDIA_LIGHTCOS_SECRET_KEY: '',
+      MEDIA_PUBLIC_ORIGIN: '',
+      AI_BASE_URL: '',
+      AI_API_KEY: '  ',
+      AI_MODEL: '',
+    })).toMatchObject({
+      MEDIA_LIGHTCOS_BUCKET: null,
+      MEDIA_LIGHTCOS_SECRET_ID: null,
+      MEDIA_LIGHTCOS_SECRET_KEY: null,
+      MEDIA_PUBLIC_ORIGIN: null,
+      AI_BASE_URL: null,
+      AI_API_KEY: null,
+      AI_MODEL: null,
+    })
+  })
+
   it('requires a complete server-held provider configuration when AI is enabled', () => {
     expect(() => parseServerEnv({ ...validEnv, AI_GATEWAY_ENABLED: 'true' })).toThrow('AI_API_KEY')
 

@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 30 complete: Owner operations console, AI controls, export, and backup status
+Phase 31 complete: local production deployment pack and 4C4G smoke validation
 
 ## Phases
 
@@ -267,6 +267,16 @@ Phase 30 complete: Owner operations console, AI controls, export, and backup sta
 - [x] Run one combined local checkpoint, clean fixtures, update reuse evidence, and commit once on `main`
 - **Status:** complete
 
+### Phase 31: Local Production Deployment Pack and 4C4G Smoke Validation
+- [x] Audit the standalone output, runtime file access, database migration, media, backup and public-origin boundaries
+- [x] Add RED/GREEN health/readiness contracts and make backup/restore tooling work both from the Windows host and inside a maintenance container
+- [x] Add a minimal multi-stage Node 24 standalone Dockerfile, production Compose stack and Nginx reverse-proxy configuration
+- [x] Keep PostgreSQL private, run migrations as a one-shot gate, persist media/cache/backups, and constrain services for a 4-core/4GB host
+- [x] Add a Linux timer/command boundary for daily backup creation without introducing another long-running application service
+- [x] Build and start the isolated production stack locally, verify migration/health/public routes/backup/restore and inspect container resources
+- [x] Run one combined code checkpoint, preserve immutable upstream hashes, clean smoke fixtures and commit once on `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -291,6 +301,16 @@ Phase 30 complete: Owner operations console, AI controls, export, and backup sta
 ## Errors Encountered
 | Error | Attempt | Resolution |
 |-------|---------|------------|
+| First production image build used generic `node:24-alpine` (Alpine 3.24); repository index TLS failed and `postgresql-client` could not resolve | 1 | Do not repeat the generic image/package combination; pin the official Node 24 Alpine 3.22 tag and its explicit PostgreSQL 17 client package |
+| Direct `docker manifest inspect node:24-alpine3.22` hit Docker Hub EOF while checking the alternative tag | 1 | Verify the tag through Docker Hub's official tag catalog, then let the changed build provide the executable proof |
+| Second production image build installed PostgreSQL 17 successfully but npm registry downloads for Next/SWC failed after pnpm retries | 2 | Keep the official registry as default, add a build-only registry argument protected by lockfile integrity, and use the domestic mirror only for this local smoke build |
+| First isolated Compose startup left app unhealthy after migration | 1 | App logs proved Compose passed disabled optional LightCOS/AI fields as empty strings while the schema accepted only undefined; add a failing env regression test and normalize blank optional values to null at the shared boundary |
+| Standalone `nginx -t` container could not resolve upstream host `app` | 1 | The syntax probe lacked the Compose network/DNS alias; rerun the same config on the active `continuum-smoke_default` network, then verify through the recreated service |
+| Browser smoke reported missing `signs.js` and `bg-canvas.jpg` from the source Home iframe | 1 | Verify local immutable source and upstream GitHub tree before adapting; both omit those files while HTML references them, so cover the thinnest route-level compatibility behavior with RED/GREEN tests |
+| Web open of the GitHub recursive-tree API was rejected as an unsafe URL | 1 | Query the same public GitHub API read-only with PowerShell and inspect only matching paths |
+| Playwright CLI `run-code` rejected three CDP-throttling expression forms (`const`, top-level `await`, async IIFE) | 1–3 | Stop retrying the unsupported expression path; use a bounded `curl --limit-rate 375k` transfer check for the dominant 6.3 MB asset and keep Playwright for real visual/console QA |
+| First Owner login through Nginx returned Next Server Action 500 | 1 | App logs proved `$host` removed port 18080 from `X-Forwarded-Host`; add a failing deployment-config test and forward `$http_host` in HTTP and HTTPS templates |
+| Final PowerShell health probe assigned to `$home`, which is the read-only `$HOME` automatic variable on Windows | 1 | Do not reuse common system variables; rerun with the task-specific `$homeResponse` name and amend the same Phase 31 commit |
 | Initial Phase 30 audit used the obsolete `src/app/(owner)` path | 1 | Logged the miss and switched to the actual `src/app/studio/(protected)` route tree before implementation |
 | Initial Phase 30 audit assumed a root `docker-compose.yml` | 1 | Locate the repository's actual Compose file before writing backup commands; do not hard-code an unverified service name |
 | First operations aggregation assertion expected 550 micro-USD | 1 | Recalculated the fixture: Tea costs 400 and completed Persona costs 200, so the correct all-feature total is 600; corrected the test expectation |

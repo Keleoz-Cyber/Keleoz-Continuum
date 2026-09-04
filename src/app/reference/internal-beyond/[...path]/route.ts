@@ -19,6 +19,25 @@ const types: Record<string, string> = {
 
 export async function GET(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const { path: segments } = await params
+  if (segments.length === 1 && segments[0] === 'bg-canvas.jpg') {
+    return new Response(null, {
+      status: 307,
+      headers: {
+        location: '/reference/internal-beyond/bg-canvas.png',
+        'cache-control': 'no-cache',
+        'x-content-adapter': 'Continuum optional source asset compatibility',
+      },
+    })
+  }
+  if (segments.length === 1 && segments[0] === 'signs.js') {
+    return new Response('', {
+      headers: {
+        'content-type': 'text/javascript; charset=utf-8',
+        'cache-control': 'public, max-age=31536000, immutable',
+        'x-content-adapter': 'Continuum optional source asset compatibility',
+      },
+    })
+  }
   const requested = path.resolve(sourceRoot, ...segments)
   const relative = path.relative(sourceRoot, requested)
   if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) return new Response('Not found', { status: 404 })

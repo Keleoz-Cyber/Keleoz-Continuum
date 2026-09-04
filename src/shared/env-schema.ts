@@ -67,9 +67,20 @@ function isHttpUrl(value: string): boolean {
 
 const databaseUrl = z.string().refine(isPostgresUrl, 'DATABASE_URL must use postgres:// or postgresql://')
 const siteOrigin = z.string().refine(isHttpOrigin, 'SITE_ORIGIN must be an HTTP(S) origin without a path')
-const optionalString = z.string().trim().min(1).optional().transform((value) => value ?? null)
-const optionalHttpUrl = z.string().trim().refine(isHttpUrl, 'AI_BASE_URL must use HTTP(S)').optional().transform((value) => value ?? null)
-const optionalHttpOrigin = z.string().trim().refine(isHttpOrigin, 'MEDIA_PUBLIC_ORIGIN must be an HTTP(S) origin without a path').optional().transform((value) => value ?? null)
+const blankToUndefined = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? undefined : value
+const optionalString = z.preprocess(
+  blankToUndefined,
+  z.string().trim().min(1).optional(),
+).transform((value) => value ?? null)
+const optionalHttpUrl = z.preprocess(
+  blankToUndefined,
+  z.string().trim().refine(isHttpUrl, 'AI_BASE_URL must use HTTP(S)').optional(),
+).transform((value) => value ?? null)
+const optionalHttpOrigin = z.preprocess(
+  blankToUndefined,
+  z.string().trim().refine(isHttpOrigin, 'MEDIA_PUBLIC_ORIGIN must be an HTTP(S) origin without a path').optional(),
+).transform((value) => value ?? null)
 const integer = (minimum: number, maximum: number, fallback: number) =>
   z.coerce.number().int().min(minimum).max(maximum).default(fallback)
 
