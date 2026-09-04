@@ -14,13 +14,18 @@ import {
   momentComments,
   momentPersonas,
   operationSettings,
+  ownerAutoMemories,
+  ownerChatCompanions,
+  ownerChatMessages,
+  ownerChatThreads,
+  ownerMemories,
   personaReviews,
 } from '@/db/schema'
 import type * as schema from '@/db/schema'
 import { calculateMeasuredAiCostMicroUsd } from '@/modules/operations/contracts'
 
 const PRIMARY_SETTINGS_ID = 'primary'
-const FEATURES = ['tea', 'story', 'tarot', 'persona'] as const
+const FEATURES = ['tea', 'story', 'tarot', 'persona', 'chat'] as const
 
 function utcDayStart(now: Date) {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
@@ -78,7 +83,7 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
       let reservedCostMicroUsd = 0
       let measuredCostMicroUsd = 0
       for (const row of rows) {
-        if (row.feature !== 'persona') guestSources.add(row.sourceHash)
+        if (row.feature !== 'persona' && row.feature !== 'chat') guestSources.add(row.sourceHash)
         if (row.status === 'completed') completedRequests += 1
         else if (row.status === 'failed') failedRequests += 1
         else pendingRequests += 1
@@ -127,6 +132,11 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
         comments,
         authorships,
         reviews,
+        companions,
+        threads,
+        messages,
+        memories,
+        autoMemories,
         settings,
       ] = await Promise.all([
         database.select().from(contentEntries).orderBy(asc(contentEntries.createdAt), asc(contentEntries.id)),
@@ -151,6 +161,11 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
         database.select().from(momentComments).orderBy(asc(momentComments.createdAt), asc(momentComments.id)),
         database.select().from(momentAuthorships).orderBy(asc(momentAuthorships.createdAt), asc(momentAuthorships.entryId)),
         database.select().from(personaReviews).orderBy(asc(personaReviews.createdAt), asc(personaReviews.id)),
+        database.select().from(ownerChatCompanions).orderBy(asc(ownerChatCompanions.createdAt), asc(ownerChatCompanions.id)),
+        database.select().from(ownerChatThreads).orderBy(asc(ownerChatThreads.createdAt), asc(ownerChatThreads.id)),
+        database.select().from(ownerChatMessages).orderBy(asc(ownerChatMessages.createdAt), asc(ownerChatMessages.id)),
+        database.select().from(ownerMemories).orderBy(asc(ownerMemories.createdAt), asc(ownerMemories.id)),
+        database.select().from(ownerAutoMemories).orderBy(asc(ownerAutoMemories.createdAt), asc(ownerAutoMemories.id)),
         getSettings(),
       ])
 
@@ -164,6 +179,7 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
         letters: letterRows,
         media: { objects, variants },
         moments: { personas, comments, authorships, reviews },
+        knowledge: { companions, threads, messages, memories, autoMemories },
       }
     },
   }

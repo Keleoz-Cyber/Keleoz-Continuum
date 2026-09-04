@@ -42,7 +42,7 @@ const PUBLIC_MOBILE_PATCH = `
   applyBranding();
   var lockObserver = new MutationObserver(applyBranding); lockObserver.observe(document.documentElement,{childList:true,subtree:true}); window.setTimeout(function(){ lockObserver.disconnect(); applyBranding(); },4000);
   var style = document.getElementById('continuum-public-mobile-style');
-  if (!style) { style = document.createElement('style'); style.id = 'continuum-public-mobile-style'; style.textContent = '#dw-name{font-family:var(--disp);letter-spacing:.06em}'; document.head.appendChild(style); }
+  if (!style) { style = document.createElement('style'); style.id = 'continuum-public-mobile-style'; style.textContent = '#dw-name{font-family:var(--disp);letter-spacing:.06em}#drawer .dw-item[data-page="chat"],#drawer .dw-item[data-page="icode"],#drawer .dw-item[data-page="api"],#drawer .dw-item[data-page="diy"],#sec-profile-cal .sb-app[data-page="chat"],#sec-profile-cal .sb-app[data-page="icode"],#sec-profile-cal .sb-app[data-page="data"],#sec-profile-cal .sb-app[data-page="visual"],#sec-profile-cal .sb-app[data-page="diy"],#sb-calapp,#sb-setapp,#sb-frdapp{display:none!important}'; document.head.appendChild(style); }
   function ensureProjectTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="projects"]')) return; var blog = document.querySelector('#sec-profile-cal .sb-app[data-page="blog"]'); if (!blog || !blog.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="projects" data-dk="app:projects"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 6.5h6l1.8 2H20v10.5H4z"/><path d="M7 13h10M7 16h7"/></svg></span><span class="sb-t">项目</span></button>'; blog.parentNode.insertBefore(template.content.firstElementChild, blog.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:projects']='项目'; }
   ensureProjectTile();
   function ensureTeaTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="tea"]')) return; var music = document.getElementById('sb-musicapp'); if (!music || !music.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="tea" data-dk="app:tea"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 5.5c0 1-.8 1.4-.8 2.3M11 4.5c0 1-.8 1.4-.8 2.3"/></svg></span><span class="sb-t">茶歇</span></button>'; music.parentNode.insertBefore(template.content.firstElementChild, music.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:tea']='茶歇'; }
@@ -53,7 +53,7 @@ const PUBLIC_MOBILE_PATCH = `
   ensureTarotTile();
   function ensureCharacterTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="character"]')) return; var tarot = document.querySelector('#sec-profile-cal .sb-app[data-page="tarot"]'); if (!tarot || !tarot.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="character" data-dk="app:character"><span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M6 20a6 6 0 0 1 12 0M8.5 13.5l-2.5-2M15.5 13.5l2.5-2"/></svg></span><span class="sb-t">角色</span></button>'; tarot.parentNode.insertBefore(template.content.firstElementChild, tarot.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:character']='角色'; }
   ensureCharacterTile();
-  var timelineTile=document.getElementById('sb-calapp'); if(timelineTile){var timelineText=timelineTile.querySelector('.sb-t');if(timelineText)timelineText.textContent='时间线';if(window.DK_NAMES)window.DK_NAMES['app:calendar']='时间线';}
+  var timelineTile=document.querySelector('#sec-profile-cal .sb-app[data-page="memory"]'); if(timelineTile){var timelineText=timelineTile.querySelector('.sb-t');if(timelineText)timelineText.textContent='时间线';if(window.DK_NAMES)window.DK_NAMES['app:memory']='时间线';}
   var searchTile=document.querySelector('#sec-profile-cal .sb-app[data-page="guide"]'); if(searchTile){var searchText=searchTile.querySelector('.sb-t');if(searchText)searchText.textContent='搜索';if(window.DK_NAMES)window.DK_NAMES['app:guide']='搜索';}
   var timelineDrawer=document.querySelector('#drawer .dw-item[data-page="memory"]'); if(timelineDrawer){var timelineEn=timelineDrawer.querySelector('.dw-en'),timelineCn=timelineDrawer.querySelector('.dw-cn');if(timelineEn)timelineEn.textContent='Timeline';if(timelineCn)timelineCn.textContent='时间线';}
   var searchDrawer=document.querySelector('#drawer .dw-item[data-page="guide"]'); if(searchDrawer){var searchEn=searchDrawer.querySelector('.dw-en'),searchCn=searchDrawer.querySelector('.dw-cn');if(searchEn)searchEn.textContent='Search';if(searchCn)searchCn.textContent='搜索';}
@@ -69,8 +69,9 @@ const PUBLIC_MOBILE_PATCH = `
   external('#sec-profile-cal .sb-app[data-page="story"]','/story');
   external('#sec-profile-cal .sb-app[data-page="tarot"]','/tarot');
   external('#sec-profile-cal .sb-app[data-page="character"]','/character');
-  external('#drawer .dw-item[data-page="memory"],#sb-calapp','/timeline');
+  external('#drawer .dw-item[data-page="memory"],#sec-profile-cal .sb-app[data-page="memory"]','/timeline');
   external('#drawer .dw-item[data-page="guide"],#sec-profile-cal .sb-app[data-page="guide"]','/search');
+  try { if (typeof DOCKS !== 'undefined' && Array.isArray(DOCKS.profile)) { DOCKS.profile = DOCKS.profile.filter(function(item){ return item.k !== 'api' && item.k !== 'set'; }); if (typeof renderDock === 'function') renderDock(); } } catch (e) {}
   if (new URLSearchParams(window.parent.location.search).get('openMusic') === '1') window.setTimeout(function(){ document.getElementById('sb-musicapp')?.click(); },900);
 `
 

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Media Library renders pre-generated local/LightCOS variants directly. */
 import Link from 'next/link'
+import { connection } from 'next/server'
 
 import { createContentDraftAction } from '@/modules/content/actions'
 import { CONTENT_TYPE_CONFIG, studioContentPath } from '@/modules/content/routing'
@@ -42,6 +43,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
   type?: string
   status?: string
 }> }) {
+  await connection()
   const params = await searchParams
   const query = params.q?.trim().slice(0, 160) ?? ''
   const type = params.type && params.type in CONTENT_TYPE_CONFIG

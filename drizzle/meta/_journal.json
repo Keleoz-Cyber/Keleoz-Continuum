@@ -43,6 +43,13 @@
       "when": 1788435251663,
       "tag": "0005_spotty_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788541942739,
+      "tag": "0006_chubby_franklin_storm",
+      "breakpoints": true
     }
   ]
 }

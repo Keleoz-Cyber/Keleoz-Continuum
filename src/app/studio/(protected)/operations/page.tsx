@@ -4,7 +4,7 @@ import { describeLatestBackupStatus } from '@/modules/operations/contracts'
 import { getBackupOverview, operationsRepository } from '@/modules/operations/runtime'
 import { serverEnv } from '@/shared/env'
 
-const featureNames = { tea: 'Tea', story: 'Story', tarot: 'Tarot', persona: 'Persona' } as const
+const featureNames = { tea: 'Tea', story: 'Story', tarot: 'Tarot', persona: 'Persona', chat: 'Owner Chat' } as const
 const aiNotices: Record<string, string> = {
   paused: 'Guest AI 已暂停；公开内容、Room 非 AI 功能和 Owner Persona 审核不受影响。',
   resumed: 'Guest AI 运行时开关已恢复；环境总开关和费用配额仍会继续生效。',

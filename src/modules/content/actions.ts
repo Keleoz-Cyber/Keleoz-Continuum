@@ -32,7 +32,7 @@ function invalidateContentProjection(type: 'blog' | 'project' | 'moment' | 'page
   revalidatePath(path)
   revalidatePath(type === 'page' ? '/about' : path.slice(0, path.lastIndexOf('/')) || path)
   revalidatePath('/')
-  revalidatePath('/studio')
+  revalidatePath('/studio', 'layout')
 }
 
 export async function createBlogDraftAction(formData: FormData): Promise<never> {

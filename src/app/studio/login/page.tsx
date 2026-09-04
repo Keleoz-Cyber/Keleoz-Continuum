@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function StudioLoginPage() {
   return (
-    <main className="studio-login-page">
+    <main className="studio-login-page source-studio-login">
       <section className="studio-login-panel" aria-labelledby="studio-login-title">
         <p className="eyebrow">Private Workspace</p>
         <h1 id="studio-login-title">Owner Studio</h1>

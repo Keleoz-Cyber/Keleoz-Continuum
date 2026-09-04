@@ -4,7 +4,7 @@
 为 Keleoz Continuum 制定可执行、可验证的第一子项目实施计划，覆盖工程基础、Owner 登录和内容发布闭环，同时固化上游复用证据。
 
 ## Current Phase
-Phase 31 complete: local production deployment pack and 4C4G smoke validation
+Phase 32 complete: source-first Studio, Owner Chat, Memory and Auto Memory recovery
 
 ## Phases
 
@@ -277,6 +277,20 @@ Phase 31 complete: local production deployment pack and 4C4G smoke validation
 - [x] Run one combined code checkpoint, preserve immutable upstream hashes, clean smoke fixtures and commit once on `main`
 - **Status:** complete
 
+### Phase 32: Source-first Studio, Owner Chat, Memory and Auto Memory Recovery
+- [x] Audit the immutable Desktop/Mobile Blog writer, Memory, Chat and every current Studio surface against the implemented routes and screenshots
+- [x] Classify each difference as public/server-required adaptation, explicitly deferred product scope, or avoidable visual/interaction drift
+- [x] Recover the original Blog writing shell and interaction hierarchy around the existing PostgreSQL/Tiptap/versioning engine instead of keeping the custom dark editor UI
+- [x] Replace the generic Studio dashboard shell with source-derived navigation, glass panels, typography, spacing and module entry patterns while preserving Owner-only operations
+- [x] Bring Owner AI Chat, Memory and Auto Memory forward as private Owner capabilities; keep Public general AI deferred
+- [x] Add PostgreSQL companions, threads/messages, memories and per-companion Auto Memory without storing provider secrets in the browser
+- [x] Reuse source Memory scoring/injection, visibility, constellation, statistics, filters, CRUD and Auto Memory archive behavior through server adapters
+- [x] Reuse Desktop/Mobile Chat presentation for Owner threads, companion selection and messages; integrate Memory/Auto Memory context with bounded server AI
+- [x] Hide Calendar, ICode, API, DIY and deep Friends entry points until they receive equivalent adapters
+- [x] Add RED/GREEN contracts for source-shell structure and keep all existing auth, autosave, publishing, media, history and lifecycle behavior
+- [x] Verify Desktop/Mobile source parity in a real browser, run one combined checkpoint and commit once on `main`
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest complete vertical slice that proves Owner creation and Guest reading?
 2. Which behaviors and contracts from Desktop and Mobile should be reused in this first slice?
@@ -311,6 +325,7 @@ Phase 31 complete: local production deployment pack and 4C4G smoke validation
 | Playwright CLI `run-code` rejected three CDP-throttling expression forms (`const`, top-level `await`, async IIFE) | 1–3 | Stop retrying the unsupported expression path; use a bounded `curl --limit-rate 375k` transfer check for the dominant 6.3 MB asset and keep Playwright for real visual/console QA |
 | First Owner login through Nginx returned Next Server Action 500 | 1 | App logs proved `$host` removed port 18080 from `X-Forwarded-Host`; add a failing deployment-config test and forward `$http_host` in HTTP and HTTPS templates |
 | Final PowerShell health probe assigned to `$home`, which is the read-only `$HOME` automatic variable on Windows | 1 | Do not reuse common system variables; rerun with the task-specific `$homeResponse` name and amend the same Phase 31 commit |
+| First Phase 32 typecheck could not index the full-mode Auto Memory priority map with the complete priority union | 1 | Keep the source ordering but type the rank for always/normal/low explicitly before continuing UI work |
 | Initial Phase 30 audit used the obsolete `src/app/(owner)` path | 1 | Logged the miss and switched to the actual `src/app/studio/(protected)` route tree before implementation |
 | Initial Phase 30 audit assumed a root `docker-compose.yml` | 1 | Locate the repository's actual Compose file before writing backup commands; do not hard-code an unverified service name |
 | First operations aggregation assertion expected 550 micro-USD | 1 | Recalculated the fixture: Tea costs 400 and completed Persona costs 200, so the correct all-feature total is 600; corrected the test expectation |

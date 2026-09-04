@@ -1,6 +1,7 @@
 export * from './auth'
 export * from './ai'
 export * from './content'
+export * from './knowledge'
 export * from './media'
 export * from './operations'
 export * from './persona'

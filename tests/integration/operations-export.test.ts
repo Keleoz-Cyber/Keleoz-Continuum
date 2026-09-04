@@ -10,11 +10,21 @@ const operations = createOperationsRepository(drizzle(pool, { schema }))
 
 beforeEach(async () => {
   await pool.query('delete from ai_usage_events')
+  await pool.query('delete from owner_chat_messages')
+  await pool.query('delete from owner_chat_threads')
+  await pool.query('delete from owner_memories')
+  await pool.query('delete from owner_auto_memories')
+  await pool.query('delete from owner_chat_companions')
   await pool.query('delete from letters')
   await pool.query('delete from operation_settings')
 })
 
 afterAll(async () => {
+  await pool.query('delete from owner_chat_messages')
+  await pool.query('delete from owner_chat_threads')
+  await pool.query('delete from owner_memories')
+  await pool.query('delete from owner_auto_memories')
+  await pool.query('delete from owner_chat_companions')
   await pool.query('delete from operation_settings')
   await pool.query('delete from ai_usage_events')
   await pool.query('delete from letters')
@@ -32,6 +42,27 @@ describe('portable Owner export', () => {
         (feature, source_hash, session_id, status, provider, model, input_characters, reserved_cost_micro_usd)
       values ('tea', 'private-ai-fingerprint', '11111111-1111-4111-8111-111111111111', 'reserved', 'provider', 'secret-model-name', 12, 45)
     `)
+    const companion = await pool.query<{ id: string }>(`
+      insert into owner_chat_companions (name, description, system_prompt)
+      values ('Archivist', 'Keeps context', 'Private companion prompt') returning id
+    `)
+    const companionId = companion.rows[0]!.id
+    const thread = await pool.query<{ id: string }>(`
+      insert into owner_chat_threads (companion_id, title)
+      values ($1, 'Portable conversation') returning id
+    `, [companionId])
+    await pool.query(`
+      insert into owner_chat_messages (thread_id, role, content)
+      values ($1, 'user', 'Remember this exchange')
+    `, [thread.rows[0]!.id])
+    await pool.query(`
+      insert into owner_memories (title, content, one_line, domain)
+      values ('A durable memory', 'Memory body', 'One line', '日常')
+    `)
+    await pool.query(`
+      insert into owner_auto_memories (companion_id, category, priority, content, updated_by)
+      values ($1, 'personal_context', 'normal', 'Prefers source fidelity', 'Archivist')
+    `, [companionId])
     await operations.setGuestAiEnabled(false, new Date('2026-09-03T00:00:00.000Z'))
 
     const exported = await operations.createPortableExport({
@@ -49,6 +80,13 @@ describe('portable Owner export', () => {
     expect(exported.letters).toEqual(expect.arrayContaining([
       expect.objectContaining({ postalCode: '260903', senderName: 'Visitor', content: 'A portable letter' }),
     ]))
+    expect(exported.knowledge).toMatchObject({
+      companions: [expect.objectContaining({ name: 'Archivist', systemPrompt: 'Private companion prompt' })],
+      threads: [expect.objectContaining({ title: 'Portable conversation' })],
+      messages: [expect.objectContaining({ role: 'user', content: 'Remember this exchange' })],
+      memories: [expect.objectContaining({ title: 'A durable memory', content: 'Memory body' })],
+      autoMemories: [expect.objectContaining({ content: 'Prefers source fidelity' })],
+    })
     expect(serialized).not.toContain('private-letter-fingerprint')
     expect(serialized).not.toContain('private-ai-fingerprint')
     expect(serialized).not.toContain('secret-model-name')

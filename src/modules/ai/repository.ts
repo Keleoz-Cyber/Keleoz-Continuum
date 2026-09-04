@@ -24,7 +24,7 @@ export class AiQuotaError extends Error {
 }
 
 type ReserveInput = {
-  feature: 'tea' | 'story' | 'tarot' | 'persona'
+  feature: 'tea' | 'story' | 'tarot' | 'persona' | 'chat'
   sourceHash: string
   sessionId: string
   provider: string
@@ -43,7 +43,7 @@ export function createAiQuotaRepository(database: NodePgDatabase<typeof schema>)
     async reserve(input: ReserveInput) {
       return database.transaction(async (transaction) => {
         await transaction.execute(sql`select pg_advisory_xact_lock(hashtext('continuum-ai-quota'))`)
-        if (input.feature !== 'persona') {
+        if (input.feature !== 'persona' && input.feature !== 'chat') {
           const [settings] = await transaction
             .select({ guestAiEnabled: operationSettings.guestAiEnabled })
             .from(operationSettings)

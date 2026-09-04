@@ -11,6 +11,7 @@ import './source-story-mobile.css'
 import './source-tarot-mobile.css'
 import './source-character-mobile.css'
 import './source-continuity.css'
+import './source-studio.css'
 
 export const metadata: Metadata = {
   title: {
