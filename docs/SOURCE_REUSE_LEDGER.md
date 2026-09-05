@@ -8,7 +8,7 @@ This ledger is a required implementation gate. Update source pointers and eviden
 | Desktop navigation/windows | Navbar, page overlay, Music/Chat/Calendar/Circle/ICode floating panels | Not authoritative | Adapter reuse | Preserve window language, drag/resize where appropriate |
 | Mobile shell | Not authoritative | Desk, Space, Circle, drawer, dock, widget, fullscreen-app sections in `index.html` | Adapter reuse | Preserve mobile-native interaction; share domain services |
 | Blog reading | Blog list, reader, search, annotations, diary/editor behavior | Mobile journal cards, reader, side sheet | Adapter reuse | Preserve reading details; replace local persistence and editor core |
-| Online editor | Existing Blog editor is reference only | Existing Blog editor is reference only | Reimplementation required | Tiptap block editor, autosave, versions, preview, stable URL |
+| Online editor | Original Rift editor DOM/CSS/JS | Original Mobile Blog editor DOM/CSS/JS | Exact runtime + server adapter | Plain/Markdown authoring across Blog/Project/Moment/Page; preserve rich documents in their block path until adapted; server publication/versions |
 | Projects | ICode `projects` is not the public Project entity | ICode `projects` is not the public Project entity | New domain module | Reuse visual language and relations, not the old storage meaning |
 | Moments | Circle / InternetBeyond feed functions and UI | Mobile Circle feed and Persona cards | Adapter reuse | Preserve post/comment/repost/visibility behavior; add server moderation |
 | Letters | Envelope, postal code, wax seal, open/close and AI letter flows | Beyond post-office mobile flows | Adapter reuse | Preserve ritual; add Guest submission, approval, public Owner reply |
@@ -34,6 +34,8 @@ This ledger is a required implementation gate. Update source pointers and eviden
 | Data/backup | IndexedDB export/import contracts | Shared backup schema | Reimplementation required | PostgreSQL backups, readable JSON export, LightCOS media inventory |
 
 ## Per-feature evidence template
+
+2026-09-05 corrective authoring boundary: `source-native/bootstrap.ts` keeps Desktop `openEditor/savePost` (8383–8430) and Mobile `blogOpenEditor/m-ed-save` (12572–12613). A publication-only adapter saves current textarea values before navigating, including Mobile; it does not change the source writer layout or Markdown toolbar. `source-native/posts.ts` recognizes losslessly adaptable plain documents, and `source-posts` rejects attempts to flatten rich content or overwrite a stale revision. All four public content types use this original writer when compatible. Publication settings now expose the existing immutable version history and save submitted exposure/summary before publishing. Source files remain immutable. Image generation and ICode are excluded by the latest user decision; media upload is not image generation. Remaining: rich-block/media authoring adaptation and source-writer autosave are not claimed complete.
 
 Before implementation, append a short entry:
 

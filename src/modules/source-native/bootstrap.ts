@@ -18,7 +18,9 @@ async function continuumNativeBoot(){
     }
     return nativeFetch(url,options);
   };
-  const records=await request('/api/studio/source-records'), posts=await request('/api/studio/source-posts');
+  const requestedType=new URLSearchParams(location.search).get('type');
+  const contentType=['blog','project','moment','page'].includes(requestedType)?requestedType:'blog';
+  const [records,posts]=await Promise.all([request('/api/studio/source-records'),request('/api/studio/source-posts?type='+contentType)]);
   const stores={};
   for(const r of records){if(r.store[0]!=='_')(stores[r.store]||(stores[r.store]=new Map())).set(r.key,r.value)}
   stores.posts=new Map(posts.map(p=>[p.id,p]));
@@ -32,7 +34,7 @@ async function continuumNativeBoot(){
     if(s==='posts'){
       const previous=stores.posts.get(d.id);
       if(previous&&previous.richDocument)throw new Error('这篇文章含结构化内容，请从发布设置打开块编辑器。');
-      const saved=await request('/api/studio/source-posts',{...d,revision:previous&&previous.revision});
+      const saved=await request('/api/studio/source-posts',{...d,type:previous?.type||contentType,revision:previous&&previous.revision});
       stores.posts.delete(d.id);Object.assign(d,saved);stores.posts.set(saved.id,clone(d));
       window.__continuumSavedPost=saved.id;return;
     }
@@ -47,6 +49,30 @@ async function continuumNativeBoot(){
   };
   dbPutAll=async(s,rows)=>{for(const r of rows)await dbPut(s,r);return rows.length};
   dbClear=async()=>{throw new Error('请从管理页面执行数据清理。')};
+  // Only the server publication transition is added; the source Save/Back flow stays intact.
+  const installPublicationButton=({container,prefix,getId,setId,isPrivate,clean,className})=>{
+    if(!container)return;
+    const button=document.createElement('button');button.type='button';button.className=className;button.textContent='发布设置';button.style.marginTop='8px';
+    button.onclick=async()=>{
+      if(button.disabled)return;
+      button.disabled=true;
+      const fields=['title','subtitle','content','cat','format'].map(key=>document.getElementById(prefix+key));
+      const signature=()=>JSON.stringify(fields.map(el=>el.value));
+      try{
+        let captured;
+        do{
+          captured=signature();
+          const [title,subtitle,content,category,format]=JSON.parse(captured);
+          if(!content.trim()){toast('内容不能为空');return}
+          const id=getId(),previous=id?stores.posts.get(id):null;
+          const post={id:id||'post_'+Date.now(),title:title.trim(),subtitle:subtitle.trim(),content,category,format,locked:previous?!!previous.locked:isPrivate(),created:previous?.created||Date.now()};
+          await dbPut('posts',post);setId(post.id);
+        }while(captured!==signature());
+        clean();window.parent.location.href='/studio/content/'+getId()+'/settings';
+      }catch(error){toast(error.message||'保存失败，请重试。')}finally{button.disabled=false}
+    };
+    container.appendChild(button);
+  };
   _ibGuardCheck=()=>{};_ibGuardInit=()=>{};
   const configureApiForm=()=>{
     document.getElementById('api-provider').value='openai';
@@ -71,9 +97,8 @@ async function continuumNativeBoot(){
   document.getElementById('bg-internal-img').classList.add('active');
   const options=new URLSearchParams(location.search), page=options.get('page')||'blog';
   navTo(page);
-  const settings=()=>{const id=window.__continuumSavedPost||editingPostId;if(id)window.parent.location.href='/studio/content/'+id+'/settings';else toast('请先保存日志。')};
   const bar=document.querySelector('#blog-edit-view .rift-sidebar');
-  if(bar){const button=document.createElement('button');button.className='btn';button.textContent='发布设置';button.style.marginTop='8px';button.onclick=settings;bar.appendChild(button)}
+  installPublicationButton({container:bar,prefix:'ed-',getId:()=>editingPostId,setId:id=>{editingPostId=id},isPrivate:()=>diaryMode,clean:()=>{editorDirty=false},className:'btn'});
   const openOriginalEditor=openEditor;
   openEditor=async(id)=>{
     const p=id?stores.posts.get(id):null;
@@ -126,6 +151,7 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
     document.getElementById('ib-splash')?.remove();
     const query=new URLSearchParams(location.search),target=query.get('page')||'blog';
     navTo(target);
+    installPublicationButton({container:document.querySelector('#sub-blog-editor .ed-page'),prefix:'m-ed-',getId:()=>bEditingId,setId:id=>{bEditingId=id},isPrivate:()=>bDiaryMode,clean:()=>{},className:'btn primary'});
     if(query.get('edit'))await blogOpenEditor(query.get('edit')==='new'?undefined:query.get('edit'));
     const originalNav=navTo;
     navTo=function(page){if(page==='profile'){window.parent.location.href='/';return}if(['chat','memory','blog','api'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};

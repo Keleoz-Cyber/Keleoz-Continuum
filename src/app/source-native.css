@@ -17,5 +17,7 @@
 .source-studio .studio-delete-form{background:#eaf2fa;box-shadow:0 8px 30px rgba(40,70,110,.18)}
 .source-studio .studio-delete-form input{background:rgba(255,255,255,.6);color:#16294f}
 .source-studio .studio-persona-generate select{background:#eaf2fa;color:#16294f}
+.publication-settings .source-memory-form>label{font-size:13px;line-height:1.7}.publication-settings .source-memory-form p{font-size:12px;line-height:1.7;color:#4a6896}
+.publication-settings .editor-version-history{background:var(--glass-bg);border-color:var(--glass-border);color:#16294f}.publication-settings .version-actions a,.publication-settings .version-actions button{background:rgba(230,242,254,.7);border-color:rgba(165,198,235,.6);color:#274673;font-size:12px}.publication-settings .version-current{color:#386953}.publication-settings .editor-version-history li small{white-space:normal;overflow-wrap:anywhere}
 .studio-main:not([data-studio-section="manage"])[data-studio-section]>.studio-overview,.studio-main:not([data-studio-section="manage"])[data-studio-section]>.studio-content-catalog{display:none}
 @media(max-width:900px){.native-studio-tools{position:relative;top:76px;right:auto;padding:0 16px;flex-wrap:wrap;gap:8px}.native-studio-tools+.native-owner-frame{height:calc(100svh - 28px)}.source-public-owner{margin-left:auto;margin-right:8px}.native-studio-tabs{gap:12px}}

@@ -52,7 +52,7 @@ export async function createContentDraftAction(formData: FormData): Promise<neve
     subtitle: null,
     categoryLabel: null,
     summary: '',
-    exposure: 'full',
+    exposure: 'hidden',
     document: {
       type: 'doc',
       content: [

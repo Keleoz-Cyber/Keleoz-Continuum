@@ -35,12 +35,38 @@ test('original writer, Memory and Chat share private server data with Mobile', a
     const post = posts.find((item: { title: string }) => item.title === title)
     expect(post.format).toBe('md')
     expect(Number.isFinite(post.created)).toBe(true)
-    await page.goto(`/studio/content/${post.id}/settings`)
+    await page.goto(`/studio/content/${post.id}`)
+    await writer.locator('#ed-content').fill('**Native content**\n\nSaved before settings.')
+    await writer.getByRole('button', { name: '发布设置', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`/studio/content/${post.id}/settings`))
+    expect((await read('/api/studio/source-posts')).find((item: { id: string }) => item.id === post.id).content).toContain('Saved before settings.')
+    await expect(page.getByRole('heading', { name: 'Publication history' })).toBeVisible()
     await page.getByLabel('公开范围').selectOption('full')
     await page.getByRole('button', { name: '保存发布设置' }).click()
     await expect(page).toHaveURL(/saved=1/)
     await page.goto(`/studio/content/${post.id}/preview`)
     await expect(page.locator('strong').filter({ hasText: 'Native content' }).first()).toBeVisible()
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto(`/studio/content/${post.id}`)
+    const mobileWriter = page.frameLocator('iframe')
+    await mobileWriter.locator('#m-ed-content').fill('**Native content**\n\nMobile saved before settings.')
+    await mobileWriter.getByRole('button', { name: '发布设置', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`/studio/content/${post.id}/settings`))
+    expect((await read('/api/studio/source-posts')).find((item: { id: string }) => item.id === post.id).content).toContain('Mobile saved before settings.')
+    await page.setViewportSize({ width: 1440, height: 1000 })
+
+    for (const type of ['project', 'moment', 'page']) {
+      await page.goto(`/studio/write?type=${type}`)
+      await writer.locator('#ed-title').fill(`${title} ${type}`)
+      await writer.locator('#ed-content').fill(`Original ${type} writer.`)
+      await writer.getByRole('button', { name: '发布设置', exact: true }).click()
+      await expect(page).toHaveURL(/\/studio\/content\/.+\/settings$/)
+      const typed = (await read(`/api/studio/source-posts?type=${type}`)).find((item: { title: string }) => item.title === `${title} ${type}`)
+      expect(typed.type).toBe(type)
+      await page.getByRole('link', { name: '← 返回写作' }).click()
+      await expect(writer.locator('#ed-content')).toHaveValue(`Original ${type} writer.`)
+    }
 
     await page.goto('/memory')
     const memory = page.frameLocator('iframe')
@@ -82,11 +108,11 @@ test('original writer, Memory and Chat share private server data with Mobile', a
 
     await page.setViewportSize({ width: 1440, height: 1000 })
     await page.goto(`/studio?q=${encodeURIComponent(title)}`)
-    const row = page.locator('.studio-content-row').filter({ hasText: title })
+    const row = page.locator('.studio-content-row').filter({ has: page.locator(`input[name="entryId"][value="${post.id}"]`) })
     await row.getByRole('button', { name: 'Archive', exact: true }).click()
     await expect(page).toHaveURL(/content=archived/)
     await page.goto(`/studio?q=${encodeURIComponent(title)}&status=archived`)
-    const archived = page.locator('.studio-content-row').filter({ hasText: title })
+    const archived = page.locator('.studio-content-row').filter({ has: page.locator(`input[name="entryId"][value="${post.id}"]`) })
     await archived.getByText('Permanent delete', { exact: true }).click()
     await archived.getByLabel('Owner password').fill(password!)
     await archived.getByRole('button', { name: 'Delete permanently' }).click()
@@ -96,6 +122,21 @@ test('original writer, Memory and Chat share private server data with Mobile', a
     for (const record of records) {
       if (record.key === companion || record.value.friendId === companion || record.value.title === title)
         await mutate({ op: 'delete', store: record.store, key: record.key })
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 })
+    for (const type of ['blog', 'project', 'moment', 'page']) {
+      const posts = await read(`/api/studio/source-posts?type=${type}`)
+      for (const post of posts.filter((item: { title: string }) => item.title === title || item.title.startsWith(`${title} `))) {
+        await page.goto(`/studio?q=${encodeURIComponent(post.title)}`)
+        await page.locator('.studio-content-row').filter({ has: page.locator(`input[name="entryId"][value="${post.id}"]`) }).getByRole('button', { name: 'Archive', exact: true }).click()
+        await expect(page).toHaveURL(/content=archived/)
+        await page.goto(`/studio?q=${encodeURIComponent(post.title)}&status=archived`)
+        const archived = page.locator('.studio-content-row').filter({ has: page.locator(`input[name="entryId"][value="${post.id}"]`) })
+        await archived.getByText('Permanent delete', { exact: true }).click()
+        await archived.getByLabel('Owner password').fill(password!)
+        await archived.getByRole('button', { name: 'Delete permanently' }).click()
+        await expect(page).toHaveURL(/content=deleted/)
+      }
     }
   }
 })
