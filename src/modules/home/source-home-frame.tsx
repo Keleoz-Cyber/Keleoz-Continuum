@@ -30,8 +30,8 @@ const PUBLIC_HOME_PATCH = `
   route('blog','/blog','Blog'); route('guide','/projects','Projects'); route('chat','/chat','Chat'); route('memory','/memory','Memory'); route('about','/about','About'); route('game','/room','Room'); route('api','/search','Search'); route('letters','/letters','Letters');
   var navList=document.querySelector('#navbar .nav-links'); if(navList){['blog','guide','chat','memory','about','game','api','letters'].forEach(function(page){var link=navList.querySelector('a[data-page="'+page+'"]');if(link&&link.parentElement)navList.appendChild(link.parentElement);});}
   if(navList){
-    [['moments','/moments','Moments'],['timeline','/timeline','Timeline']].forEach(function(item){var li=document.createElement('li'),a=document.createElement('a');a.dataset.page='continuum-'+item[0];a.href=item[1];a.textContent=item[2];a.onclick=function(e){e.preventDefault();window.parent.location.href=item[1]};li.appendChild(a);navList.appendChild(li)});
-    ['blog','guide','continuum-moments','continuum-timeline','about','game','api','letters','chat','memory'].forEach(function(page){var a=navList.querySelector('a[data-page="'+page+'"]');if(a)navList.appendChild(a.parentElement)});
+    [['moments','/moments','Moments'],['timeline','/timeline','Timeline'],['calendar','/calendar','Calendar']].forEach(function(item){var li=document.createElement('li'),a=document.createElement('a');a.dataset.page='continuum-'+item[0];a.href=item[1];a.textContent=item[2];a.onclick=function(e){e.preventDefault();window.parent.location.href=item[1]};li.appendChild(a);navList.appendChild(li)});
+    ['blog','guide','continuum-moments','continuum-timeline','about','game','api','letters','chat','memory','continuum-calendar'].forEach(function(page){var a=navList.querySelector('a[data-page="'+page+'"]');if(a)navList.appendChild(a.parentElement)});
     var studio=document.createElement('a');studio.href='/studio';studio.textContent='Studio';studio.style.cssText='margin-left:auto;color:#233e6c;font-size:.65rem';studio.onclick=function(e){e.preventDefault();window.parent.location.href='/studio'};document.getElementById('navbar').appendChild(studio);
   }
   var warning = document.getElementById('ib-guard-overlay'); if (warning) warning.remove();
@@ -61,6 +61,7 @@ const PUBLIC_MOBILE_PATCH = `
   function ensureCharacterTile() { if (document.querySelector('#sec-profile-cal .sb-app[data-page="character"]')) return; var tarot = document.querySelector('#sec-profile-cal .sb-app[data-page="tarot"]'); if (!tarot || !tarot.parentNode) return; var template = document.createElement('template'); template.innerHTML = '<button class="sb-app" data-page="character" data-dk="app:character"><span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M6 20a6 6 0 0 1 12 0M8.5 13.5l-2.5-2M15.5 13.5l2.5-2"/></svg></span><span class="sb-t">角色</span></button>'; tarot.parentNode.insertBefore(template.content.firstElementChild, tarot.nextSibling); if (window.DK_NAMES) window.DK_NAMES['app:character']='角色'; }
   ensureCharacterTile();
   var timelineTile=document.getElementById('sb-calapp'); if(timelineTile){var timelineText=timelineTile.querySelector('.sb-t');if(timelineText)timelineText.textContent='时间线';if(window.DK_NAMES)window.DK_NAMES['app:calendar']='时间线';}
+  if(timelineTile&&!document.getElementById('continuum-calendar-app')){var calendarTile=timelineTile.cloneNode(true);calendarTile.id='continuum-calendar-app';calendarTile.dataset.dk='app:owner-calendar';calendarTile.querySelector('.sb-t').textContent='日历';timelineTile.parentNode.insertBefore(calendarTile,timelineTile.nextSibling);if(window.DK_NAMES)window.DK_NAMES['app:owner-calendar']='日历';}
   var searchTile=document.querySelector('#sec-profile-cal .sb-app[data-page="guide"]'); if(searchTile){var searchText=searchTile.querySelector('.sb-t');if(searchText)searchText.textContent='搜索';if(window.DK_NAMES)window.DK_NAMES['app:guide']='搜索';}
   var timelineDrawer=document.querySelector('#drawer .dw-item[data-page="memory"]'); if(timelineDrawer){var timelineEn=timelineDrawer.querySelector('.dw-en'),timelineCn=timelineDrawer.querySelector('.dw-cn');if(timelineEn)timelineEn.textContent='Memory';if(timelineCn)timelineCn.textContent='记忆';}
   var searchDrawer=document.querySelector('#drawer .dw-item[data-page="guide"]'); if(searchDrawer){var searchEn=searchDrawer.querySelector('.dw-en'),searchCn=searchDrawer.querySelector('.dw-cn');if(searchEn)searchEn.textContent='Search';if(searchCn)searchCn.textContent='搜索';}
@@ -79,6 +80,7 @@ const PUBLIC_MOBILE_PATCH = `
   external('#drawer .dw-item[data-page="memory"],#sec-profile-cal .sb-app[data-page="memory"]','/memory');
   external('#drawer .dw-item[data-page="chat"],#sec-profile-cal .sb-app[data-page="chat"]','/chat');
   external('#sb-calapp','/timeline');
+  external('#continuum-calendar-app','/calendar');
   if(style)style.textContent+='#drawer .dw-item[data-page="chat"],#sec-profile-cal .sb-app[data-page="chat"],#sb-calapp{display:flex!important}';
   external('#drawer .dw-item[data-page="guide"],#sec-profile-cal .sb-app[data-page="guide"]','/search');
   try { if (typeof DOCKS !== 'undefined' && Array.isArray(DOCKS.profile)) { DOCKS.profile = DOCKS.profile.filter(function(item){ return item.k !== 'api' && item.k !== 'set'; }); if (typeof renderDock === 'function') renderDock(); } } catch (e) {}

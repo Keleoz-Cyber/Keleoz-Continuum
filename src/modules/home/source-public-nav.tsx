@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-type PublicSection = 'blog' | 'projects' | 'moments' | 'timeline' | 'about' | 'letters' | 'room' | 'search' | 'chat' | 'memory' | 'studio'
+type PublicSection = 'blog' | 'projects' | 'moments' | 'timeline' | 'about' | 'letters' | 'room' | 'search' | 'chat' | 'memory' | 'calendar' | 'studio'
 
 const publicLinks: Array<{ key: PublicSection; href: string; label: string }> = [
   { key: 'blog', href: '/blog', label: 'Blog' },
@@ -13,6 +13,7 @@ const publicLinks: Array<{ key: PublicSection; href: string; label: string }> = 
   { key: 'letters', href: '/letters', label: 'Letters' },
   { key: 'chat', href: '/chat', label: 'Chat' },
   { key: 'memory', href: '/memory', label: 'Memory' },
+  { key: 'calendar', href: '/calendar', label: 'Calendar' },
 ]
 
 function PublicMark() {

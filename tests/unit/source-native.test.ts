@@ -7,6 +7,21 @@ import { getOriginalTarotFaces } from '@/modules/source-native/tarot-faces'
 import { getOriginalLetterArt } from '@/modules/source-native/letter-art'
 
 describe('original UI persistence boundary', () => {
+  it('accepts the three native Calendar stores without creating public records', () => {
+    for (const store of ['calEvents', 'calNotes', 'calLedger']) {
+      expect(sourceWrite.safeParse({ op: 'put', store, key: 'calendar_fixture', value: { id: 'calendar_fixture', vis: 'self' } }).success).toBe(true)
+    }
+  })
+  it('opens the original Calendar windows and refreshes calendar context before Chat', () => {
+    expect(nativeBootstrap).toContain("await window.IBCAL.open()")
+    expect(nativeMobileBootstrap).toContain('await window.openCalApp()')
+    expect(nativeBootstrap).toContain('await window.IBCAL.invalidate()')
+    expect(nativeMobileBootstrap).toContain('buildCalBlock=async')
+    expect(nativeMobileBootstrap).toContain('await loadCS(true)')
+    expect(nativeMobileBootstrap).toContain('if(calendarSettingsReadFailed)_cs.allowNotes=false')
+    expect(nativeMobileBootstrap).toContain('return _cs')
+    expect(nativeBootstrap).toContain("calendarSettingsReadFailed?'':calendarTail(cfg)")
+  })
   it('extracts the original engraved letter artwork with only branding replacement', () => {
     const art = getOriginalLetterArt()
     expect(art.stamp).toContain('stampPerf')

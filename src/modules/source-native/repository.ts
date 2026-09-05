@@ -29,7 +29,8 @@ export async function seedSourceKnowledge() {
   })
 }
 
-export async function readSourceRecords() {
+export async function readSourceRecords(store?: string) {
+  if (store) return db.select().from(ownerSourceRecords).where(eq(ownerSourceRecords.store, store))
   await seedSourceKnowledge()
   await db.insert(ownerSourceRecords).values({ store: 'about', key: 'main', value: { id: 'main', name: 'Keleoz' } }).onConflictDoNothing()
   return db.select().from(ownerSourceRecords)

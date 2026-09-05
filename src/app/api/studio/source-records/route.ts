@@ -1,12 +1,14 @@
 import { getCurrentOwner } from '@/modules/auth/dal'
-import { sourceWrite } from '@/modules/source-native/contracts'
+import { sourceStore, sourceWrite } from '@/modules/source-native/contracts'
 import { deleteSourceRecord, readSourceRecords, writeSourceRecord } from '@/modules/source-native/repository'
 import { hasAllowedOrigin } from '@/shared/same-origin'
 import { serverEnv } from '@/shared/env'
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!await getCurrentOwner()) return Response.json({ error: 'unauthorized' }, { status: 401 })
-  return Response.json(await readSourceRecords(), { headers: { 'Cache-Control': 'private, no-store' } })
+  const store = new URL(request.url).searchParams.get('store')
+  if (store && !sourceStore.safeParse(store).success) return Response.json({ error: 'invalid_store' }, { status: 400 })
+  return Response.json(await readSourceRecords(store || undefined), { headers: { 'Cache-Control': 'private, no-store' } })
 }
 
 export async function POST(request: Request) {

@@ -1,8 +1,12 @@
 // This runs inside the original classic script, before its original init().
 // Presentation, editor, Chat, Memory, modal and floating-window functions remain upstream-owned.
 import { writerRuntime } from './writer-runtime'
+import { preserveCalendarFields } from './calendar'
+import { createSourceStoreQueue } from './store-queue'
 export const nativeBootstrap = String.raw`
 ${writerRuntime}
+const preserveCalendarFields=${preserveCalendarFields.toString()};
+const createSourceStoreQueue=${createSourceStoreQueue.toString()};
 async function continuumNativeBoot(){
   const nativeFetch=window.fetch.bind(window);
   const request=async(url,body)=>{
@@ -27,12 +31,16 @@ async function continuumNativeBoot(){
   for(const r of records){if(r.store[0]!=='_')(stores[r.store]||(stores[r.store]=new Map())).set(r.key,r.value)}
   stores.posts=new Map(posts.map(p=>[p.id,p]));
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const storeQueue=createSourceStoreQueue();
+  let calendarSettingsReadFailed=false;
+  const freshStore=(s)=>storeQueue.run(s,async()=>{const rows=await request('/api/studio/source-records?store='+s);stores[s]=new Map(rows.map(r=>[r.key,r.value]))});
   const config=v=>v?{...v,provider:'openai',apiKey:'server-managed',endpoint:'https://continuum.invalid/v1/chat/completions',model:v.model||'Site AI',tools:false,webSearch:false}:v;
   openDB=async()=>({});
-  dbGetAll=async(s)=>[...(stores[s]||new Map()).values()].map(v=>clone(s==='apiConfigs'?config(v):v));
-  dbGet=async(s,k)=>{const v=(stores[s]||new Map()).get(String(k));return clone(s==='apiConfigs'?config(v):v)};
+  dbGetAll=async(s)=>{if(['calEvents','calNotes','calLedger'].includes(s))await freshStore(s);return [...(stores[s]||new Map()).values()].map(v=>clone(s==='apiConfigs'?config(v):v))};
+  dbGet=async(s,k)=>{if(s==='calLedger')await freshStore(s);if(s==='apiSettings'&&k==='calendarSettings'){try{await freshStore(s);calendarSettingsReadFailed=false}catch(error){calendarSettingsReadFailed=true;throw error}}const v=(stores[s]||new Map()).get(String(k));return clone(s==='apiConfigs'?config(v):v)};
   dbGetByIndex=async(s,idx,val)=>(await dbGetAll(s)).filter(v=>v[idx==='byFriend'?'friendId':idx==='byProject'?'projectId':idx]===val);
   dbPut=async(s,d)=>{
+    if(s==='calEvents'&&new URLSearchParams(location.search).get('mobile')==='1')Object.assign(d,preserveCalendarFields(stores[s]?.get(d.id),d));
     if(s==='posts'){
       const previous=stores.posts.get(d.id);
       if(previous&&previous.richDocument)throw new Error('这篇文章含结构化内容，请从发布设置打开块编辑器。');
@@ -41,13 +49,12 @@ async function continuumNativeBoot(){
       window.__continuumSavedPost=saved.id;return;
     }
     const key=String(s==='categories'?d.name:d.id);
-    const saved=await request('/api/studio/source-records',{op:'put',store:s,key,value:d});
-    (stores[s]||(stores[s]=new Map())).set(key,saved);
+    const value=clone(d);
+    await storeQueue.run(s,async()=>{const saved=await request('/api/studio/source-records',{op:'put',store:s,key,value});(stores[s]||(stores[s]=new Map())).set(key,saved)});
   };
   dbDelete=async(s,k)=>{
     if(s==='posts'){window.parent.location.href='/studio?section=manage';return}
-    await request('/api/studio/source-records',{op:'delete',store:s,key:String(k)});
-    if(stores[s])stores[s].delete(String(k));
+    await storeQueue.run(s,async()=>{await request('/api/studio/source-records',{op:'delete',store:s,key:String(k)});if(stores[s])stores[s].delete(String(k))});
   };
   dbPutAll=async(s,rows)=>{for(const r of rows)await dbPut(s,r);return rows.length};
   dbClear=async()=>{throw new Error('请从管理页面执行数据清理。')};
@@ -76,8 +83,18 @@ async function continuumNativeBoot(){
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('app').classList.add('visible');
   document.getElementById('bg-internal-img').classList.add('active');
+  document.querySelector('#home-title .t-internal').textContent='Keleoz';
+  document.querySelector('#home-title .t-beyond').textContent='Continuum';
+  document.getElementById('home-credit').textContent='A Personal Digital Space.';
   const options=new URLSearchParams(location.search), page=options.get('page')||'blog';
-  navTo(page);
+  navTo(page==='calendar'?'home':page);
+  if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
+  const calendarSystem=window.IBCAL.buildSys;
+  window.IBCAL.buildSys=async function(cfg){await window.IBCAL.invalidate();return calendarSettingsReadFailed?'':calendarSystem(cfg)};
+  const calendarTail=window.IBCAL.buildTail,calendarReply=window.IBCAL.processReply;
+  window.IBCAL.buildTail=async cfg=>calendarSettingsReadFailed?'':calendarTail(cfg);
+  window.IBCAL.processReply=async(text,cfg)=>calendarSettingsReadFailed?{clean:text,results:[]}:calendarReply(text,cfg);
+  if(page==='calendar')await window.IBCAL.open();
   const bar=document.querySelector('#blog-edit-view .rift-sidebar');
   writer=installSourceWriter({container:bar,prefix:'ed-',getId:()=>editingPostId,setId:id=>{editingPostId=id},isPrivate:()=>diaryMode,clean:()=>{editorDirty=false},className:'btn',request,dbPut,stores});
   const originalSave=savePost,originalClose=closeEditor;
@@ -136,7 +153,12 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
     await _lkBoot();document.title='Keleoz Continuum';
     document.getElementById('ib-splash')?.remove();
     const query=new URLSearchParams(location.search),target=query.get('page')==='about'?'profile':query.get('page')||'blog';
-    navTo(target);
+    navTo(target==='calendar'?'profile':target);
+    const calendarSettings=loadCS;
+    loadCS=async function(force){await calendarSettings(force);if(calendarSettingsReadFailed)_cs.allowNotes=false;return _cs};
+    const calendarBlock=buildCalBlock;
+    buildCalBlock=async function(cfg){await loadCS(true);await loadCal();return calendarBlock(cfg)};
+    if(target==='calendar')await window.openCalApp();
     writer=installSourceWriter({container:document.querySelector('#sub-blog-editor .ed-page'),prefix:'m-ed-',getId:()=>bEditingId,setId:id=>{bEditingId=id},isPrivate:()=>bDiaryMode,clean:()=>{},className:'btn primary',request,dbPut,stores});
     let replaySave=false;
     const saveButton=document.getElementById('m-ed-save');

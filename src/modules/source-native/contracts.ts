@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const sourceStore = z.enum(['apiConfigs', 'apiSettings', 'chatMessages', 'chatThreads', 'chatSummaries', 'groups', 'memories', 'autoMemory', 'categories', 'about', 'uploadedFiles', 'blogAnnotations', 'blogComments'])
+export const sourceStore = z.enum(['apiConfigs', 'apiSettings', 'chatMessages', 'chatThreads', 'chatSummaries', 'groups', 'memories', 'autoMemory', 'categories', 'about', 'uploadedFiles', 'blogAnnotations', 'blogComments', 'calEvents', 'calNotes', 'calLedger'])
 export const sourceWrite = z.object({
   op: z.enum(['put', 'delete']), store: sourceStore,
   key: z.string().min(1).max(180),
