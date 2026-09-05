@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import { sourcePostSchema, sourceDocumentText, isSourceEditable } from '@/modules/source-native/posts'
+import { parseAndRenderDocument } from '@/modules/content/document'
 
 describe('source writer content adaptation', () => {
+  it('retains explicit source media attachments in both native editing and published HTML', () => {
+    const image = { type:'continuumImage', attrs:{mediaId:'a2345678-1234-4234-8234-123456789012',alt:'Photo',caption:'Caption',size:'content'} }
+    const doc = { type:'doc' as const,attrs:{sourceText:'**Body**',sourceFormat:'md',sourceMedia:true},content:[{type:'paragraph',content:[{type:'text',text:'**Body**'}]},image] }
+    expect(isSourceEditable(doc)).toBe(true)
+    expect(sourceDocumentText(doc)).toBe('**Body**')
+    const rendered = parseAndRenderDocument(doc)
+    expect(rendered.html).toContain('<strong>Body</strong>')
+    expect(rendered.html).toContain('/media/a2345678-1234-4234-8234-123456789012/large.webp')
+    expect(rendered.plainText).toContain('Caption')
+    expect(sourcePostSchema.safeParse({id:'new',title:'A',content:'B',attachments:[{...image,attrs:{mediaId:'bad'}}]}).success).toBe(false)
+  })
   it('supports all public content types without treating ICode projects as content', () => {
     for (const type of ['blog', 'project', 'moment', 'page']) {
       expect(sourcePostSchema.parse({ id: 'post_new', title: 'Title', content: 'Body', type }).type).toBe(type)

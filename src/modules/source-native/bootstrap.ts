@@ -1,6 +1,8 @@
 // This runs inside the original classic script, before its original init().
 // Presentation, editor, Chat, Memory, modal and floating-window functions remain upstream-owned.
+import { writerRuntime } from './writer-runtime'
 export const nativeBootstrap = String.raw`
+${writerRuntime}
 async function continuumNativeBoot(){
   const nativeFetch=window.fetch.bind(window);
   const request=async(url,body)=>{
@@ -49,30 +51,9 @@ async function continuumNativeBoot(){
   };
   dbPutAll=async(s,rows)=>{for(const r of rows)await dbPut(s,r);return rows.length};
   dbClear=async()=>{throw new Error('请从管理页面执行数据清理。')};
-  // Only the server publication transition is added; the source Save/Back flow stays intact.
-  const installPublicationButton=({container,prefix,getId,setId,isPrivate,clean,className})=>{
-    if(!container)return;
-    const button=document.createElement('button');button.type='button';button.className=className;button.textContent='发布设置';button.style.marginTop='8px';
-    button.onclick=async()=>{
-      if(button.disabled)return;
-      button.disabled=true;
-      const fields=['title','subtitle','content','cat','format'].map(key=>document.getElementById(prefix+key));
-      const signature=()=>JSON.stringify(fields.map(el=>el.value));
-      try{
-        let captured;
-        do{
-          captured=signature();
-          const [title,subtitle,content,category,format]=JSON.parse(captured);
-          if(!content.trim()){toast('内容不能为空');return}
-          const id=getId(),previous=id?stores.posts.get(id):null;
-          const post={id:id||'post_'+Date.now(),title:title.trim(),subtitle:subtitle.trim(),content,category,format,locked:previous?!!previous.locked:isPrivate(),created:previous?.created||Date.now()};
-          await dbPut('posts',post);setId(post.id);
-        }while(captured!==signature());
-        clean();window.parent.location.href='/studio/content/'+getId()+'/settings';
-      }catch(error){toast(error.message||'保存失败，请重试。')}finally{button.disabled=false}
-    };
-    container.appendChild(button);
-  };
+  let writer;
+  const appendMedia=(id,container)=>{document.getElementById('continuum-post-media')?.remove();const html=stores.posts.get(id)?.attachmentHtml;if(html&&container){const media=document.createElement('div');media.id='continuum-post-media';media.innerHTML=html;container.appendChild(media)}};
+  const mediaStyle=document.createElement('style');mediaStyle.textContent='#continuum-post-media img,#continuum-post-media video{max-width:100%;height:auto}#continuum-post-media audio{width:100%}#continuum-post-media figure{margin:20px 0}#continuum-post-media figcaption{font-size:.8rem}#continuum-post-media .continuum-gallery{display:flex;gap:8px}#continuum-post-media .continuum-gallery>figure{flex:1;min-width:0}';document.head.appendChild(mediaStyle);
   _ibGuardCheck=()=>{};_ibGuardInit=()=>{};
   const configureApiForm=()=>{
     document.getElementById('api-provider').value='openai';
@@ -98,20 +79,23 @@ async function continuumNativeBoot(){
   const options=new URLSearchParams(location.search), page=options.get('page')||'blog';
   navTo(page);
   const bar=document.querySelector('#blog-edit-view .rift-sidebar');
-  installPublicationButton({container:bar,prefix:'ed-',getId:()=>editingPostId,setId:id=>{editingPostId=id},isPrivate:()=>diaryMode,clean:()=>{editorDirty=false},className:'btn'});
+  writer=installSourceWriter({container:bar,prefix:'ed-',getId:()=>editingPostId,setId:id=>{editingPostId=id},isPrivate:()=>diaryMode,clean:()=>{editorDirty=false},className:'btn',request,dbPut,stores});
+  const originalSave=savePost,originalClose=closeEditor;
+  savePost=async()=>{try{await writer.flush();return await originalSave()}catch(error){toast(error.message)}};
+  closeEditor=()=>{writer.close();return originalClose()};
   const openOriginalEditor=openEditor;
   openEditor=async(id)=>{
     const p=id?stores.posts.get(id):null;
     if(p&&p.richDocument){window.parent.location.href='/studio/content/'+id+'/advanced';return}
-    return openOriginalEditor(id);
+    await writer.flush();await openOriginalEditor(id);writer.reset();
   };
   if(options.get('edit'))await openEditor(options.get('edit')==='new'?undefined:options.get('edit'));
   deletePost=function(){window.parent.location.href='/studio?section=manage'};
-  document.querySelectorAll('.rift-imp-hint').forEach(el=>el.textContent='可直接将文本或 Markdown 文件拖入正文区。');
+  document.querySelectorAll('.rift-imp-hint:not([data-media-hint])').forEach(el=>el.textContent='可直接将文本或 Markdown 文件拖入正文区。');
   const visibility=document.querySelector('#mem-f-visibility option[value="public"]');if(visibility)visibility.textContent='所有同行者可见';
   const beyond=document.getElementById('chat-beyond-toggle');if(beyond)beyond.onclick=()=>window.parent.location.href='/moments';
   const originalViewPost=viewPost;
-  viewPost=async(id)=>{window.__continuumSavedPost=id;return originalViewPost(id)};
+  viewPost=async(id)=>{if(stores.posts.get(id)?.richDocument){window.parent.location.href='/studio/content/'+id+'/preview';return}window.__continuumSavedPost=id;await originalViewPost(id);appendMedia(id,document.getElementById('post-view-body')?.parentElement)};
   if(page==='chat'&&apiConfigs.length)await selectFriend(apiConfigs[0].id);
   const originalNav=navTo;
   navTo=function(next){
@@ -142,16 +126,23 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
   const originalEditor=blogOpenEditor;
   blogOpenEditor=async(id)=>{
     if(id&&stores.posts.get(id)?.richDocument){window.parent.location.href='/studio/content/'+id+'/advanced';return}
-    return originalEditor(id);
+    if(writer)await writer.flush();await originalEditor(id);if(writer)writer.reset();
   };
   const originalAset=openAset;
+  const originalViewMobile=viewPostM;
+  viewPostM=async id=>{if(stores.posts.get(id)?.richDocument){window.parent.location.href='/studio/content/'+id+'/preview';return}await originalViewMobile(id);appendMedia(id,document.querySelector('#m-post-view .pv-body'))};
   openAset=function(c){originalAset(c);document.getElementById('aset-provider').value='openai';document.getElementById('aset-key').value='server-managed';document.getElementById('aset-model').value='Site AI';document.getElementById('aset-endpoint').value='https://continuum.invalid/v1/chat/completions';document.getElementById('aset-key').closest('.set-card').style.display='none'};
   window.__continuumShowMobile=async()=>{
     await _lkBoot();document.title='Keleoz Continuum';
     document.getElementById('ib-splash')?.remove();
     const query=new URLSearchParams(location.search),target=query.get('page')||'blog';
     navTo(target);
-    installPublicationButton({container:document.querySelector('#sub-blog-editor .ed-page'),prefix:'m-ed-',getId:()=>bEditingId,setId:id=>{bEditingId=id},isPrivate:()=>bDiaryMode,clean:()=>{},className:'btn primary'});
+    writer=installSourceWriter({container:document.querySelector('#sub-blog-editor .ed-page'),prefix:'m-ed-',getId:()=>bEditingId,setId:id=>{bEditingId=id},isPrivate:()=>bDiaryMode,clean:()=>{},className:'btn primary',request,dbPut,stores});
+    let replaySave=false;
+    const saveButton=document.getElementById('m-ed-save');
+    saveButton.addEventListener('click',async event=>{if(replaySave){replaySave=false;return}event.stopImmediatePropagation();try{await writer.flush();replaySave=true;saveButton.click()}catch(error){toast(error.message)}},true);
+    const originalCloseSub=closeSub;
+    closeSub=function(id){if(id==='sub-blog-editor'){writer.flush().then(()=>{writer.close();originalCloseSub(id)}).catch(error=>toast(error.message));return}return originalCloseSub(id)};
     if(query.get('edit'))await blogOpenEditor(query.get('edit')==='new'?undefined:query.get('edit'));
     const originalNav=navTo;
     navTo=function(page){if(page==='profile'){window.parent.location.href='/';return}if(['chat','memory','blog','api'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};

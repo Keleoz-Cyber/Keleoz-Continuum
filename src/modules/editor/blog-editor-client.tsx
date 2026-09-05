@@ -4,10 +4,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
-import type { Editor } from '@tiptap/core'
+import { generateJSON, type Editor } from '@tiptap/core'
 
 import { getContinuumExtensions } from '@/modules/content/extensions'
-import type { DraftSnapshot, TiptapDocument } from '@/modules/content/schemas'
+import type { DraftSnapshot, TiptapDocument, TiptapNode } from '@/modules/content/schemas'
 import {
   canApplyEditorLink,
   editorTextSelectionRange,
@@ -51,6 +51,7 @@ export function BlogEditorClient(props: {
   media: EditorMediaItem[]
   references: EditorContentReference[]
   versions: EditorContentVersion[]
+  sourceConversion?: { html: string; attachments: TiptapNode[] }
 }) {
   const [title, setTitle] = useState(props.initialSnapshot.title)
   const [subtitle, setSubtitle] = useState(props.initialSnapshot.subtitle ?? '')
@@ -71,9 +72,12 @@ export function BlogEditorClient(props: {
   const [linkSelectionHasCode, setLinkSelectionHasCode] = useState(false)
   const [selectedBlockIndex, setSelectedBlockIndex] = useState<number | null>(null)
   const extensions = useMemo(() => getContinuumExtensions(), [])
+  const initialContent = useMemo(() => props.sourceConversion ? {
+    type:'doc',content:[...(generateJSON(props.sourceConversion.html,extensions).content??[]),...props.sourceConversion.attachments],
+  } : props.initialSnapshot.document, [extensions,props.sourceConversion,props.initialSnapshot.document])
   const editor = useEditor({
     extensions,
-    content: props.initialSnapshot.document,
+    content: initialContent,
     immediatelyRender: false,
     onCreate: ({ editor: currentEditor }) => setSelectedBlockIndex(selectedTopLevelBlockIndex(currentEditor)),
     onSelectionUpdate: ({ editor: currentEditor }) => setSelectedBlockIndex(selectedTopLevelBlockIndex(currentEditor)),
@@ -234,7 +238,7 @@ export function BlogEditorClient(props: {
         </details>
         <details className="editor-media-palette source-rift-drawer">
           <summary>Media blocks · 正文只保存媒体 ID</summary>
-          <header><div><span>Media Library</span><small>图片、音频、视频与附件</small></div><a href="/studio#media-title">Manage library</a></header>
+          <header><div><span>Media Library</span><small>图片、音频、视频与附件</small></div><a href="/studio?section=media" target="_blank" rel="noreferrer">Manage library</a></header>
           {props.media.length ? <>
             <div className="editor-media-options"><label><span>Image size</span><select value={mediaSize} onChange={(event) => setMediaSize(event.target.value as typeof mediaSize)}><option value="compact">Compact</option><option value="content">Content</option><option value="wide">Wide</option></select></label><label><span>Caption / description</span><input value={mediaCaption} onChange={(event) => setMediaCaption(event.target.value)} maxLength={2_000} placeholder="可选公开说明" /></label></div>
             <div className="editor-media-list">{props.media.map((media) => <article key={media.id}>

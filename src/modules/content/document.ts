@@ -6,6 +6,7 @@ import { advancedNodeText, prepareAdvancedDocument } from '@/modules/content/adv
 import { extractMediaReferences, mediaNodeText } from '@/modules/content/media-nodes'
 import { tiptapDocumentSchema, type TiptapDocument, type TiptapNode } from '@/modules/content/schemas'
 import { renderOriginalBlog } from '@/modules/source-native/blog-renderer'
+import { sourceAttachments } from '@/modules/source-native/posts'
 
 export type RenderedDocument = {
   document: TiptapDocument
@@ -36,7 +37,7 @@ export function parseAndRenderDocument(input: unknown): RenderedDocument {
   extractMediaReferences(document)
   const sourceText = document.attrs?.sourceText
   const sourceFormat = document.attrs?.sourceFormat
-  const unsafeHtml = typeof sourceText === 'string' && (sourceFormat === 'md' || sourceFormat === 'txt') ? renderOriginalBlog(sourceText, sourceFormat) : renderToHTMLString({
+  const unsafeHtml = typeof sourceText === 'string' && (sourceFormat === 'md' || sourceFormat === 'txt') ? renderOriginalBlog(sourceText, sourceFormat) + (document.attrs?.sourceMedia === true ? renderToHTMLString({content:{type:'doc',content:sourceAttachments(document)},extensions:getContinuumExtensions()}) : '') : renderToHTMLString({
     content: document,
     extensions: getContinuumExtensions(),
   })

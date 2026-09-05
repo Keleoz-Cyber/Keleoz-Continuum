@@ -6,6 +6,7 @@ import type { DraftSnapshot } from '@/modules/content/schemas'
 import type { EditorMediaItem } from '@/modules/editor/media-nodes'
 import type { EditorContentReference } from '@/modules/editor/advanced-nodes'
 import type { EditorContentVersion } from '@/modules/editor/content-version-history'
+import type { TiptapNode } from '@/modules/content/schemas'
 
 const BlogEditorClient = dynamic(
   () => import('@/modules/editor/blog-editor-client').then((module) => module.BlogEditorClient),
@@ -20,6 +21,7 @@ export function BlogEditorShell(props: {
   media: EditorMediaItem[]
   references: EditorContentReference[]
   versions: EditorContentVersion[]
+  sourceConversion?: { html: string; attachments: TiptapNode[] }
 }) {
   return <BlogEditorClient {...props} />
 }

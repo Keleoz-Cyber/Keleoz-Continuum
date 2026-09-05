@@ -5,8 +5,9 @@ import { contentRepository } from '@/modules/content/runtime'
 import { hasAllowedOrigin } from '@/shared/same-origin'
 import { serverEnv } from '@/shared/env'
 import { tiptapDocumentSchema } from '@/modules/content/schemas'
-import { isSourceEditable, sourceDocumentText, sourcePostSchema } from '@/modules/source-native/posts'
+import { isSourceEditable, sourceAttachments, sourceDocumentText, sourcePostSchema } from '@/modules/source-native/posts'
 import { DraftConflictError } from '@/modules/content/repository'
+import { parseAndRenderDocument } from '@/modules/content/document'
 
 export async function GET(request: Request) {
   if (!await getCurrentOwner()) return Response.json({ error: 'unauthorized' }, { status: 401 })
@@ -17,7 +18,8 @@ export async function GET(request: Request) {
     const document = draft ? tiptapDocumentSchema.parse(draft.document) : null
     const attrs = document?.attrs
     const editable = document && isSourceEditable(document)
-    return { id: entry.id, type: entry.type, title: entry.title, subtitle: entry.subtitle ?? '', category: entry.categoryLabel ?? '', content: editable ? sourceDocumentText(document) : '', format: attrs?.sourceFormat ?? 'txt', locked: Boolean(attrs?.sourceLocked), revision: entry.revision, richDocument: !editable, created: Number(attrs?.sourceCreated) || entry.updatedAt.getTime(), updated: entry.updatedAt.getTime() }
+    const attachments=document ? sourceAttachments(document) : []
+    return { id: entry.id, type: entry.type, title: entry.title, subtitle: entry.subtitle ?? '', category: entry.categoryLabel ?? '', content: editable ? sourceDocumentText(document) : '', attachments, attachmentHtml:parseAndRenderDocument({type:'doc',content:attachments}).html, format: attrs?.sourceFormat ?? 'txt', locked: Boolean(attrs?.sourceLocked), revision: entry.revision, richDocument: !editable, created: Number(attrs?.sourceCreated) || entry.updatedAt.getTime(), updated: entry.updatedAt.getTime() }
   }))
   return Response.json(posts, { headers: { 'Cache-Control': 'private, no-store' } })
 }
@@ -33,12 +35,13 @@ export async function POST(request: Request) {
   if (existing && existing.type !== p.type) return Response.json({ error: 'wrong_content_type' }, { status: 400 })
   if (existing && !isSourceEditable(tiptapDocumentSchema.parse(existing.document))) return Response.json({ error: 'rich_document_requires_block_editor' }, { status: 409 })
   if (existing && p.revision !== existing.revision) return Response.json({ error: 'draft_conflict' }, { status: 409 })
-  const snapshot = { title: p.title.trim() || '未命名日志', subtitle: p.subtitle || null, categoryLabel: p.category || null, summary: existing?.summary ?? '', exposure: existing?.exposure ?? 'hidden' as const, document: { type: 'doc' as const, attrs: { sourceText: p.content, sourceFormat: p.format, sourceLocked: p.locked, sourceCreated: p.created ?? Date.now() }, content: p.content.split(/\n\n+/).map((text) => ({ type: 'paragraph', ...(text ? { content: [{ type: 'text', text }] } : {}) })) } }
+  const attachments=p.attachments ?? (existing ? sourceAttachments(tiptapDocumentSchema.parse(existing.document)) : [])
+  const snapshot = { title: p.title.trim() || '未命名日志', subtitle: p.subtitle || null, categoryLabel: p.category || null, summary: existing?.summary ?? '', exposure: existing?.exposure ?? 'hidden' as const, document: { type: 'doc' as const, attrs: { sourceText: p.content, sourceFormat: p.format, sourceLocked: p.locked, sourceCreated: p.created ?? Date.now(), sourceMedia: true }, content: [...p.content.split(/\n\n+/).map((text) => ({ type: 'paragraph', ...(text ? { content: [{ type: 'text', text }] } : {}) })), ...attachments] } }
   try {
     const saved = existing
       ? await contentRepository.saveDraft({ entryId: existing.id, expectedRevision: existing.revision, snapshot })
       : await contentRepository.createDraft({ ...snapshot, type: p.type, slug: `${p.type}-${randomUUID().slice(0, 8)}` })
-    return Response.json({ ...p, created: p.created ?? Date.now(), updated: Date.now(), id: existing?.id ?? ('id' in saved ? saved.id : p.id), revision: saved.revision }, { headers: { 'Cache-Control': 'private, no-store' } })
+    return Response.json({ ...p, attachments, attachmentHtml:parseAndRenderDocument({type:'doc',content:attachments}).html, created: p.created ?? Date.now(), updated: Date.now(), id: existing?.id ?? ('id' in saved ? saved.id : p.id), revision: saved.revision }, { headers: { 'Cache-Control': 'private, no-store' } })
   } catch (error) {
     if (error instanceof DraftConflictError) return Response.json({ error: 'draft_conflict' }, { status: 409 })
     throw error
