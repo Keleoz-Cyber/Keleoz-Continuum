@@ -1,9 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { useEditor } from '@tiptap/react'
 import { generateJSON, type Editor } from '@tiptap/core'
 
 import { getContinuumExtensions } from '@/modules/content/extensions'
@@ -16,7 +15,8 @@ import {
 } from '@/modules/editor/formatting'
 import { useDraftAutosave } from '@/modules/editor/use-draft-autosave'
 import { moveTopLevelDocumentBlock, topLevelBlockIndexAtPosition } from '@/modules/editor/block-order'
-import { ContentVersionHistory, type EditorContentVersion } from '@/modules/editor/content-version-history'
+import { type EditorContentVersion } from '@/modules/editor/content-version-history'
+import { OriginalEditorFrame } from './original-editor-frame'
 import {
   buildCalloutNode,
   buildCollapseNode,
@@ -34,7 +34,7 @@ import {
 } from '@/modules/editor/media-nodes'
 
 function FormatButton(props: { label: string; active?: boolean; disabled?: boolean; onClick: () => void }) {
-  return <button type="button" aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</button>
+  return <button type="button" className="btn" onMouseDown={event=>event.preventDefault()} aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</button>
 }
 
 function selectedTopLevelBlockIndex(editor: Editor) {
@@ -52,12 +52,15 @@ export function BlogEditorClient(props: {
   references: EditorContentReference[]
   versions: EditorContentVersion[]
   sourceConversion?: { html: string; attachments: TiptapNode[] }
+  categories?: string[]
 }) {
   const [title, setTitle] = useState(props.initialSnapshot.title)
   const [subtitle, setSubtitle] = useState(props.initialSnapshot.subtitle ?? '')
   const [categoryLabel, setCategoryLabel] = useState(props.initialSnapshot.categoryLabel ?? '')
-  const [summary, setSummary] = useState(props.initialSnapshot.summary)
-  const [exposure, setExposure] = useState(props.initialSnapshot.exposure)
+  const summary = props.initialSnapshot.summary
+  const exposure = props.initialSnapshot.exposure
+  const [mediaItems,setMediaItems]=useState(props.media)
+  const [notice,setNotice]=useState('')
   const [document, setDocument] = useState<TiptapDocument>(props.initialSnapshot.document)
   const [mediaCaption, setMediaCaption] = useState('')
   const [mediaSize, setMediaSize] = useState<'compact' | 'content' | 'wide'>('content')
@@ -114,7 +117,7 @@ export function BlogEditorClient(props: {
   const insertGallery = () => {
     if (!editor) return
     const selected = galleryIds.flatMap((id) => {
-      const media = props.media.find((item) => item.id === id)
+      const media = mediaItems.find((item) => item.id === id)
       return media ? [media] : []
     })
     editor.chain().focus().insertContent([buildEditorGalleryNode(selected), { type: 'paragraph' }]).run()
@@ -142,7 +145,7 @@ export function BlogEditorClient(props: {
     if (!editor || !linkSelection) return
     editor.chain().focus().setTextSelection(linkSelection).unsetLink().run()
   }
-  const blockCount = document.content?.length ?? 0
+  const blockCount = editor?.state.doc.childCount ?? 0
   const editorText = editor?.getText() ?? ''
   const editorStats = {
     characters: editorText.length,
@@ -151,53 +154,49 @@ export function BlogEditorClient(props: {
   }
   const moveSelectedBlock = (direction: -1 | 1) => {
     if (!editor || selectedBlockIndex === null) return
-    const moved = moveTopLevelDocumentBlock(document, selectedBlockIndex, direction)
-    if (moved === document) return
+    const current=editor.getJSON() as TiptapDocument
+    const moved = moveTopLevelDocumentBlock(current, selectedBlockIndex, direction)
+    if (moved === current) return
     editor.commands.setContent(moved, { emitUpdate: false })
     setDocument(moved)
     setSelectedBlockIndex(selectedBlockIndex + direction)
   }
 
+  const saveAndGo=async(destination:string)=>{try{await autosave.flush();window.location.href=destination}catch{setNotice('保存失败或版本冲突，当前内容仍保留。请重试；冲突时请先备份当前内容再重新打开。')}}
+  const importText=async(file:File)=>{
+    try{
+      if(file.size>500_000||! /\.(txt|md|markdown)$/i.test(file.name))throw new Error('请选择不超过 500 KB 的文本或 Markdown 文件。')
+      const response=await fetch('/api/studio/source-markdown',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:await file.text(),format:/\.(md|markdown)$/i.test(file.name)?'md':'txt'})})
+      if(!response.ok)throw new Error('导入失败，原有内容没有改变。')
+      const {html}=await response.json();editor?.chain().focus().insertContentAt(editor.state.doc.content.size,generateJSON(html,extensions).content??[]).run()
+    }catch(error){setNotice(error instanceof Error?error.message:'导入失败')}
+  }
+  const sourceCommand=(command:string)=>{
+    if(!editor)return
+    const chain=editor.chain().focus()
+    switch(command){
+      case 'h1':chain.toggleHeading({level:2}).run();break
+      case 'h2':chain.toggleHeading({level:3}).run();break
+      case 'h3':chain.toggleHeading({level:4}).run();break
+      case 'b':chain.toggleBold().run();break
+      case 'i':chain.toggleItalic().run();break
+      case 'code':chain.toggleCode().run();break
+      case 'quote':chain.toggleBlockquote().run();break
+      case 'ul':chain.toggleBulletList().run();break
+      case 'ol':chain.toggleOrderedList().run();break
+      case 'pre':chain.toggleCodeBlock().run();break
+      case 'hr':chain.setHorizontalRule().run();break
+      case 'link':setLinkSelection(editorTextSelectionRange(editor.state.selection));setLinkSelectionHasCode(editor.isActive('code'));setNotice('已保留文字选区，请展开“格式工具”填写链接。');break
+    }
+  }
+
   return (
-    <section className="blog-editor source-rift-editor">
-      <div className="source-rift-sidebar-head">
-        <Link href="/studio">← 返回</Link>
-        <h2>writing...</h2><i />
-        <time>{new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' }).format(new Date())}</time>
-      </div>
-      <div className="editor-meta-grid">
-        <label>
-          <span>Title</span>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} />
-        </label>
-        <label>
-          <span>Subtitle</span>
-          <input value={subtitle} onChange={(event) => setSubtitle(event.target.value)} />
-        </label>
-        <label>
-          <span>Collection label</span>
-          <input value={categoryLabel} onChange={(event) => setCategoryLabel(event.target.value)} />
-        </label>
-        <label>
-          <span>Exposure</span>
-          <select
-            value={exposure}
-            onChange={(event) => setExposure(event.target.value as DraftSnapshot['exposure'])}
-          >
-            <option value="full">Full</option>
-            <option value="summary">Summary</option>
-            <option value="hidden">Hidden</option>
-          </select>
-        </label>
-      </div>
-      <label className="editor-summary">
-        <span>Public summary</span>
-        <textarea value={summary} onChange={(event) => setSummary(event.target.value)} />
-      </label>
-      <div className="editor-slug">/{props.slug}</div>
-      <div className="source-rift-stats"><span>Stats</span><p>Chars <b>{editorStats.characters}</b></p><p>Lines <b>{editorStats.lines}</b></p><p>Size <b>{editorStats.kilobytes.toFixed(1)} KB</b></p></div>
-      <div className="editor-surface">
-        <div className="editor-format-toolbar" aria-label="Formatting tools">
+    <OriginalEditorFrame editor={editor} title={title} subtitle={subtitle} category={categoryLabel} categories={props.categories??[]} onMetadata={(key,value)=>{if(key==='title')setTitle(value);else if(key==='subtitle')setSubtitle(value);else setCategoryLabel(value)}} onSave={saveAndGo} onImport={importText} onCommand={sourceCommand} entryId={props.entryId} characters={editorStats.characters} lines={editorStats.lines} size={editorStats.kilobytes} tools={<>
+      <button className="btn" onClick={()=>void saveAndGo(`/studio/content/${props.entryId}/settings`)}>发布设置与版本</button>
+      <button className="btn" onClick={()=>void saveAndGo(`/studio/content/${props.entryId}/preview`)}>保存并预览</button>
+      {props.sourceConversion?<p>首次修改正文后转为块文档；仅查看不会改变原文。</p>:null}
+      {notice?<p role="status">{notice}</p>:null}
+        <details className="editor-format-toolbar" aria-label="Formatting tools"><summary>格式工具</summary>
           <FormatButton label="P" active={editor?.isActive('paragraph')} onClick={() => editor?.chain().focus().setParagraph().run()} />
           <FormatButton label="H2" active={editor?.isActive('heading', { level: 2 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} />
           <FormatButton label="H3" active={editor?.isActive('heading', { level: 3 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} />
@@ -221,7 +220,7 @@ export function BlogEditorClient(props: {
             {normalizedLink && !linkSelection ? <small role="status">Select text before focusing the link field.</small> : null}
             {normalizedLink && linkSelection && linkSelectionHasCode ? <small role="status">Inline code and Link cannot be combined.</small> : null}
           </div>
-        </div>
+        </details>
         <div className="editor-block-order-controls" aria-label="Block ordering">
           <span>{selectedBlockIndex === null ? 'Select a block' : `Block ${selectedBlockIndex + 1} of ${blockCount}`}</span>
           <button type="button" disabled={selectedBlockIndex === null || selectedBlockIndex === 0} onClick={() => moveSelectedBlock(-1)}>Move up</button>
@@ -239,9 +238,10 @@ export function BlogEditorClient(props: {
         <details className="editor-media-palette source-rift-drawer">
           <summary>Media blocks · 正文只保存媒体 ID</summary>
           <header><div><span>Media Library</span><small>图片、音频、视频与附件</small></div><a href="/studio?section=media" target="_blank" rel="noreferrer">Manage library</a></header>
-          {props.media.length ? <>
+          <button className="btn" onClick={async()=>{try{const response=await fetch('/api/studio/source-media');if(!response.ok)throw new Error();setMediaItems(await response.json())}catch{setNotice('媒体库刷新失败，请重试。')}}}>刷新媒体库</button>
+          {mediaItems.length ? <>
             <div className="editor-media-options"><label><span>Image size</span><select value={mediaSize} onChange={(event) => setMediaSize(event.target.value as typeof mediaSize)}><option value="compact">Compact</option><option value="content">Content</option><option value="wide">Wide</option></select></label><label><span>Caption / description</span><input value={mediaCaption} onChange={(event) => setMediaCaption(event.target.value)} maxLength={2_000} placeholder="可选公开说明" /></label></div>
-            <div className="editor-media-list">{props.media.map((media) => <article key={media.id}>
+            <div className="editor-media-list">{mediaItems.map((media) => <article key={media.id}>
               {media.kind === 'image' ? <Image src={`/media/${media.id}/thumb.webp`} alt={media.altText} width={320} height={213} unoptimized /> : <span className={`editor-media-kind ${media.kind}`}>{media.kind === 'audio' ? 'AUDIO' : media.kind === 'video' ? 'VIDEO' : 'FILE'}</span>}
               <div><strong>{media.originalName}</strong><small>{media.altText || 'No alt text'}</small></div>
               <button type="button" onClick={() => media.kind === 'image' ? insertImage(media) : insertNonImage(media)}>Insert {media.kind}</button>
@@ -250,18 +250,16 @@ export function BlogEditorClient(props: {
             <div className="editor-media-actions"><button type="button" disabled={galleryIds.length < 2} onClick={insertGallery}>Insert gallery ({galleryIds.length}/3)</button><button type="button" onClick={() => editor?.chain().focus().deleteSelection().run()}>Remove selected block</button></div>
           </> : <p>媒体库为空。先返回 Studio 上传图片。</p>}
         </details>
-        <EditorContent editor={editor} />
-      </div>
       <div className="editor-status" data-state={autosave.state}>
-        <span>{autosave.state}</span>
-        <span>Revision {autosave.revision}</span>
+        <span>{{idle:'自动保存已开启',dirty:'等待保存',saving:'正在保存',saved:'已保存',conflict:'版本冲突，请先保留当前内容再重新打开',error:'保存失败'}[autosave.state]}</span>
+        <span> · r{autosave.revision}</span>
         {autosave.state === 'error' || autosave.state === 'conflict' ? (
           <button onClick={autosave.retry} type="button">
             Retry
           </button>
         ) : null}
       </div>
-      <ContentVersionHistory entryId={props.entryId} draftRevision={autosave.revision} versions={props.versions} />
-    </section>
+      <label>导入文本 / Markdown<input type="file" accept=".txt,.md,.markdown" onChange={event=>{if(event.target.files?.[0])void importText(event.target.files[0]);event.target.value=''}}/></label>
+    </>} />
   )
 }

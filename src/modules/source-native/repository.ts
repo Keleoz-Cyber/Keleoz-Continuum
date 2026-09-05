@@ -35,6 +35,11 @@ export async function readSourceRecords() {
   return db.select().from(ownerSourceRecords)
 }
 
+export async function readSourceCategories(){
+  const rows=await db.select({name:ownerSourceRecords.key}).from(ownerSourceRecords).where(eq(ownerSourceRecords.store,'categories'))
+  return rows.map(row=>row.name)
+}
+
 export async function writeSourceRecord(store: string, key: string, value: Record<string, unknown>) {
   const record = { ...value, ...(store === 'categories' ? { name: key } : { id: key }) }
   const safe = store === 'apiConfigs' || store === 'apiSettings' ? withoutProviderSecrets(record) : record

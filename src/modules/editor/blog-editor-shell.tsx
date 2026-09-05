@@ -22,6 +22,7 @@ export function BlogEditorShell(props: {
   references: EditorContentReference[]
   versions: EditorContentVersion[]
   sourceConversion?: { html: string; attachments: TiptapNode[] }
+  categories?: string[]
 }) {
-  return <BlogEditorClient {...props} />
+  return <BlogEditorClient key={props.entryId} {...props} />
 }

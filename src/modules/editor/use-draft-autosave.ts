@@ -1,79 +1,37 @@
 'use client'
-
-import { useCallback, useEffect, useRef, useState } from 'react'
-
+import { useCallback,useEffect,useState } from 'react'
 import type { DraftSnapshot } from '@/modules/content/schemas'
-
-export type AutosaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'conflict' | 'error'
-
-export function useDraftAutosave(input: {
-  entryId: string
-  initialRevision: number
-  snapshot: DraftSnapshot
-  delayMs?: number
-}) {
-  const [state, setState] = useState<AutosaveState>('idle')
-  const [revision, setRevision] = useState(input.initialRevision)
-  const revisionRef = useRef(input.initialRevision)
-  const [retryNonce, setRetryNonce] = useState(0)
-  const payload = JSON.stringify(input.snapshot)
-  const lastSavedPayload = useRef(payload)
-
-  useEffect(() => {
-    if (payload === lastSavedPayload.current && retryNonce === 0) {
-      return
+import { DraftSaveQueue,type SaveState } from './draft-save-queue'
+export type AutosaveState=SaveState
+export function useDraftAutosave(input:{entryId:string;initialRevision:number;snapshot:DraftSnapshot;delayMs?:number}){
+  const [state,setState]=useState<SaveState>('idle')
+  const [revision,setRevision]=useState(input.initialRevision)
+  const [queue]=useState(()=>new DraftSaveQueue(input.snapshot,input.initialRevision,async(snapshot,expectedRevision)=>{
+    const response=await fetch(`/api/studio/content/${input.entryId}/draft`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({snapshot,expectedRevision})})
+    const result=await response.json()
+    if(response.status===409)throw new Error('draft_conflict')
+    if(!response.ok||typeof result.revision!=='number')throw new Error('save_failed')
+    return result.revision
+  },(status,nextRevision)=>{setState(status);setRevision(nextRevision)}))
+  useEffect(()=>{
+    queue.update(input.snapshot)
+    if(!queue.dirty())return
+    const timer=setTimeout(()=>{queue.flush().catch(()=>{})},input.delayMs??900)
+    return()=>clearTimeout(timer)
+  },[queue,input.snapshot,input.delayMs])
+  useEffect(()=>{
+    const warn=(event:BeforeUnloadEvent)=>{if(queue.dirty()){event.preventDefault();event.returnValue=''}}
+    const navigate=(event:MouseEvent)=>{
+      const link=(event.target as Element).closest?.('a[href]') as HTMLAnchorElement|null
+      if(!queue.dirty()||!link||event.button!==0||event.metaKey||event.ctrlKey||link.target==='_blank')return
+      event.preventDefault();event.stopImmediatePropagation()
+      queue.flush().then(()=>{window.location.href=link.href}).catch(()=>{})
     }
-
-    setState('dirty')
-    const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
-      setState('saving')
-      try {
-        const response = await fetch(`/api/studio/content/${input.entryId}/draft`, {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ expectedRevision: revisionRef.current, snapshot: input.snapshot }),
-          signal: controller.signal,
-        })
-        const result = (await response.json()) as {
-          revision?: number
-          currentRevision?: number
-        }
-        if (response.status === 409) {
-          if (typeof result.currentRevision === 'number') {
-            revisionRef.current = result.currentRevision
-            setRevision(result.currentRevision)
-          }
-          setState('conflict')
-          return
-        }
-        if (!response.ok || typeof result.revision !== 'number') {
-          setState('error')
-          return
-        }
-        revisionRef.current = result.revision
-        setRevision(result.revision)
-        lastSavedPayload.current = payload
-        setState('saved')
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') setState('error')
-      }
-    }, input.delayMs ?? 900)
-
-    return () => {
-      window.clearTimeout(timer)
-      controller.abort()
-    }
-  }, [input.delayMs, input.entryId, input.snapshot, payload, retryNonce])
-
-  useEffect(() => {
-    if (!['dirty', 'saving', 'conflict'].includes(state)) return
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
-    window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [state])
-
-  const retry = useCallback(() => setRetryNonce((value) => value + 1), [])
-
-  return { state, revision, retry }
+    window.addEventListener('beforeunload',warn)
+    document.addEventListener('click',navigate,true)
+    return()=>{window.removeEventListener('beforeunload',warn);document.removeEventListener('click',navigate,true)}
+  },[queue])
+  const flush=useCallback(()=>{queue.update(input.snapshot);return queue.flush()},[queue,input.snapshot])
+  const retry=useCallback(()=>{void flush().catch(()=>{})},[flush])
+  return {state,revision,retry,flush}
 }
