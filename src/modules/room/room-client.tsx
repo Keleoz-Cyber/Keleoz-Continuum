@@ -29,7 +29,7 @@ function stopSourceRoomRuntime() {
   game.container = null
 }
 
-export function RoomClient({ companionName }: { companionName: string }) {
+export function RoomClient({ companionName,defaultOutfit=2 }: { companionName: string;defaultOutfit?:number }) {
   const [loaded, setLoaded] = useState(false)
   const [mobile, setMobile] = useState(false)
   const scriptRef = useRef<HTMLScriptElement | null>(null)
@@ -66,6 +66,7 @@ export function RoomClient({ companionName }: { companionName: string }) {
       script.src = '/game/game_module.js'
       script.async = false
       script.onload = () => {
+        if(window.G)window.G.outfitIdx=defaultOutfit;
         setLoaded(true)
         startTimer = window.setTimeout(startRoom, 60)
       }
@@ -107,7 +108,7 @@ export function RoomClient({ companionName }: { companionName: string }) {
       releaseAiAdapter?.()
       releaseStateBridge?.()
     }
-  }, [companionName])
+  }, [companionName,defaultOutfit])
 
   if (mobile) {
     return <main className="source-room-page source-room-mobile-note"><div><h1>Room</h1><p>Room 是桌面端的像素空间，请在较宽屏幕上打开。</p><small>Mobile 端的 Tea、Story、Tarot 与 Character 入口会以独立 App 形式提供。</small></div></main>
@@ -130,6 +131,7 @@ declare global {
   interface Window {
     navTo?: (page: string) => void
     G?: {
+      outfitIdx?:number
       running?: boolean
       state?: string
       animFrame?: number | null

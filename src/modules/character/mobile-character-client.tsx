@@ -13,7 +13,7 @@ import {
   type MobileCharacterEvent,
 } from './mobile-state'
 
-export function MobileCharacterClient() {
+export function MobileCharacterClient({defaultOutfit=2}:{defaultOutfit?:number}) {
   const router = useRouter()
   const [state, setState] = useState(() => createMobileCharacterState(null))
   const [hydrated, setHydrated] = useState(false)
@@ -30,13 +30,13 @@ export function MobileCharacterClient() {
     let cancelled = false
     void loadRoomSourceStateFromBrowser().then((sourceState) => {
       if (cancelled) return
-      const next = createMobileCharacterState(sourceState)
+      const next = createMobileCharacterState(sourceState,defaultOutfit)
       restoredSleeping.current = next.phase === 'sleeping'
       setState(next)
       setHydrated(true)
     })
     return () => { cancelled = true }
-  }, [])
+  }, [defaultOutfit])
 
   useEffect(() => {
     if (!hydrated) return

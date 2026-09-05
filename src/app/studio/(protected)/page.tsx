@@ -48,7 +48,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
 }> }) {
   await connection()
   const params = await searchParams
-  if (!params.section && !params.q && !params.type && !params.status && !params.content && !params.persona) return <><nav className="native-studio-tools"><Link href="/studio/write">＋ 写日志</Link><Link href="/studio?section=manage">发布管理</Link><Link href="/studio?section=letters">来信</Link><Link href="/studio?section=media">媒体</Link><Link href="/studio?section=persona">Persona</Link><Link href="/studio/companions">同行者设置</Link><Link href="/studio/operations">系统</Link></nav><NativeOwnerFrame page="blog" /></>
+  if (!params.section && !params.q && !params.type && !params.status && !params.content && !params.persona) return <><nav className="native-studio-tools"><Link href="/studio/write">＋ 写日志</Link><Link href="/studio?section=manage">发布管理</Link><Link href="/studio?section=letters">来信</Link><Link href="/studio?section=media">媒体</Link><Link href="/studio?section=persona">Persona</Link><Link href="/studio/companions">同行者设置</Link><Link href="/studio/settings">站点配置</Link><Link href="/studio/operations">系统</Link></nav><NativeOwnerFrame page="blog" /></>
   const section = params.section || 'manage'
   const query = params.q?.trim().slice(0, 160) ?? ''
   const type = params.type && params.type in CONTENT_TYPE_CONFIG
@@ -74,7 +74,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
     <main className="studio-main" data-studio-section={section}>
       <header className="module-intro">
         <div className="module-intro-top"><h1>Studio</h1><span className="module-intro-sub">Publishing & space settings</span></div><div className="module-intro-rule" />
-        <nav className="native-studio-tabs"><Link href="/studio">日志</Link><Link href="/studio?section=manage">发布管理</Link><Link href="/studio?section=letters">来信审核</Link><Link href="/studio?section=media">媒体</Link><Link href="/studio?section=persona">Persona</Link><Link href="/studio?section=review">AI 审核</Link><Link href="/studio/companions">同行者设置</Link><Link href="/studio/operations">系统</Link><form action={logoutAction}><button>退出登录</button></form></nav>
+        <nav className="native-studio-tabs"><Link href="/studio">日志</Link><Link href="/studio?section=manage">发布管理</Link><Link href="/studio?section=letters">来信审核</Link><Link href="/studio?section=media">媒体</Link><Link href="/studio?section=persona">Persona</Link><Link href="/studio?section=review">AI 审核</Link><Link href="/studio/companions">同行者设置</Link><Link href="/studio/settings">站点配置</Link><Link href="/studio/operations">系统</Link><form action={logoutAction}><button>退出登录</button></form></nav>
       </header>
       {params.persona && personaNotices[params.persona] ? <p className="studio-notice">{personaNotices[params.persona]}</p> : null}
       {params.content && contentNotices[params.content] ? <p className="studio-notice">{contentNotices[params.content]}</p> : null}

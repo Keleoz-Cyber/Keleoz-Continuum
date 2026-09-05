@@ -100,7 +100,7 @@ async function continuumNativeBoot(){
   const originalNav=navTo;
   navTo=function(next){
     if(next==='home'){window.parent.location.href='/';return}
-    if(next==='blog'||next==='chat'||next==='memory'||next==='api'){originalNav(next);return}
+    if(next==='blog'||next==='chat'||next==='memory'||next==='api'||next==='about'){originalNav(next);return}
     toast('此入口尚未接入站点，请使用顶栏的对应页面。');
   };
   window.addEventListener('unhandledrejection',e=>{toast(e.reason&&e.reason.message||'操作失败，请重试。')});
@@ -135,7 +135,7 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
   window.__continuumShowMobile=async()=>{
     await _lkBoot();document.title='Keleoz Continuum';
     document.getElementById('ib-splash')?.remove();
-    const query=new URLSearchParams(location.search),target=query.get('page')||'blog';
+    const query=new URLSearchParams(location.search),target=query.get('page')==='about'?'profile':query.get('page')||'blog';
     navTo(target);
     writer=installSourceWriter({container:document.querySelector('#sub-blog-editor .ed-page'),prefix:'m-ed-',getId:()=>bEditingId,setId:id=>{bEditingId=id},isPrivate:()=>bDiaryMode,clean:()=>{},className:'btn primary',request,dbPut,stores});
     let replaySave=false;
@@ -145,7 +145,7 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
     closeSub=function(id){if(id==='sub-blog-editor'){writer.flush().then(()=>{writer.close();originalCloseSub(id)}).catch(error=>toast(error.message));return}return originalCloseSub(id)};
     if(query.get('edit'))await blogOpenEditor(query.get('edit')==='new'?undefined:query.get('edit'));
     const originalNav=navTo;
-    navTo=function(page){if(page==='profile'){window.parent.location.href='/';return}if(['chat','memory','blog','api'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};
+    navTo=function(page){if(page==='profile'&&target!=='profile'){window.parent.location.href='/';return}if(['chat','memory','blog','api','profile'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};
     window.__continuumNativeReady=true;
   };
 }

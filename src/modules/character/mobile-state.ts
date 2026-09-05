@@ -88,15 +88,15 @@ function withSourceState(
   return { ...state, outfitIdx: next.outfitIdx, phase, dialogue: null, sourceState: JSON.stringify(next) }
 }
 
-export function createMobileCharacterState(sourceState: string | null): MobileCharacterState {
+export function createMobileCharacterState(sourceState: string | null,defaultOutfit=2): MobileCharacterState {
   const parsed = parseSourceState(sourceState)
-  const initial = parsed ?? defaultSourceState
+  const initial = parsed ?? {...defaultSourceState,outfitIdx:Number.isInteger(defaultOutfit)&&CHARACTER_OUTFITS[defaultOutfit]?defaultOutfit:2}
   const sleeping = (initial.state === 'sleeping' || initial.state === 'lying') && initial.lieMode === 'sleeping'
   return {
     outfitIdx: initial.outfitIdx,
     phase: sleeping ? 'sleeping' : 'awake',
     dialogue: null,
-    sourceState: parsed ? sourceState! : JSON.stringify(defaultSourceState),
+    sourceState: parsed ? sourceState! : JSON.stringify(initial),
   }
 }
 

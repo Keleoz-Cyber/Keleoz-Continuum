@@ -1,7 +1,8 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-import { contentMedia, mediaObjects, mediaVariants } from '@/db/schema'
+import { contentMedia, mediaObjects, mediaVariants,ownerSourceRecords } from '@/db/schema'
+import { siteConfigSchema,siteMediaIds } from '@/modules/site-config/contracts'
 import type * as schema from '@/db/schema'
 
 export type MediaVariantRecord = {
@@ -147,6 +148,8 @@ export function createMediaRepository(database: NodePgDatabase<typeof schema>) {
       return variant ?? null
     },
     async prepareDelete(id: string) {
+      const [site]=await database.select({value:ownerSourceRecords.value}).from(ownerSourceRecords).where(and(eq(ownerSourceRecords.store,'_site'),eq(ownerSourceRecords.key,'public')))
+      if(site&&siteMediaIds(siteConfigSchema.parse(site.value)).includes(id))throw new Error('Media is used by the published site configuration')
       const [attachment] = await database.select({ entryId: contentMedia.entryId }).from(contentMedia)
         .where(eq(contentMedia.mediaId, id)).limit(1)
       if (attachment) throw new Error('Media is attached to published content')

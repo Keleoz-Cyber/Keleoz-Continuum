@@ -3,19 +3,22 @@ import Link from 'next/link'
 import type { PublicMomentItem } from '@/modules/persona/repository'
 import { GuestCommentButton } from './guest-comment-button'
 import { SourceMomentMedia } from './source-moment-media'
+import type { PublicSiteConfig } from '@/modules/site-config/contracts'
 
-function MomentAuthor({ item }: { item: PublicMomentItem }) {
+function MomentAuthor({ item,settings }: { item: PublicMomentItem;settings?:PublicSiteConfig }) {
+  const name=item.author.isAi?item.author.name:settings?.name??item.author.name
+  const avatar=!item.author.isAi?settings?.avatarUrl:null
   return <>
-    <span className={`source-moment-avatar${item.author.isAi ? ' persona' : ''}`} aria-hidden="true">{item.author.name.slice(0, 1).toUpperCase()}</span>
-    <span className="source-moment-author"><strong>{item.author.name}</strong><small>{item.author.handle}</small></span>
+    <span className={`source-moment-avatar${item.author.isAi ? ' persona' : ''}`} style={avatar?{backgroundImage:`url("${avatar}")`,backgroundSize:'cover',backgroundPosition:'center'}:undefined} aria-hidden="true">{avatar?null:name.slice(0, 1).toUpperCase()}</span>
+    <span className="source-moment-author"><strong>{name}</strong><small>{item.author.handle}</small></span>
     {item.author.isAi ? <span className="source-moment-ai">AI Persona</span> : null}
   </>
 }
 
-export function PublicMomentCard({ item, detail = false }: { item: PublicMomentItem; detail?: boolean }) {
+export function PublicMomentCard({ item, detail = false,settings }: { item: PublicMomentItem; detail?: boolean;settings?:PublicSiteConfig }) {
   return <article className={`source-moment-card glass-card${detail ? ' source-moment-detail' : ''}`}>
     <header>
-      <MomentAuthor item={item} />
+      <MomentAuthor item={item} settings={settings}/>
       <i>/</i>
       <time dateTime={item.publishedAt} title={new Date(item.publishedAt).toLocaleString('zh-CN')}>{detail ? new Date(item.publishedAt).toLocaleString('zh-CN') : new Date(item.publishedAt).toLocaleDateString('zh-CN')}</time>
       {item.categoryLabel ? <em>{item.categoryLabel}</em> : null}
@@ -42,11 +45,11 @@ export function PublicMomentCard({ item, detail = false }: { item: PublicMomentI
   </article>
 }
 
-export function PublicMoments({ items }: { items: PublicMomentItem[] }) {
+export function PublicMoments({ items,settings }: { items: PublicMomentItem[];settings?:PublicSiteConfig }) {
   if (items.length === 0) return <div className="source-moment-empty glass-card">还没有动态。<br />这里会记录短暂的想法、照片与近况。</div>
   return (
     <div className="source-moment-feed">
-      {items.map((item) => <PublicMomentCard item={item} key={item.slug} />)}
+      {items.map((item) => <PublicMomentCard item={item} key={item.slug} settings={settings}/>)}
     </div>
   )
 }

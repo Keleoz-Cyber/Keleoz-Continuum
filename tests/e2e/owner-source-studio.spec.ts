@@ -1,5 +1,62 @@
 import { expect, test } from '@playwright/test'
 
+test('publishes site settings without exposing private profile fields and restores local fixtures',async({page,isMobile})=>{
+  const databaseUrl=process.env.E2E_DATABASE_URL
+  test.skip(isMobile||!databaseUrl||!process.env.E2E_OWNER_PASSWORD,'Requires explicit local configuration QA database.')
+  if(!['localhost','127.0.0.1'].includes(new URL(databaseUrl!).hostname))throw new Error('Local QA database only')
+  test.setTimeout(120_000)
+  const {Pool}=await import('pg'),sharp=(await import('sharp')).default,{createHash}=await import('node:crypto')
+  const pool=new Pool({connectionString:databaseUrl})
+  const backup=(await pool.query("select * from owner_source_records where (store='_site' and key='public') or (store='about' and key='main')")).rows
+  const mediaBefore=new Set((await pool.query('select id from media_objects')).rows.map(row=>row.id))
+  const name=`SiteQA${Date.now().toString().slice(-8)}`
+  const image=await sharp({create:{width:8,height:8,channels:3,background:{r:Date.now()%255,g:67,b:121}}}).png().toBuffer()
+  const fixtureHashes=new Set([createHash('sha256').update(image).digest('hex')])
+  try{
+    await page.goto('/studio/login')
+    await page.getByLabel('Username').fill(process.env.E2E_OWNER_USERNAME||'admin');await page.getByLabel('Password').fill(process.env.E2E_OWNER_PASSWORD!)
+    await page.getByRole('button',{name:'Enter Studio'}).click();await expect(page).toHaveURL(/\/studio$/)
+    await page.setViewportSize({width:1440,height:1000});await page.goto('/studio/profile')
+    const profile=page.frameLocator('iframe')
+    await profile.getByRole('button',{name:'设置资料',exact:true}).click()
+    await profile.locator('#about-name').fill(name);await profile.locator('#about-bio').fill('Private biography fixture');await profile.locator('#about-bio-private').check()
+    await profile.locator('#pf-avatar-inp').setInputFiles({name:'qa-avatar.png',mimeType:'image/png',buffer:image})
+    await expect(profile.getByText('头像已选择',{exact:true})).toBeVisible()
+    await profile.locator('#pf-bg-inp').setInputFiles({name:'qa-cover.png',mimeType:'image/png',buffer:image});await expect(profile.getByText('背景已选择',{exact:true})).toBeVisible()
+    await profile.getByRole('button',{name:'保存',exact:true}).click()
+    await expect(profile.locator('.pc-avatar-name')).toHaveText(name)
+    const priorPublic=await page.request.get('/about');expect(await priorPublic.text()).not.toContain(name)
+    await page.getByRole('button',{name:'发布已保存资料'}).click();await expect(page).toHaveURL(/profile=published/)
+    await page.goto('/about');await expect(page.getByRole('heading',{name,exact:true})).toBeVisible();await expect(page.getByRole('img',{name,exact:true})).toBeVisible()
+    expect(await (await page.request.get('/about')).text()).not.toContain('Private biography fixture')
+    await page.locator('.source-page').evaluate(async element=>{await document.fonts.ready;await Promise.all(element.getAnimations().map(animation=>animation.finished))})
+    await page.screenshot({path:'output/playwright/site-config-about.png'})
+    const wav=Buffer.alloc(172);wav.write('RIFF');wav.writeUInt32LE(164,4);wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(8000,24);wav.writeUInt32LE(16000,28);wav.writeUInt16LE(2,32);wav.writeUInt16LE(16,34);wav.write('data',36);wav.writeUInt32LE(128,40);wav.writeInt16LE(Date.now()%30000,44)
+    fixtureHashes.add(createHash('sha256').update(wav).digest('hex'))
+    await page.goto('/studio?section=media');await page.locator('input[type=file]').setInputFiles({name:name+'.wav',mimeType:'audio/wav',buffer:wav})
+    await page.getByRole('button',{name:'Upload media'}).click();await expect(page.getByText(name+'.wav',{exact:true})).toBeVisible()
+    await page.goto('/studio/settings');await page.getByLabel('英文副标题').fill('A configured digital space.');await page.getByLabel('首页中文介绍').fill('站点配置联调。');await page.getByLabel('首页默认主题').selectOption('infernal');await page.getByLabel('Room / Character 初始服装').selectOption('4');await page.getByLabel(name+'.wav',{exact:true}).check();await page.getByRole('button',{name:'保存并应用公开配置'}).click();await expect(page).toHaveURL(/saved=1/)
+    await page.screenshot({path:'output/playwright/site-config-settings.png',fullPage:true})
+    const config=(await pool.query("select value from owner_source_records where store='_site' and key='public'")).rows[0].value
+    const blocked=await page.evaluate(async id=>(await fetch('/api/studio/media?id='+id,{method:'DELETE'})).status,config.avatarId);expect(blocked).toBe(409)
+    await page.goto('/');const home=page.frameLocator('iframe');await expect(home.locator('body')).toHaveClass(/theme-infernal/);await expect(home.locator('#playlist')).toContainText(name)
+    expect(await home.locator('body').evaluate(()=>new Function('return audioEl.paused')())).toBe(true)
+    await expect(home.locator('.source-public-definition')).toHaveText('站点配置联调。')
+    await page.goto('/room');await expect.poll(()=>page.evaluate(()=>window.G?.running===true&&window.G?.outfitIdx===4),{timeout:20_000}).toBe(true)
+    await page.setViewportSize({width:390,height:844});await page.goto('/');const mobile=page.frameLocator('iframe');await expect(mobile.locator('#pf-name')).toHaveText(name)
+    await expect.poll(()=>mobile.locator('body').evaluate(()=>new Function('return typeof _pw!=="undefined"&&_pw.list.some(t=>t.id.startsWith("site-"))')())).toBe(true)
+    await page.goto('/about');expect(await page.locator('.source-about-identity').evaluate(el=>getComputedStyle(el,'::before').backgroundImage)).toContain(config.coverId)
+    await page.goto('/character');await expect(page.locator('img[src="/game/sprites/idle_jk.png"]')).toBeVisible()
+    await page.screenshot({path:'output/playwright/site-config-character.png'})
+  }finally{
+    await pool.query("delete from owner_source_records where (store='_site' and key='public') or (store='about' and key='main')")
+    for(const row of backup)await pool.query('insert into owner_source_records(store,key,value,updated_at) values($1,$2,$3,$4)',[row.store,row.key,row.value,row.updated_at])
+    const created=(await pool.query('select id,sha256 from media_objects')).rows.filter(row=>!mediaBefore.has(row.id)&&fixtureHashes.has(row.sha256))
+    for(const row of created)await page.evaluate(async id=>{await fetch('/api/studio/media?id='+id,{method:'DELETE'})},row.id)
+    await pool.end()
+  }
+})
+
 test('original writer, Memory and Chat share private server data with Mobile', async ({ page, isMobile }) => {
   const username = process.env.E2E_OWNER_USERNAME
   const password = process.env.E2E_OWNER_PASSWORD

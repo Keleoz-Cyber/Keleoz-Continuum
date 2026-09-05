@@ -1,6 +1,9 @@
 .native-owner-frame{display:block;position:relative;z-index:2;width:100%;height:100svh;border:0;background:#cbd0d8}
+.native-profile-publish{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;padding:10px;background:rgba(235,244,255,.94);color:#274673;font-size:12px}.native-profile-publish form{margin:0}.source-studio:has(.native-profile-publish)>.native-owner-frame{height:calc(100svh - 72px)}
 .source-about-gallery a{display:block;overflow:hidden}.source-about-gallery img{width:100%;height:100%;object-fit:cover}
 .source-about-card:not(:has(.source-about-gallery)) .source-about-bio{flex:1}
+.source-about-avatar{overflow:hidden}.source-about-avatar img{width:100%;height:100%;object-fit:cover}.source-about-identity:has(.source-about-avatar img){isolation:isolate}
+.source-about-identity{background-image:var(--profile-cover);background-size:cover;background-position:center}@media(max-width:760px){.source-about-identity{background-image:linear-gradient(160deg,rgba(160,197,239,.5),rgba(220,235,251,.42))}.source-about-identity::before{background-image:var(--profile-cover,url('/reference/internal-beyond/bg-internal.jpg'))}}
 .original-mobile-tarot-face{position:relative;width:70px;height:108px;overflow:hidden}.original-mobile-tarot-face>div{position:relative;width:70px;height:108px;transition:transform .55s}.original-mobile-tarot-face>div>div{position:relative;width:115px;height:178px;transform:scale(.6087);transform-origin:top left}
 .mobile-tarot-app{background-image:linear-gradient(rgba(13,10,22,.8),rgba(13,10,22,.8)),url('/game/room_night.png')}
 .source-public-page:has(>.native-mobile)>.source-public-nav,.source-studio:has(>.native-mobile)>.native-studio-tools{display:none}

@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import type { PublicSiteConfig } from '@/modules/site-config/contracts'
+import { siteConfigScript } from '@/modules/site-config/source-patch'
 
 const PUBLIC_HOME_PATCH = `
   document.title = 'Keleoz Continuum';
@@ -83,7 +85,7 @@ const PUBLIC_MOBILE_PATCH = `
   if (new URLSearchParams(window.parent.location.search).get('openMusic') === '1') window.setTimeout(function(){ document.getElementById('sb-musicapp')?.click(); },900);
 `
 
-export function SourceHomeFrame() {
+export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [mobile, setMobile] = useState(false)
@@ -106,14 +108,14 @@ export function SourceHomeFrame() {
       if (!sourceWindow || !sourceDocument || sourceDocument.getElementById('continuum-public-home-patch') || sourceDocument.getElementById('continuum-public-mobile-patch')) return
       const script = sourceDocument.createElement('script')
       script.id = mobile ? 'continuum-public-mobile-patch' : 'continuum-public-home-patch'
-      script.textContent = mobile ? PUBLIC_MOBILE_PATCH : PUBLIC_HOME_PATCH
+      script.textContent = 'window.__continuumPublishedName='+JSON.stringify(settings.name).replaceAll('<','\\u003c')+';' + (mobile ? PUBLIC_MOBILE_PATCH.replaceAll("'Keleoz'",'window.__continuumPublishedName') : PUBLIC_HOME_PATCH) + siteConfigScript(settings,mobile)
       sourceDocument.body.appendChild(script)
       setLoaded(true)
     }
     frame.addEventListener('load', patchSource)
     if (frame.contentDocument?.readyState === 'complete') patchSource()
     return () => frame.removeEventListener('load', patchSource)
-  }, [mobile])
+  }, [mobile,settings])
 
   return (
     <section className="source-home-frame" aria-label="Continuum scene">
