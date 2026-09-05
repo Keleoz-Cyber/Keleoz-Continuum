@@ -3,8 +3,10 @@
 import { writerRuntime } from './writer-runtime'
 import { preserveCalendarFields } from './calendar'
 import { createSourceStoreQueue } from './store-queue'
+import { searchRuntime } from './search-runtime'
 export const nativeBootstrap = String.raw`
 ${writerRuntime}
+${searchRuntime}
 const preserveCalendarFields=${preserveCalendarFields.toString()};
 const createSourceStoreQueue=${createSourceStoreQueue.toString()};
 async function continuumNativeBoot(){
@@ -34,7 +36,7 @@ async function continuumNativeBoot(){
   const storeQueue=createSourceStoreQueue();
   let calendarSettingsReadFailed=false;
   const freshStore=(s)=>storeQueue.run(s,async()=>{const rows=await request('/api/studio/source-records?store='+s);stores[s]=new Map(rows.map(r=>[r.key,r.value]))});
-  const config=v=>v?{...v,provider:'openai',apiKey:'server-managed',endpoint:'https://continuum.invalid/v1/chat/completions',model:v.model||'Site AI',tools:false,webSearch:false}:v;
+  const config=v=>v?{...v,provider:'openai',apiKey:'server-managed',endpoint:'https://continuum.invalid/v1/chat/completions',model:v.model||'Site AI',tools:false,webSearch:v.webSearch!==false}:v;
   openDB=async()=>({});
   dbGetAll=async(s)=>{if(['calEvents','calNotes','calLedger'].includes(s))await freshStore(s);return [...(stores[s]||new Map()).values()].map(v=>clone(s==='apiConfigs'?config(v):v))};
   dbGet=async(s,k)=>{if(s==='calLedger')await freshStore(s);if(s==='apiSettings'&&k==='calendarSettings'){try{await freshStore(s);calendarSettingsReadFailed=false}catch(error){calendarSettingsReadFailed=true;throw error}}const v=(stores[s]||new Map()).get(String(k));return clone(s==='apiConfigs'?config(v):v)};
@@ -89,6 +91,8 @@ async function continuumNativeBoot(){
   const options=new URLSearchParams(location.search), page=options.get('page')||'blog';
   navTo(page==='calendar'?'home':page);
   if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
+  installDesktopSearch();
+  const searchLabel=document.querySelector('#api-websearch-group label');if(searchLabel)searchLabel.title='免 Key 搜索。开启后发送“搜索 …”或“阅读 https://…”。只发送本次查询，不发送聊天历史。';
   const calendarSystem=window.IBCAL.buildSys;
   window.IBCAL.buildSys=async function(cfg){await window.IBCAL.invalidate();return calendarSettingsReadFailed?'':calendarSystem(cfg)};
   const calendarTail=window.IBCAL.buildTail,calendarReply=window.IBCAL.processReply;
@@ -151,6 +155,7 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
   openAset=function(c){originalAset(c);document.getElementById('aset-provider').value='openai';document.getElementById('aset-key').value='server-managed';document.getElementById('aset-model').value='Site AI';document.getElementById('aset-endpoint').value='https://continuum.invalid/v1/chat/completions';document.getElementById('aset-key').closest('.set-card').style.display='none'};
   window.__continuumShowMobile=async()=>{
     await _lkBoot();document.title='Keleoz Continuum';
+    installMobileSearch();
     document.getElementById('ib-splash')?.remove();
     const query=new URLSearchParams(location.search),target=query.get('page')==='about'?'profile':query.get('page')||'blog';
     navTo(target==='calendar'?'profile':target);

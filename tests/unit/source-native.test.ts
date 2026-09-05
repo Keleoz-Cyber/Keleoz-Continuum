@@ -7,6 +7,11 @@ import { getOriginalTarotFaces } from '@/modules/source-native/tarot-faces'
 import { getOriginalLetterArt } from '@/modules/source-native/letter-art'
 
 describe('original UI persistence boundary', () => {
+  it('connects only the search adapter to both original Chat engines', () => {
+    expect(nativeBootstrap).toContain('installDesktopSearch();')
+    expect(nativeMobileBootstrap).toContain('installMobileSearch();')
+    expect(nativeBootstrap).not.toContain('webSearch:false}:v')
+  })
   it('accepts the three native Calendar stores without creating public records', () => {
     for (const store of ['calEvents', 'calNotes', 'calLedger']) {
       expect(sourceWrite.safeParse({ op: 'put', store, key: 'calendar_fixture', value: { id: 'calendar_fixture', vis: 'self' } }).success).toBe(true)
