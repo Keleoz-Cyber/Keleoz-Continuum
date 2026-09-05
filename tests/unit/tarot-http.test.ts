@@ -11,6 +11,15 @@ function request(body: unknown, origin = 'http://continuum.test') {
 }
 
 describe('Tarot HTTP boundary', () => {
+  it('allows retry of a failed follow-up but not replay of a successful one',async()=>{
+    let fail=true
+    const handler=createTarotHttpHandler({siteOrigin:'http://continuum.test',fingerprintSecret:'test-secret',getClientAddress:async()=>'test',service:{async complete(input){if(input.request.mode==='followup'&&fail)throw new TarotUnavailableError();return {content:'解读'}}}})
+    const initial=await (await handler(request(reading))).json()
+    const followup={...reading,mode:'followup',followupIndex:0,followupGrant:initial.followupGrant,history:[{role:'assistant',content:'解读'}],question:'继续'}
+    expect((await handler(request(followup))).status).toBe(503)
+    fail=false;expect((await handler(request(followup))).status).toBe(200)
+    expect((await handler(request(followup))).status).toBe(403)
+  })
   it('issues and chains one-time follow-up grants without exposing server prompts', async () => {
     const calls: unknown[] = []
     const handler = createTarotHttpHandler({ siteOrigin: 'http://continuum.test',

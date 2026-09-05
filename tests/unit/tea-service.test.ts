@@ -43,6 +43,13 @@ function createDependencies() {
 }
 
 describe('Tea service', () => {
+  it('does not return a cut-off reply as a successful Tea turn',async()=>{
+    const deps=createDependencies()
+    const service=createTeaService({...deps,provider:{async complete(){return {content:'只有半句',truncated:true,providerRequestId:'cut',promptTokens:10,completionTokens:320}}},policy,gate:createAiConcurrencyGate(1),providerName:'test',model:'test'})
+    await expect(service.complete({request,sourceHash:'qa',now:new Date()})).rejects.toMatchObject({code:'output_truncated'})
+    expect(deps.calls.find(call=>call.kind==='complete')?.value).toMatchObject({completionTokens:320})
+    expect(deps.calls.at(-1)?.kind).toBe('fail')
+  })
   it('rebuilds the site prompt, reserves quota, and records only provider metadata', async () => {
     const dependencies = createDependencies()
     const service = createTeaService({

@@ -11,7 +11,7 @@ type Dependencies = {
     complete(input: { id: string; outputCharacters: number; promptTokens: number; completionTokens: number; providerRequestId: string; completedAt: Date }): Promise<void>
     fail(input: { id: string; errorCode: string; completedAt: Date }): Promise<void>
   }
-  provider: { complete(messages: AiMessage[]): Promise<{ content: string; providerRequestId: string; promptTokens: number; completionTokens: number }> }
+  provider: { complete(messages: AiMessage[],signal?:AbortSignal): Promise<{ content: string; truncated?:boolean;providerRequestId: string; promptTokens: number; completionTokens: number }> }
   policy: AiQuotaPolicy
   gate: { tryAcquire(): (() => void) | null }
   providerName: string
@@ -19,7 +19,7 @@ type Dependencies = {
 }
 
 export function createTarotService(dependencies: Dependencies) {
-  return { async complete(input: { request: TarotGatewayRequest; sourceHash: string; now: Date }) {
+  return { async complete(input: { request: TarotGatewayRequest; sourceHash: string; now: Date;signal?:AbortSignal }) {
     if (!dependencies.policy.enabled) throw new TarotUnavailableError()
     const release = dependencies.gate.tryAcquire()
     if (!release) throw new TarotBusyError()
@@ -33,10 +33,11 @@ export function createTarotService(dependencies: Dependencies) {
         policy: dependencies.policy, now: input.now,
       })
       reservationId = reservation.id
-      const result = await dependencies.provider.complete(messages)
+      const result = await dependencies.provider.complete(messages,input.signal)
       await dependencies.repository.complete({ id: reservation.id, outputCharacters: result.content.length,
         promptTokens: result.promptTokens, completionTokens: result.completionTokens,
         providerRequestId: result.providerRequestId, completedAt: new Date() })
+      if(result.truncated)throw new AiProviderError('output_truncated')
       return { content: result.content }
     } catch (error) {
       if (reservationId) await dependencies.repository.fail({ id: reservationId,

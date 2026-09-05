@@ -8,6 +8,10 @@ const messages = [
 ]
 
 describe('OpenAI-compatible provider adapter', () => {
+  it('retains usage when thinking exhausts the output budget before final text',async()=>{
+    const provider=createOpenAiCompatibleProvider({baseUrl:'https://provider.example',apiKey:'test',model:'test',maxOutputTokens:320,timeoutMs:1000,fetcher:async()=>Response.json({id:'reasoning-only',object:'chat.completion',created:1,model:'test',choices:[{index:0,message:{role:'assistant',content:null},finish_reason:'length'}],usage:{prompt_tokens:30,completion_tokens:320,total_tokens:350}})})
+    await expect(provider.complete(messages)).resolves.toMatchObject({content:'',truncated:true,completionTokens:320})
+  })
   it('keeps credentials server-side and parses the complete chat response contract', async () => {
     let observed: { url: string; init?: RequestInit } | undefined
     const fetcher: typeof fetch = async (input, init) => {

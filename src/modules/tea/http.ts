@@ -11,7 +11,7 @@ type Dependencies = {
   fingerprintSecret: string
   getClientAddress(request: Request): Promise<string>
   service: {
-    complete(input: { request: TeaGatewayRequest; sourceHash: string; now: Date }): Promise<{ content: string }>
+    complete(input: { request: TeaGatewayRequest; sourceHash: string; now: Date;signal?:AbortSignal }): Promise<{ content: string }>
   }
 }
 
@@ -57,6 +57,7 @@ export function createTeaHttpHandler(dependencies: Dependencies) {
         request: parsed.data,
         sourceHash,
         now: new Date(),
+        signal:request.signal,
       })
       return json({ content: result.content }, 200)
     } catch (error) {
@@ -71,6 +72,7 @@ export function createTeaHttpHandler(dependencies: Dependencies) {
         return json({ error: quotaMessage(error.reason) }, status, { 'retry-after': error.reason === 'cooldown' ? '3' : '3600' })
       }
       if (error instanceof AiProviderError) {
+        if(error.code==='output_truncated')return json({error:'回复达到输出上限，未作为完整结果保存，请重试。'},502)
         return json({ error: 'Tea AI 暂时没有回应，请稍后再试。' }, 502)
       }
       return json({ error: 'Tea 暂时无法继续，请稍后再试。' }, 500)

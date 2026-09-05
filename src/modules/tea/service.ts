@@ -39,8 +39,9 @@ type Dependencies = {
     fail(input: { id: string; errorCode: string; completedAt: Date }): Promise<void>
   }
   provider: {
-    complete(messages: AiMessage[]): Promise<{
+    complete(messages: AiMessage[],signal?:AbortSignal): Promise<{
       content: string
+      truncated?:boolean
       providerRequestId: string
       promptTokens: number
       completionTokens: number
@@ -54,7 +55,7 @@ type Dependencies = {
 
 export function createTeaService(dependencies: Dependencies) {
   return {
-    async complete(input: { request: TeaGatewayRequest; sourceHash: string; now: Date }) {
+    async complete(input: { request: TeaGatewayRequest; sourceHash: string; now: Date;signal?:AbortSignal }) {
       if (!dependencies.policy.enabled) throw new AiUnavailableError()
       const release = dependencies.gate.tryAcquire()
       if (!release) throw new AiBusyError()
@@ -85,7 +86,7 @@ export function createTeaService(dependencies: Dependencies) {
         })
         reservationId = reservation.id
 
-        const result = await dependencies.provider.complete(messages)
+        const result = await dependencies.provider.complete(messages,input.signal)
         await dependencies.repository.complete({
           id: reservation.id,
           outputCharacters: result.content.length,
@@ -94,6 +95,7 @@ export function createTeaService(dependencies: Dependencies) {
           providerRequestId: result.providerRequestId,
           completedAt: new Date(),
         })
+        if(result.truncated)throw new AiProviderError('output_truncated')
         return { content: result.content }
       } catch (error) {
         if (reservationId) {

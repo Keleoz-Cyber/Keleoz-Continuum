@@ -7,7 +7,7 @@ import { createTarotFollowupGrantManager } from './followup-grant'
 import { TarotBusyError, TarotUnavailableError } from './service'
 
 type Dependencies = { siteOrigin: string; fingerprintSecret: string; getClientAddress(request: Request): Promise<string>;
-  service: { complete(input: { request: TarotGatewayRequest; sourceHash: string; now: Date }): Promise<{ content: string }> } }
+  service: { complete(input: { request: TarotGatewayRequest; sourceHash: string; now: Date;signal?:AbortSignal }): Promise<{ content: string }> } }
 function json(body: unknown, status: number, headers?: HeadersInit) {
   return Response.json(body, { status, headers: { 'cache-control': 'no-store', ...headers } })
 }
@@ -20,13 +20,14 @@ export function createTarotHttpHandler(dependencies: Dependencies) {
     const parsed = tarotGatewayRequestSchema.safeParse(body)
     if (!parsed.success) return json({ error: 'Tarot 请求内容不符合要求。' }, 400)
     const now = new Date()
-    if (parsed.data.mode === 'followup' && !grants.consume(parsed.data, now)) {
+    const rollback=parsed.data.mode==='followup'?grants.claim(parsed.data,now):null
+    if (parsed.data.mode === 'followup' && !rollback) {
       return json({ error: 'Tarot 追问授权无效或已使用。' }, 403)
     }
-    const address = await dependencies.getClientAddress(request)
-    const sourceHash = createHmac('sha256', dependencies.fingerprintSecret).update(`tarot\0${address}`).digest('hex')
     try {
-      const result = await dependencies.service.complete({ request: parsed.data, sourceHash, now })
+      const address = await dependencies.getClientAddress(request)
+      const sourceHash = createHmac('sha256', dependencies.fingerprintSecret).update(`tarot\0${address}`).digest('hex')
+      const result = await dependencies.service.complete({ request: parsed.data, sourceHash, now,signal:request.signal })
       let followupGrant: string | undefined
       if (parsed.data.mode === 'reading') {
         followupGrant = grants.issue({ ...parsed.data, followupIndex: 0,
@@ -37,6 +38,8 @@ export function createTarotHttpHandler(dependencies: Dependencies) {
       }
       return json(followupGrant ? { ...result, followupGrant } : result, 200)
     } catch (error) {
+      rollback?.(new Date())
+      if(error instanceof AiProviderError&&error.code==='output_truncated')return json({error:'解读达到输出上限，请重试；本次不会推进追问次数。'},502)
       if (error instanceof TarotUnavailableError) return json({ error: 'Tarot AI 暂未开放。' }, 503, { 'retry-after': '60' })
       if (error instanceof TarotBusyError) return json({ error: '现在有人正在进行占卜，请稍后再试。' }, 503, { 'retry-after': '2' })
       if (error instanceof AiQuotaError) return json({ error: 'Tarot 访客额度暂时不可用。' }, error.reason === 'disabled' ? 503 : 429)

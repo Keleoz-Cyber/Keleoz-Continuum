@@ -21,15 +21,20 @@ export function createTarotFollowupGrantManager(secret: string) {
       grants.set(token, { expiresAt, fingerprint: bound })
       return token
     },
-    consume(input: Input, now: Date) {
+    claim(input: Input, now: Date) {
       const token = typeof input.followupGrant === 'string' ? input.followupGrant : ''
       const grant = grants.get(token)
-      if (!grant) return false
-      grants.delete(token)
-      if (grant.expiresAt < now.getTime()) return false
+      if (!grant) return null
+      if (grant.expiresAt < now.getTime()) {grants.delete(token);return null}
       const expected = Buffer.from(grant.fingerprint, 'hex')
       const actual = Buffer.from(fingerprint(input), 'hex')
-      return expected.length === actual.length && timingSafeEqual(expected, actual)
+      if(expected.length!==actual.length||!timingSafeEqual(expected,actual))return null
+      grants.delete(token)
+      let restored=false
+      return (at:Date)=>{if(!restored&&at.getTime()<=grant.expiresAt){restored=true;grants.set(token,grant)}}
+    },
+    consume(input: Input,now:Date){
+      return this.claim(input,now)!==null
     },
   }
 }

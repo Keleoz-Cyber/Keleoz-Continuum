@@ -12,7 +12,7 @@ type Dependencies = {
   fingerprintSecret: string
   getClientAddress(request: Request): Promise<string>
   service: {
-    complete(input: { request: StoryGatewayRequest; sourceHash: string; now: Date }): Promise<{
+    complete(input: { request: StoryGatewayRequest; sourceHash: string; now: Date;signal?:AbortSignal }): Promise<{
       content: string
       truncated: boolean
     }>
@@ -65,19 +65,21 @@ export function createStoryHttpHandler(dependencies: Dependencies) {
     if (!parsed.success) return json({ error: 'Story 请求内容不符合要求。' }, 400)
 
     const now = new Date()
-    if (parsed.data.mode === 'document' && !documentGrants.consume(parsed.data, now)) {
+    const rollback=parsed.data.mode==='document'?documentGrants.claim(parsed.data,now):null
+    if (parsed.data.mode === 'document' && !rollback) {
       return json({ error: 'Story 文档授权无效或已使用。' }, 403)
     }
 
-    const address = await dependencies.getClientAddress(request)
-    const sourceHash = createHmac('sha256', dependencies.fingerprintSecret)
-      .update(`story\0${address}`)
-      .digest('hex')
     try {
+      const address = await dependencies.getClientAddress(request)
+      const sourceHash = createHmac('sha256', dependencies.fingerprintSecret)
+        .update(`story\0${address}`)
+        .digest('hex')
       const result = await dependencies.service.complete({
         request: parsed.data,
         sourceHash,
         now,
+        signal:request.signal,
       })
       let documentGrant: string | undefined
       if (parsed.data.mode === 'turn' && parsed.data.messages.length >= 23 && endingReply(result.content)) {
@@ -97,6 +99,8 @@ export function createStoryHttpHandler(dependencies: Dependencies) {
       }
       return json(documentGrant ? { ...result, documentGrant } : result, 200)
     } catch (error) {
+      rollback?.(new Date())
+      if(error instanceof AiProviderError&&error.code==='output_truncated')return json({error:'剧情输出达到上限，未推进故事，请重试。'},502)
       if (error instanceof StoryUnavailableError) {
         return json({ error: 'Story AI 暂未开放。' }, 503, { 'retry-after': '60' })
       }

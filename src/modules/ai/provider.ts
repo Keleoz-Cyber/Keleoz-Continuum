@@ -3,7 +3,7 @@ import { z } from 'zod'
 export type AiMessage = { role: 'system' | 'user' | 'assistant'; content: string }
 
 export class AiProviderError extends Error {
-  constructor(public readonly code: 'upstream_error' | 'invalid_response') {
+  constructor(public readonly code: 'upstream_error' | 'invalid_response' | 'output_truncated' | 'cancelled' | 'timeout') {
     super(code)
     this.name = 'AiProviderError'
   }
@@ -18,7 +18,7 @@ const providerResponseSchema = z.object({
     index: z.number(),
     message: z.object({
       role: z.literal('assistant'),
-      content: z.string().refine((value) => value.trim().length > 0),
+      content: z.string().nullable(),
     }),
     finish_reason: z.string().nullable(),
   })).min(1),
@@ -41,7 +41,10 @@ export function createOpenAiCompatibleProvider(config: {
   const fetcher = config.fetcher ?? fetch
 
   return {
-    async complete(messages: AiMessage[]) {
+    async complete(messages: AiMessage[],signal?:AbortSignal) {
+      const deadline=AbortSignal.timeout(config.timeoutMs)
+      const upstreamSignal=signal?AbortSignal.any([signal,deadline]):deadline
+      const failure=()=>new AiProviderError(signal?.aborted?'cancelled':deadline.aborted?'timeout':'upstream_error')
       let response: Response
       try {
         response = await fetcher(endpoint, {
@@ -57,10 +60,10 @@ export function createOpenAiCompatibleProvider(config: {
             max_tokens: config.maxOutputTokens,
             stream: false,
           }),
-          signal: AbortSignal.timeout(config.timeoutMs),
+          signal: upstreamSignal,
         })
       } catch {
-        throw new AiProviderError('upstream_error')
+        throw failure()
       }
 
       if (!response.ok) throw new AiProviderError('upstream_error')
@@ -69,13 +72,16 @@ export function createOpenAiCompatibleProvider(config: {
       try {
         body = await response.json()
       } catch {
+        if(upstreamSignal.aborted)throw failure()
         throw new AiProviderError('invalid_response')
       }
       const parsed = providerResponseSchema.safeParse(body)
       if (!parsed.success) throw new AiProviderError('invalid_response')
+      const choice=parsed.data.choices[0]!
+      if(!choice.message.content?.trim()&&choice.finish_reason!=='length')throw new AiProviderError('invalid_response')
 
       return {
-        content: parsed.data.choices[0]!.message.content,
+        content: choice.message.content??'',
         truncated: parsed.data.choices[0]!.finish_reason === 'length',
         providerRequestId: parsed.data.id,
         promptTokens: parsed.data.usage.prompt_tokens,

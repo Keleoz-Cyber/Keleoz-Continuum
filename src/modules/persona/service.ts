@@ -1,4 +1,6 @@
 import type { AiMessage } from '@/modules/ai/provider'
+import { AiProviderError } from '@/modules/ai/provider'
+import { ownerDailyAiSession } from '@/modules/ai/daily-session'
 import type { AiQuotaPolicy } from '@/modules/ai/quota'
 import {
   assertPersonaCanPropose,
@@ -116,7 +118,7 @@ export function createPersonaGenerationService(deps: {
       const reservation = await deps.quota.reserve({
         feature: 'persona',
         sourceHash: input.ownerId,
-        sessionId: input.ownerId,
+        sessionId: ownerDailyAiSession(input.ownerId,input.now),
         provider: deps.providerName,
         model: deps.model,
         inputCharacters: messages.reduce((total, message) => total + message.content.length, 0),
@@ -128,8 +130,10 @@ export function createPersonaGenerationService(deps: {
         await deps.quota.fail({ id: reservation.id, errorCode: 'persona_busy', completedAt: new Date() })
         throw new Error('Persona AI is busy')
       }
+      let completion:ProviderResult|null=null
       try {
-        const completion = await deps.provider.complete(messages)
+        completion = await deps.provider.complete(messages)
+        if(completion.truncated)throw new AiProviderError('output_truncated')
         const proposal = parsePersonaAiProposal(completion.content, {
           action: input.action,
           targetEntryId: input.targetEntryId,
@@ -137,16 +141,10 @@ export function createPersonaGenerationService(deps: {
         })
         assertPersonaCanPropose(persona, proposal)
         const review = await deps.personas.createReview({ personaId: persona.id, proposal, now: input.now })
-        await deps.quota.complete({
-          id: reservation.id,
-          outputCharacters: completion.content.length,
-          promptTokens: completion.promptTokens,
-          completionTokens: completion.completionTokens,
-          providerRequestId: completion.providerRequestId,
-          completedAt: new Date(),
-        })
+        await deps.quota.complete({id:reservation.id,outputCharacters:completion.content.length,promptTokens:completion.promptTokens,completionTokens:completion.completionTokens,providerRequestId:completion.providerRequestId,completedAt:new Date()})
         return review
       } catch (error) {
+        if(completion)await deps.quota.complete({id:reservation.id,outputCharacters:completion.content.length,promptTokens:completion.promptTokens,completionTokens:completion.completionTokens,providerRequestId:completion.providerRequestId,completedAt:new Date()})
         const errorCode = error instanceof Error && error.message.includes('JSON')
           ? 'invalid_persona_proposal'
           : 'persona_generation_failed'

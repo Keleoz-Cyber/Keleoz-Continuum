@@ -49,8 +49,8 @@ type Dependencies = {
     }): Promise<void>
     fail(input: { id: string; errorCode: string; completedAt: Date }): Promise<void>
   }
-  turnProvider: { complete(messages: AiMessage[]): Promise<ProviderResult> }
-  documentProvider: { complete(messages: AiMessage[]): Promise<ProviderResult> }
+  turnProvider: { complete(messages: AiMessage[],signal?:AbortSignal): Promise<ProviderResult> }
+  documentProvider: { complete(messages: AiMessage[],signal?:AbortSignal): Promise<ProviderResult> }
   turnPolicy: AiQuotaPolicy
   documentPolicy: AiQuotaPolicy
   gate: { tryAcquire(): (() => void) | null }
@@ -60,7 +60,7 @@ type Dependencies = {
 
 export function createStoryService(dependencies: Dependencies) {
   return {
-    async complete(input: { request: StoryGatewayRequest; sourceHash: string; now: Date }) {
+    async complete(input: { request: StoryGatewayRequest; sourceHash: string; now: Date;signal?:AbortSignal }) {
       const documentMode = input.request.mode === 'document'
       const policy = documentMode ? dependencies.documentPolicy : dependencies.turnPolicy
       if (!policy.enabled) throw new StoryUnavailableError()
@@ -89,7 +89,7 @@ export function createStoryService(dependencies: Dependencies) {
         reservationId = reservation.id
 
         const provider = documentMode ? dependencies.documentProvider : dependencies.turnProvider
-        const result = await provider.complete(messages)
+        const result = await provider.complete(messages,input.signal)
         await dependencies.repository.complete({
           id: reservation.id,
           outputCharacters: result.content.length,
@@ -98,6 +98,7 @@ export function createStoryService(dependencies: Dependencies) {
           providerRequestId: result.providerRequestId,
           completedAt: new Date(),
         })
+        if(result.truncated&&(!documentMode||!result.content.trim()))throw new AiProviderError('output_truncated')
         return { content: result.content, truncated: result.truncated }
       } catch (error) {
         if (reservationId) {

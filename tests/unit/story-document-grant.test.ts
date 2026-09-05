@@ -19,6 +19,13 @@ const input = {
 }
 
 describe('Story document grant', () => {
+  it('releases a failed claim for retry without allowing concurrent replay',()=>{
+    const manager=createStoryDocumentGrantManager('secret'),now=new Date()
+    const token=manager.issue(input,now),request={...input,documentGrant:token}
+    const rollback=manager.claim(request,now)
+    expect(rollback).toBeTypeOf('function');expect(manager.claim(request,now)).toBeNull()
+    rollback!(now);expect(manager.consume(request,now)).toBe(true);expect(manager.consume(request,now)).toBe(false)
+  })
   it('binds a short-lived one-time grant to the exact session, history, and segment', () => {
     const manager = createStoryDocumentGrantManager('0123456789abcdef0123456789abcdef')
     const now = new Date('2026-08-30T01:00:00Z')
