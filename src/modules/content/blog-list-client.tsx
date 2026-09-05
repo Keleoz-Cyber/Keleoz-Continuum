@@ -47,7 +47,7 @@ export function BlogListClient({ items, isOwner }: { items: PublicContentListIte
                 {categories.map((itemCategory) => <button className={`cat-tag${category === itemCategory ? ' active' : ''}`} type="button" key={itemCategory} onClick={() => setCategory(itemCategory)}>{itemCategory}</button>)}
               </div>
               {isOwner ? <><div className="blog-side-rule" /><div className="blog-actions">
-                <Link className="btn btn-primary" href="/studio">+ 写日志</Link>
+                <Link className="btn btn-primary" href="/studio/write">+ 写日志</Link>
               </div></> : null}
             </aside>
             <div className="blog-main">

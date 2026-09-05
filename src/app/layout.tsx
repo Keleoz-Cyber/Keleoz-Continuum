@@ -12,6 +12,7 @@ import './source-tarot-mobile.css'
 import './source-character-mobile.css'
 import './source-continuity.css'
 import './source-studio.css'
+import './source-native.css'
 
 export const metadata: Metadata = {
   title: {

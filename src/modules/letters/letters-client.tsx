@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { SourcePublicNav } from '@/modules/home/source-public-nav'
 
@@ -38,30 +38,14 @@ function downloadLetters(letters: PublicLetter[]) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000)
 }
 
-function LetterStamp() {
-  const maskId = useId().replaceAll(':', '')
-  return (
-    <svg className="stamp-svg" viewBox="0 0 60 76" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <defs><mask id={maskId}><rect x="2" y="2" width="56" height="72" rx="3.5" fill="#fff" />{Array.from({ length: 10 }, (_, index) => <circle key={`l-${index}`} cx="2" cy={2 + index * 8} r="2.4" />)}{Array.from({ length: 10 }, (_, index) => <circle key={`r-${index}`} cx="58" cy={2 + index * 8} r="2.4" />)}{Array.from({ length: 6 }, (_, index) => <circle key={`t-${index}`} cx={10 + index * 8} cy="2" r="2.4" />)}{Array.from({ length: 6 }, (_, index) => <circle key={`b-${index}`} cx={10 + index * 8} cy="74" r="2.4" />)}</mask></defs>
-      <rect className="stamp-paper" x="2" y="2" width="56" height="72" rx="3.5" mask={`url(#${maskId})`} />
-      <rect className="stamp-frame" x="6.5" y="6.5" width="47" height="63" rx="2.5" fill="none" />
-      <g className="stamp-flower" fill="none" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"><path d="M23.6 28.7c-2.5-4.2 2-7.8 3.5-2.1 4.3-2.2 6.2 2.9.1 3.9 1.2 4.7-4.2 5.8-4.1.2-4.1 2.6-6.1-2.4-.2-4.1-1.3-4.9 3.8-5.8 4.2-2.8z" /><path d="M37.4 26.4c-3.5-3.7 1.7-6.6.9-.6 5-1.6 5.4 3.2.4 2.8 2.1 4.5-2.6 5.7-3.3.5-3 3.7-5.2-.9-.4-2.7-4.6-.7-3.6-5.5 2.4-3.1z" /><path d="M24.8 34.1q1.7 6.9 5.2 11.3M36.4 31.4q-2.8 8.6-6.4 14M29.4 42.4q-2-2.5-5-.9 2 2.6 5 .9z" /></g>
-      <text className="stamp-txt-top" x="30" y="13.4" textAnchor="middle">KELEOZ</text><text className="stamp-txt-bot" x="30" y="50.6" textAnchor="middle">CONTINUUM</text><text className="stamp-txt-post" x="30" y="65.2" textAnchor="middle">POST · KC</text>
-    </svg>
-  )
-}
-
-function SealEmblem() {
-  return <svg className="seal-emblem-svg" viewBox="0 0 40 40" aria-hidden="true"><g className="seal-emblem" fill="none" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 20Q24.7 15.14 20 11Q15.3 15.14 20 20Z" /><path d="M20 20Q26.07 22.97 28.56 17.22Q23.17 14.03 20 20Z" /><path d="M20 20Q19.05 26.69 25.29 27.28Q26.66 21.17 20 20Z" /><path d="M20 20Q13.34 21.17 14.71 27.28Q20.95 26.69 20 20Z" /><path d="M20 20Q16.83 14.03 11.44 17.22Q13.93 22.97 20 20Z" /><circle cx="20" cy="20" r="1.7" /></g></svg>
-}
-
-export function LettersClient({ letters }: { letters: PublicLetter[] }) {
+export function LettersClient({ letters, art }: { letters: PublicLetter[]; art: { stamp: string; seal: string } }) {
   const [composeOpen, setComposeOpen] = useState(false)
   const [formState, setFormState] = useState<FormState>('idle')
   const [postalCode, setPostalCode] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [openId, setOpenId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  useEffect(() => { if (openId) document.getElementById(`letter-${openId}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [openId])
 
   const filteredLetters = useMemo(() => {
     const query = search.trim()
@@ -123,10 +107,10 @@ export function LettersClient({ letters }: { letters: PublicLetter[] }) {
               {!opened ? <div className="letter-envelope"><div className="envelope-face">
                 <svg className="envelope-deco" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon className="flap-fill" points="5,99 95,99 50,64" vectorEffect="non-scaling-stroke" /></svg>
                 <div className="envelope-postal">{letter.postalCode.split('').map((digit, index) => <span className="pc-cell" key={`${letter.id}-${index}`}>{digit}</span>)}</div>
-                <div className="envelope-stamp"><LetterStamp /></div>
+                <div className="envelope-stamp"><span dangerouslySetInnerHTML={{ __html: art.stamp }} /></div>
                 <div className="envelope-addr"><div className="envelope-to">To: Keleoz</div><div className="envelope-from">From: {letter.senderName || 'Anonymous'}</div><div className="envelope-date">{date}</div></div>
-                <button className="envelope-seal" type="button" onClick={() => setOpenId(letter.id)} title="拆开信件"><SealEmblem /></button>
-              </div></div> : <div className="letter-card glass-card letter-expanded">
+                <button className="envelope-seal" type="button" onClick={() => setOpenId(letter.id)} title="拆开信件"><span dangerouslySetInnerHTML={{ __html: art.seal }} /></button>
+              </div></div> : <div id={`letter-${letter.id}`} className="letter-card glass-card letter-expanded">
                 <div className="letter-card-content">{letter.content}</div>
                 {letter.ownerReply ? <div className="letter-owner-reply"><span>Reply from Keleoz</span><p>{letter.ownerReply}</p></div> : null}
                 <div className="letter-card-meta">{date}</div>

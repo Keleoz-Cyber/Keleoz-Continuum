@@ -6,11 +6,12 @@ import { loginAction, type LoginState } from '@/modules/auth/actions'
 
 const initialState: LoginState = { error: null }
 
-export function LoginForm() {
+export function LoginForm({ returnTo }: { returnTo?: string }) {
   const [state, action, pending] = useActionState(loginAction, initialState)
 
   return (
     <form action={action} className="studio-login-form">
+      <input type="hidden" name="next" value={returnTo ?? '/studio'} />
       <label>
         <span>Username</span>
         <input autoComplete="username" name="username" required />

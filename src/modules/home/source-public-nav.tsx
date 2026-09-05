@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-type PublicSection = 'blog' | 'projects' | 'moments' | 'timeline' | 'about' | 'letters' | 'room' | 'search'
+type PublicSection = 'blog' | 'projects' | 'moments' | 'timeline' | 'about' | 'letters' | 'room' | 'search' | 'chat' | 'memory' | 'studio'
 
 const publicLinks: Array<{ key: PublicSection; href: string; label: string }> = [
   { key: 'blog', href: '/blog', label: 'Blog' },
@@ -11,6 +11,8 @@ const publicLinks: Array<{ key: PublicSection; href: string; label: string }> = 
   { key: 'room', href: '/room', label: 'Room' },
   { key: 'search', href: '/search', label: 'Search' },
   { key: 'letters', href: '/letters', label: 'Letters' },
+  { key: 'chat', href: '/chat', label: 'Chat' },
+  { key: 'memory', href: '/memory', label: 'Memory' },
 ]
 
 function PublicMark() {
@@ -42,9 +44,10 @@ function PublicNavLink({ children, className, href, reloadDocument }: {
     : <Link className={className} href={href}>{children}</Link>
 }
 
-export function SourcePublicNav({ current, reloadDocument = false }: {
+export function SourcePublicNav({ current, reloadDocument = false, owner }: {
   current?: PublicSection
   reloadDocument?: boolean
+  owner?: string
 }) {
   return (
     <nav className="source-public-nav" aria-label="主导航">
@@ -52,6 +55,7 @@ export function SourcePublicNav({ current, reloadDocument = false }: {
       <ul className="source-public-links">
         {publicLinks.map((item) => <li key={item.key}><PublicNavLink className={current === item.key ? 'active' : ''} href={item.href} reloadDocument={reloadDocument}>{item.label}</PublicNavLink></li>)}
       </ul>
+      <Link className="source-public-owner" href="/studio">{owner || 'Studio'}</Link>
       <details className="source-public-mobile-menu">
         <summary aria-label="打开导航" role="button"><span /><span /><span /></summary>
         <div>{publicLinks.map((item) => <PublicNavLink className={current === item.key ? 'active' : ''} href={item.href} key={item.key} reloadDocument={reloadDocument}>{item.label}</PublicNavLink>)}</div>

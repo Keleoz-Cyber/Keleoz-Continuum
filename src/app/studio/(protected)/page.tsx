@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element -- Media Library renders pre-generated local/LightCOS variants directly. */
 import Link from 'next/link'
 import { connection } from 'next/server'
+import { NativeOwnerFrame } from '@/modules/source-native/frame'
+import { logoutAction } from '@/modules/auth/actions'
 
 import { createContentDraftAction } from '@/modules/content/actions'
 import { CONTENT_TYPE_CONFIG, studioContentPath } from '@/modules/content/routing'
@@ -42,9 +44,12 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
   q?: string
   type?: string
   status?: string
+  section?: string
 }> }) {
   await connection()
   const params = await searchParams
+  if (!params.section && !params.q && !params.type && !params.status && !params.content && !params.persona) return <><nav className="native-studio-tools"><Link href="/studio/write">＋ 写日志</Link><Link href="/studio?section=manage">发布管理</Link><Link href="/studio?section=letters">来信</Link><Link href="/studio?section=media">媒体</Link><Link href="/studio?section=persona">Persona</Link><Link href="/studio/companions">同行者设置</Link><Link href="/studio/operations">系统</Link></nav><NativeOwnerFrame page="blog" /></>
+  const section = params.section || 'manage'
   const query = params.q?.trim().slice(0, 160) ?? ''
   const type = params.type && params.type in CONTENT_TYPE_CONFIG
     ? params.type as keyof typeof CONTENT_TYPE_CONFIG
@@ -66,11 +71,10 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
   })))
 
   return (
-    <main className="studio-main">
-      <header className="studio-title-block">
-        <p className="eyebrow">Create · 创作</p>
-        <h1>Studio</h1>
-        <p>草稿与发布工具将在这里保持克制地展开。</p>
+    <main className="studio-main" data-studio-section={section}>
+      <header className="module-intro">
+        <div className="module-intro-top"><h1>Studio</h1><span className="module-intro-sub">Publishing & space settings</span></div><div className="module-intro-rule" />
+        <nav className="native-studio-tabs"><Link href="/studio">日志</Link><Link href="/studio?section=manage">发布管理</Link><Link href="/studio?section=letters">来信审核</Link><Link href="/studio?section=media">媒体</Link><Link href="/studio?section=persona">Persona</Link><Link href="/studio?section=review">AI 审核</Link><Link href="/studio/companions">同行者设置</Link><Link href="/studio/operations">系统</Link><form action={logoutAction}><button>退出登录</button></form></nav>
       </header>
       {params.persona && personaNotices[params.persona] ? <p className="studio-notice">{personaNotices[params.persona]}</p> : null}
       {params.content && contentNotices[params.content] ? <p className="studio-notice">{contentNotices[params.content]}</p> : null}
@@ -114,7 +118,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
           )) : <p className="studio-muted">没有符合当前筛选条件的内容。</p>}
         </div>
       </section>
-      <section className="studio-inbox" aria-labelledby="letters-inbox-title">
+      <section className="studio-inbox" hidden={section !== 'letters'} aria-labelledby="letters-inbox-title">
         <div className="studio-inbox-heading">
           <div>
             <p className="studio-kicker">Inbox · 信箱</p>
@@ -142,7 +146,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
           </div>
         )}
       </section>
-      <section className="studio-inbox studio-media-space" aria-labelledby="media-title">
+      <section className="studio-inbox studio-media-space" hidden={section !== 'media'} aria-labelledby="media-title">
         <div className="studio-inbox-heading"><div><p className="studio-kicker">Space · Media</p><h2 id="media-title">Media Library</h2></div><strong>{media.length}</strong></div>
         <p className="studio-muted">图片会生成 WebP / AVIF 多尺寸变体；音频、短视频和附件验证真实类型后保留一个随机地址的原始对象。</p>
         <MediaUploadForm />
@@ -151,7 +155,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
           return <article key={item.id}>{thumbnail ? <img src={thumbnail.publicUrl} alt={item.altText} width={thumbnail.width} height={thumbnail.height} /> : <span className={`studio-media-kind ${item.kind}`}>{item.kind === 'audio' ? 'AUDIO' : item.kind === 'video' ? 'VIDEO' : 'FILE'}</span>}<div><strong>{item.originalName}</strong><span>{item.width && item.height ? `${item.width}×${item.height}` : item.kind}</span><small>{item.altText || 'No description'}</small><MediaDeleteButton id={item.id} /></div></article>
         })}</div> : null}
       </section>
-      <section className="studio-inbox studio-persona-space" aria-labelledby="persona-title">
+      <section className="studio-inbox studio-persona-space" hidden={section !== 'persona'} aria-labelledby="persona-title">
         <div className="studio-inbox-heading">
           <div><p className="studio-kicker">Space · Persona</p><h2 id="persona-title">AI Persona permissions</h2></div>
           <strong>{personas.length}</strong>
@@ -187,7 +191,7 @@ export default async function StudioOverviewPage({ searchParams }: { searchParam
           {replyTargets.length ? <form action={generatePersonaReviewAction}><input type="hidden" name="action" value="reply" /><select name="personaId" aria-label="Persona for reply">{personas.map((persona) => <option value={persona.id} key={persona.id}>{persona.name}</option>)}</select><select name="replyTarget" aria-label="Target comment">{replyTargets.map((target) => <option value={target.value} key={target.value}>{target.label}</option>)}</select><button disabled={!personaAiEnabled}>Generate reply</button></form> : null}
         </div> : null}
       </section>
-      <section className="studio-inbox studio-ai-review" aria-labelledby="ai-review-title">
+      <section className="studio-inbox studio-ai-review" hidden={section !== 'review'} aria-labelledby="ai-review-title">
         <div className="studio-inbox-heading"><div><p className="studio-kicker">Inbox · AI Review</p><h2 id="ai-review-title">Persona proposals</h2></div><strong>{pendingReviews.length}</strong></div>
         {reviews.length === 0 ? <p className="studio-muted">还没有 Persona 提案。</p> : <div className="studio-review-list">
           {reviews.slice(0, 20).map((review) => <article className="studio-review-item" key={review.id}>

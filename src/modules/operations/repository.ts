@@ -19,6 +19,7 @@ import {
   ownerChatMessages,
   ownerChatThreads,
   ownerMemories,
+  ownerSourceRecords,
   personaReviews,
 } from '@/db/schema'
 import type * as schema from '@/db/schema'
@@ -137,6 +138,7 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
         messages,
         memories,
         autoMemories,
+        sourceRecords,
         settings,
       ] = await Promise.all([
         database.select().from(contentEntries).orderBy(asc(contentEntries.createdAt), asc(contentEntries.id)),
@@ -166,6 +168,7 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
         database.select().from(ownerChatMessages).orderBy(asc(ownerChatMessages.createdAt), asc(ownerChatMessages.id)),
         database.select().from(ownerMemories).orderBy(asc(ownerMemories.createdAt), asc(ownerMemories.id)),
         database.select().from(ownerAutoMemories).orderBy(asc(ownerAutoMemories.createdAt), asc(ownerAutoMemories.id)),
+        database.select().from(ownerSourceRecords).orderBy(asc(ownerSourceRecords.store), asc(ownerSourceRecords.key)),
         getSettings(),
       ])
 
@@ -179,7 +182,7 @@ export function createOperationsRepository(database: NodePgDatabase<typeof schem
         letters: letterRows,
         media: { objects, variants },
         moments: { personas, comments, authorships, reviews },
-        knowledge: { companions, threads, messages, memories, autoMemories },
+        knowledge: { companions, threads, messages, memories, autoMemories, sourceRecords },
       }
     },
   }

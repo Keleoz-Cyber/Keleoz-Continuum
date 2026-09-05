@@ -17,8 +17,8 @@ export const getCurrentOwner = cache(async () => {
 
 export const getOptionalCurrentOwner = cache(() => resolveOptionalOwner(getCurrentOwner))
 
-export async function requireOwner(): Promise<{ id: string; username: string }> {
+export async function requireOwner(returnTo?: string): Promise<{ id: string; username: string }> {
   const owner = await getCurrentOwner()
-  if (!owner) redirect('/studio/login')
+  if (!owner) redirect(returnTo ? `/studio/login?next=${encodeURIComponent(returnTo)}` : '/studio/login')
   return owner
 }

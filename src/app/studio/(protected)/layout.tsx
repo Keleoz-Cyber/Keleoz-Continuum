@@ -1,7 +1,5 @@
-import Link from 'next/link'
-
-import { logoutAction } from '@/modules/auth/actions'
 import { requireOwner } from '@/modules/auth/dal'
+import { SourcePublicNav } from '@/modules/home/source-public-nav'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,19 +9,9 @@ export default async function ProtectedStudioLayout({
   const owner = await requireOwner()
 
   return (
-    <div className="studio-shell source-studio">
-      <header className="studio-header">
-        <div className="studio-header-links">
-          <Link className="source-studio-brand" href="/studio"><span>◇</span> KC</Link>
-          <nav aria-label="Studio navigation"><Link href="/studio">Studio</Link><Link href="/studio/chat">Chat</Link><Link href="/studio/memory">Memory</Link><Link href="/studio/operations">System</Link><Link href="/">View site</Link></nav>
-        </div>
-        <div className="studio-owner">
-          <span><i>{owner.username.slice(0, 1).toUpperCase()}</i>{owner.username}</span>
-          <form action={logoutAction}>
-            <button type="submit">Log out</button>
-          </form>
-        </div>
-      </header>
+    <div className="studio-shell source-studio source-public-page">
+      <div className="source-public-bg" aria-hidden="true" />
+      <SourcePublicNav current="studio" owner={owner.username} />
       {children}
     </div>
   )

@@ -69,7 +69,8 @@ export async function loginAction(
     path: '/',
     expires: result.expiresAt,
   })
-  redirect('/studio')
+  const next = String(formData.get('next') ?? '')
+  redirect(['/chat', '/memory'].includes(next) ? next : '/studio')
 }
 
 export async function logoutAction(): Promise<never> {

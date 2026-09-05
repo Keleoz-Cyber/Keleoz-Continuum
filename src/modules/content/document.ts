@@ -5,6 +5,7 @@ import { getContinuumExtensions } from '@/modules/content/extensions'
 import { advancedNodeText, prepareAdvancedDocument } from '@/modules/content/advanced-nodes'
 import { extractMediaReferences, mediaNodeText } from '@/modules/content/media-nodes'
 import { tiptapDocumentSchema, type TiptapDocument, type TiptapNode } from '@/modules/content/schemas'
+import { renderOriginalBlog } from '@/modules/source-native/blog-renderer'
 
 export type RenderedDocument = {
   document: TiptapDocument
@@ -33,7 +34,9 @@ function nodeText(node: TiptapNode): string {
 export function parseAndRenderDocument(input: unknown): RenderedDocument {
   const document = prepareAdvancedDocument(tiptapDocumentSchema.parse(input))
   extractMediaReferences(document)
-  const unsafeHtml = renderToHTMLString({
+  const sourceText = document.attrs?.sourceText
+  const sourceFormat = document.attrs?.sourceFormat
+  const unsafeHtml = typeof sourceText === 'string' && (sourceFormat === 'md' || sourceFormat === 'txt') ? renderOriginalBlog(sourceText, sourceFormat) : renderToHTMLString({
     content: document,
     extensions: getContinuumExtensions(),
   })
