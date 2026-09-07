@@ -8,5 +8,5 @@ export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const [data,settings] = await Promise.all([loadHomePublicData({ list: getCachedPublicList, timeline: getCachedPublicTimeline, detail: getCachedPublicBySlug }),getPublicSiteConfig()])
-  return <main className="continuum-home"><SourceHomeFrame settings={settings}/><PublicHomeSections data={data} /></main>
+  return <main className="continuum-home"><SourceHomeFrame settings={settings}/><PublicHomeSections data={data} /><footer className="continuum-filing"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">皖ICP备2026007914号-2</a></footer></main>
 }

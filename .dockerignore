@@ -10,6 +10,9 @@ playwright-report
 test-results
 .env
 .env.*
+**/.env
+**/.env.*
+var/deploy*
 deploy/*.env
 deploy/certs
 *.key
