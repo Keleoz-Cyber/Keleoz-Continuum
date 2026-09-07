@@ -255,6 +255,20 @@
 .source-reader-page .post-view-sub { margin: 0 0 8px; color: #3f5e8c; font-size: 1.05rem; font-style: italic; }
 .source-reader-page .post-view-meta { display: flex; gap: 10px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid rgba(90,140,200,.18); color: #4a6890; font-size: .88rem; opacity: .85; }
 .source-reader-page .post-view-content { color: #142952; font-size: 1rem; line-height: 2.1; word-wrap: break-word; }
+/* Original Desktop reader sizes, scoped to the public Blog reader. */
+.source-reader-page #blog-read-view.fontsize-s .post-view-title { font-size: 2.1rem; }
+.source-reader-page #blog-read-view.fontsize-s .post-view-sub { font-size: .95rem; }
+.source-reader-page #blog-read-view.fontsize-s .post-view-meta { font-size: .8rem; }
+.source-reader-page #blog-read-view.fontsize-s .post-view-content { font-size: .91rem; line-height: 2; }
+.source-reader-page #blog-read-view.fontsize-s .post-view { max-width: 780px; margin: 0 auto; }
+.source-reader-page #blog-read-view.fontsize-m .post-view-title { font-size: 2.4rem; }
+.source-reader-page #blog-read-view.fontsize-m .post-view-content { font-size: 1rem; line-height: 2.1; }
+.source-reader-page #blog-read-view.fontsize-l .post-view-title { font-size: 3rem; }
+.source-reader-page #blog-read-view.fontsize-l .post-view-sub { font-size: 1.2rem; }
+.source-reader-page #blog-read-view.fontsize-l .post-view-meta { font-size: 1rem; }
+.source-reader-page #blog-read-view.fontsize-l .post-view-content { font-size: 1.18rem; line-height: 2.3; }
+.source-reader-page #blog-read-view.fontsize-l .post-view { max-width: 1140px; }
+::highlight(continuum-reader-match) { background-color: rgba(114,168,216,.3); color: inherit; }
 .source-reader-page .post-view-content p { margin: 0 0 1.2em; }
 .source-reader-page .post-view-content h1,
 .source-reader-page .post-view-content h2 { margin: 1.5em 0 .6em; padding-bottom: .28em; border-bottom: 1px solid rgba(90,140,200,.18); color: #16305c; font-family: "Cormorant Garamond", "Iowan Old Style", serif; font-weight: 500; }

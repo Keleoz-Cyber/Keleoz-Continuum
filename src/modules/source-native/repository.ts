@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { ownerSourceRecords } from '@/db/schema'
 import { ownerKnowledgeRepository } from '@/modules/owner-memory/runtime'
@@ -41,13 +41,38 @@ export async function readSourceCategories(){
   return rows.map(row=>row.name)
 }
 
-export async function writeSourceRecord(store: string, key: string, value: Record<string, unknown>) {
-  const record = { ...value, ...(store === 'categories' ? { name: key } : { id: key }) }
-  const safe = store === 'apiConfigs' || store === 'apiSettings' ? withoutProviderSecrets(record) : record
-  await db.insert(ownerSourceRecords).values({ store, key, value: safe }).onConflictDoUpdate({ target: [ownerSourceRecords.store, ownerSourceRecords.key], set: { value: safe, updatedAt: new Date() } })
-  return safe
+export class SourceRecordConflictError extends Error {
+  constructor() { super('source_record_conflict') }
 }
 
-export async function deleteSourceRecord(store: string, key: string) {
-  await db.delete(ownerSourceRecords).where(and(eq(ownerSourceRecords.store, store), eq(ownerSourceRecords.key, key)))
+function checkSourceRevision(existing: { updatedAt: Date } | undefined, expectedUpdatedAt: string | null | undefined) {
+  if (expectedUpdatedAt === undefined) return
+  if (expectedUpdatedAt === null ? Boolean(existing) : !existing || existing.updatedAt.toISOString() !== expectedUpdatedAt) {
+    throw new SourceRecordConflictError()
+  }
+}
+
+export async function writeSourceRecord(store: string, key: string, value: Record<string, unknown>, expectedUpdatedAt?: string | null) {
+  const record: Record<string, unknown> = { ...value, ...(store === 'categories' ? { name: key } : { id: key }) }
+  delete record.expectedUpdatedAt
+  const safe = store === 'apiConfigs' || store === 'apiSettings' ? withoutProviderSecrets(record) : record
+  return db.transaction(async tx => {
+    // The same lock covers missing rows, so competing creates and deletes also serialize.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${JSON.stringify([store, key])}, 7152035))`)
+    const [existing] = await tx.select({ updatedAt: ownerSourceRecords.updatedAt }).from(ownerSourceRecords).where(and(eq(ownerSourceRecords.store, store), eq(ownerSourceRecords.key, key)))
+    checkSourceRevision(existing, expectedUpdatedAt)
+    // Tokens round-trip through JavaScript dates; never emit two versions in one millisecond.
+    const updatedAt = new Date(Math.max(Date.now(), (existing?.updatedAt.getTime() ?? -1) + 1))
+    await tx.insert(ownerSourceRecords).values({ store, key, value: safe, updatedAt }).onConflictDoUpdate({ target: [ownerSourceRecords.store, ownerSourceRecords.key], set: { value: safe, updatedAt } })
+    return { value: safe, updatedAt }
+  })
+}
+
+export async function deleteSourceRecord(store: string, key: string, expectedUpdatedAt?: string | null) {
+  await db.transaction(async tx => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${JSON.stringify([store, key])}, 7152035))`)
+    const [existing] = await tx.select({ updatedAt: ownerSourceRecords.updatedAt }).from(ownerSourceRecords).where(and(eq(ownerSourceRecords.store, store), eq(ownerSourceRecords.key, key)))
+    checkSourceRevision(existing, expectedUpdatedAt)
+    await tx.delete(ownerSourceRecords).where(and(eq(ownerSourceRecords.store, store), eq(ownerSourceRecords.key, key)))
+  })
 }

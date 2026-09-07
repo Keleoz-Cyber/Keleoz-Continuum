@@ -56,7 +56,7 @@ describe('source visual parity adapters', () => {
   })
 
   it('adds Mobile Tea as a real Desk app without routing into the pixel Room', () => {
-    const homeFrame = readFileSync('src/modules/home/source-home-frame.tsx', 'utf8')
+    const homeFrame = readFileSync('src/modules/home/source-home-frame.tsx', 'utf8')+readFileSync('src/modules/home/mobile-public-patch.ts','utf8')
 
     expect(homeFrame).toContain('data-page="tea"')
     expect(homeFrame).toContain("external('#sec-profile-cal .sb-app[data-page=\"tea\"]','/tea')")

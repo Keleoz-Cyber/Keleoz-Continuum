@@ -2,11 +2,14 @@ import { MediaValidationError } from '@/modules/media/contracts'
 import { mediaService } from '@/modules/media/runtime'
 import { requireOwner } from '@/modules/auth/dal'
 import { z } from 'zod'
+import { hasAllowedOrigin } from '@/shared/same-origin'
+import { serverEnv } from '@/shared/env'
 
 const MAX_FORM_BYTES = 26 * 1024 * 1024
 
 export async function POST(request: Request) {
   await requireOwner()
+  if(!hasAllowedOrigin(request,serverEnv.SITE_ORIGIN))return Response.json({error:'Invalid request origin.'},{status:403})
   const declaredLength = Number(request.headers.get('content-length') ?? 0)
   if (Number.isFinite(declaredLength) && declaredLength > MAX_FORM_BYTES) {
     return Response.json({ error: 'Upload exceeds the V1 media size limit.' }, { status: 413 })
@@ -32,6 +35,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   await requireOwner()
+  if(!hasAllowedOrigin(request,serverEnv.SITE_ORIGIN))return Response.json({error:'Invalid request origin.'},{status:403})
   const id = z.uuid().safeParse(new URL(request.url).searchParams.get('id'))
   if (!id.success) return Response.json({ error: 'Invalid media id.' }, { status: 400 })
   try {

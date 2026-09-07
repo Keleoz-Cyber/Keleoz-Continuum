@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/modules/site-config/runtime',()=>({getPublicSiteConfig:async()=>({appearance:{desktop:{}}})}))
 
 import { GET } from '@/app/reference/internal-beyond/[...path]/route'
 

@@ -2,7 +2,7 @@ import { and,eq,inArray } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type * as schema from '@/db/schema'
 import { ownerSourceRecords,mediaObjects } from '@/db/schema'
-import { siteConfigSchema,siteMediaIds,type SiteConfig } from './contracts'
+import { siteConfigSchema,siteMediaIds,siteImageIds,type SiteConfig } from './contracts'
 export function createSiteConfigRepository(database:NodePgDatabase<typeof schema>){
   const read=async()=>{
     const [record]=await database.select({value:ownerSourceRecords.value}).from(ownerSourceRecords).where(and(eq(ownerSourceRecords.store,'_site'),eq(ownerSourceRecords.key,'public')))
@@ -17,7 +17,7 @@ export function createSiteConfigRepository(database:NodePgDatabase<typeof schema
       const ids=siteMediaIds(next)
       if(ids.length){
         const media=await tx.select({id:mediaObjects.id,mime:mediaObjects.mimeType,state:mediaObjects.state}).from(mediaObjects).where(inArray(mediaObjects.id,ids))
-        const images=[next.avatarId,next.coverId,...next.galleryIds]
+        const images=siteImageIds(next)
         for(const id of ids){const item=media.find(item=>item.id===id);if(!item||item.state!=='ready'||(images.includes(id)&&!item.mime.startsWith('image/'))||(next.playlist.includes(id)&&!item.mime.startsWith('audio/')))throw new Error('invalid_site_media')}
       }
       const value={...next,revision:next.revision+1}

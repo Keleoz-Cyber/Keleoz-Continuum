@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { adaptDesktopSourceForPublicHome } from '@/modules/home/source-html-adapter'
+import { getPublicSiteConfig } from '@/modules/site-config/runtime'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Desktop')
 const types: Record<string, string> = {
@@ -45,7 +46,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     const data = await readFile(requested)
     const adaptHome = path.basename(requested) === 'InternalBeyond.html'
       && new URL(request.url).searchParams.get('continuum-gloss') === '2'
-    const body = adaptHome ? adaptDesktopSourceForPublicHome(data.toString('utf8')) : new Uint8Array(data)
+    let body = adaptHome ? adaptDesktopSourceForPublicHome(data.toString('utf8')) : new Uint8Array(data)
+    if(adaptHome&&typeof body==='string'){
+      const {appearance}=await getPublicSiteConfig()
+      for(const [key,file] of [['internal','bg-internal.jpg'],['infernal','bg-infernal.jpg'],['canvas','bg-canvas.png'],['canvas','bg-canvas.jpg']])if(appearance.desktop[key])body=body.replaceAll(file,appearance.desktop[key])
+    }
     return new Response(body, {
       headers: {
         'content-type': types[path.extname(requested).toLowerCase()] ?? 'application/octet-stream',

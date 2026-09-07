@@ -12,7 +12,14 @@ export function siteConfigScript(config:PublicSiteConfig,mobile:boolean){
   }
   applySiteCopy();
   ${mobile?`
-  var originalGet=dbGet;dbGet=async function(store,key){if(store==='about'&&key==='main')return {id:'main',name:site.name,nameColor:site.nameColor,bio:site.bio,customText:site.customText,avatar:site.avatarUrl||'',bgImage:site.coverUrl||'',galleryImages:site.galleryUrls};return originalGet(store,key)};
+  var originalGet=dbGet;dbGet=async function(store,key){if(store==='about'&&key==='main')return {id:'main',name:site.name,nameColor:site.nameColor,bio:site.bio,customText:site.customText,avatar:site.avatarUrl||'',bgImage:site.coverUrl||'',galleryImages:site.galleryUrls,infAvatar:site.infernalAvatarUrl||'',infBgImage:site.infernalCoverUrl||'',infGalleryImages:site.infernalGalleryUrls};return originalGet(store,key)};
+  var sourceLoadMP=loadMP;
+  loadMP=async function(){var prefs=await sourceLoadMP();prefs.ui={...prefs.ui,...site.appearance.ui};prefs.desk=JSON.parse(JSON.stringify(site.appearance.desk));prefs.deskDeco=site.appearance.decorations;_mp=prefs;return prefs};
+  loadMP().then(async function(){
+    _mbgs={id:'mobileBgs',...site.appearance.backgrounds};
+    await _uiApply();_uiApplyBg();await deskApplyLayout();
+    window.__continuumSiteApplied=true;
+  });
   var privateEdit=document.getElementById('pf-set-btn');if(privateEdit)privateEdit.style.display='none';
   if(typeof renderProfile==='function')renderProfile();
   _pwLoad().then(function(){if(_pw.idx<0&&_pw.list.length){_pw.idx=0;var audio=_pwA();audio.preload='none';audio.src=_pwSrc(_pw.list[0]);}_pwPaint();});
@@ -25,6 +32,6 @@ export function siteConfigScript(config:PublicSiteConfig,mobile:boolean){
   var originalTheme=window.toggleTheme,installing=true;window.toggleTheme=function(){var remember=!installing;originalTheme();setTimeout(function(){applySiteCopy();if(remember)try{localStorage.setItem('continuum_theme',document.body.classList.contains('theme-infernal')?'infernal':'internal')}catch(e){}},1300)};
   var preferred=site.theme;try{preferred=localStorage.getItem('continuum_theme')||preferred}catch(e){};if((preferred==='infernal')!==document.body.classList.contains('theme-infernal'))window.toggleTheme();installing=false;
   `}
-  window.__continuumSiteApplied=true;
+  ${mobile?'':'window.__continuumSiteApplied=true;'}
   `
 }

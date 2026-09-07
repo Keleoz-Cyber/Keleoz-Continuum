@@ -4,16 +4,23 @@ import { writerRuntime } from './writer-runtime'
 import { preserveCalendarFields } from './calendar'
 import { createSourceStoreQueue } from './store-queue'
 import { searchRuntime } from './search-runtime'
+import { desktopAppearanceRuntime } from './appearance-runtime'
+import { PUBLIC_MOBILE_PATCH } from '@/modules/home/mobile-public-patch'
 export const nativeBootstrap = String.raw`
 ${writerRuntime}
 ${searchRuntime}
+${desktopAppearanceRuntime}
 const preserveCalendarFields=${preserveCalendarFields.toString()};
 const createSourceStoreQueue=${createSourceStoreQueue.toString()};
 async function continuumNativeBoot(){
   const nativeFetch=window.fetch.bind(window);
+  const responseVersions=new WeakMap(),readVersions=new WeakMap(),versions={},latestVersions={};
+  const failedSaves=new Map();
   const request=async(url,body)=>{
     const response=await nativeFetch(url,{method:body?'POST':'GET',credentials:'same-origin',headers:body?{'content-type':'application/json'}:{},body:body?JSON.stringify(body):undefined});
     const data=await response.json();
+    const revision=response.headers.get('X-Source-Revision');if(revision&&data&&typeof data==='object')responseVersions.set(data,revision);
+    if(response.status===409&&data.error==='source_record_conflict')throw new Error('这条记录已在其他窗口修改或删除，请重新打开后再操作。');
     if(!response.ok)throw new Error(data.error==='draft_conflict'?'草稿已在另一个窗口更新，请重新打开后再编辑。':(typeof data.error==='string'?data.error:'保存失败，请重试。'));
     return data;
   };
@@ -30,16 +37,19 @@ async function continuumNativeBoot(){
   const contentType=['blog','project','moment','page'].includes(requestedType)?requestedType:'blog';
   const [records,posts]=await Promise.all([request('/api/studio/source-records'),request('/api/studio/source-posts?type='+contentType)]);
   const stores={};
-  for(const r of records){if(r.store[0]!=='_')(stores[r.store]||(stores[r.store]=new Map())).set(r.key,r.value)}
+  for(const r of records){if(r.store[0]!=='_'){(stores[r.store]||(stores[r.store]=new Map())).set(r.key,r.value);(versions[r.store]||(versions[r.store]=new Map())).set(r.key,r.updatedAt)}}
+  for(const s of Object.keys(versions))latestVersions[s]=new Map(versions[s]);
   stores.posts=new Map(posts.map(p=>[p.id,p]));
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const storeQueue=createSourceStoreQueue();
   let calendarSettingsReadFailed=false;
-  const freshStore=(s)=>storeQueue.run(s,async()=>{const rows=await request('/api/studio/source-records?store='+s);stores[s]=new Map(rows.map(r=>[r.key,r.value]))});
+  const freshStore=(s)=>storeQueue.run(s,async()=>{const rows=await request('/api/studio/source-records?store='+s);stores[s]=new Map(rows.map(r=>[r.key,r.value]));latestVersions[s]=new Map(rows.map(r=>[r.key,r.updatedAt]));versions[s]??=new Map();for(const r of rows)if(!versions[s].has(r.key))versions[s].set(r.key,r.updatedAt)});
+  const mutableStores=['calEvents','calNotes','calLedger','memories','autoMemory','apiConfigs','apiSettings','chatThreads'];
+  const readClone=(s,k,v)=>{const result=clone(s==='apiConfigs'?config(v):v);if(result&&typeof result==='object')readVersions.set(result,latestVersions[s]?.get(String(k))??versions[s]?.get(String(k))??null);return result};
   const config=v=>v?{...v,provider:'openai',apiKey:'server-managed',endpoint:'https://continuum.invalid/v1/chat/completions',model:v.model||'Site AI',tools:false,webSearch:v.webSearch!==false}:v;
   openDB=async()=>({});
-  dbGetAll=async(s)=>{if(['calEvents','calNotes','calLedger'].includes(s))await freshStore(s);return [...(stores[s]||new Map()).values()].map(v=>clone(s==='apiConfigs'?config(v):v))};
-  dbGet=async(s,k)=>{if(s==='calLedger')await freshStore(s);if(s==='apiSettings'&&k==='calendarSettings'){try{await freshStore(s);calendarSettingsReadFailed=false}catch(error){calendarSettingsReadFailed=true;throw error}}const v=(stores[s]||new Map()).get(String(k));return clone(s==='apiConfigs'?config(v):v)};
+  dbGetAll=async(s)=>{if(mutableStores.includes(s))await freshStore(s);return [...(stores[s]||new Map()).entries()].map(([k,v])=>readClone(s,k,v))};
+  dbGet=async(s,k)=>{if(s==='apiSettings'&&k==='calendarSettings'){try{await freshStore(s);calendarSettingsReadFailed=false}catch(error){calendarSettingsReadFailed=true;throw error}}else if(mutableStores.includes(s))await freshStore(s);return readClone(s,k,(stores[s]||new Map()).get(String(k)))};
   dbGetByIndex=async(s,idx,val)=>(await dbGetAll(s)).filter(v=>v[idx==='byFriend'?'friendId':idx==='byProject'?'projectId':idx]===val);
   dbPut=async(s,d)=>{
     if(s==='calEvents'&&new URLSearchParams(location.search).get('mobile')==='1')Object.assign(d,preserveCalendarFields(stores[s]?.get(d.id),d));
@@ -52,14 +62,15 @@ async function continuumNativeBoot(){
     }
     const key=String(s==='categories'?d.name:d.id);
     const value=clone(d);
-    await storeQueue.run(s,async()=>{const saved=await request('/api/studio/source-records',{op:'put',store:s,key,value});(stores[s]||(stores[s]=new Map())).set(key,saved)});
+    await storeQueue.run(s,async()=>{try{const saved=await request('/api/studio/source-records',{op:'put',store:s,key,value,expectedUpdatedAt:readVersions.has(d)?readVersions.get(d):versions[s]?.get(key)??null});const rev=responseVersions.get(saved);if(!rev)throw new Error('保存响应缺少版本，请刷新后确认。');(stores[s]||(stores[s]=new Map())).set(key,saved);(versions[s]||(versions[s]=new Map())).set(key,rev);(latestVersions[s]||(latestVersions[s]=new Map())).set(key,rev);readVersions.set(d,rev);failedSaves.delete(s+':'+key)}catch(error){failedSaves.set(s+':'+key,error);throw error}});
   };
   dbDelete=async(s,k)=>{
     if(s==='posts'){window.parent.location.href='/studio?section=manage';return}
-    await storeQueue.run(s,async()=>{await request('/api/studio/source-records',{op:'delete',store:s,key:String(k)});if(stores[s])stores[s].delete(String(k))});
+    await storeQueue.run(s,async()=>{await request('/api/studio/source-records',{op:'delete',store:s,key:String(k),expectedUpdatedAt:versions[s]?.get(String(k))??null});if(stores[s])stores[s].delete(String(k));versions[s]?.delete(String(k))});
   };
   dbPutAll=async(s,rows)=>{for(const r of rows)await dbPut(s,r);return rows.length};
   dbClear=async()=>{throw new Error('请从管理页面执行数据清理。')};
+  const loadEditorLocked=async(prefix,load)=>{const fields=['title','subtitle','content','cat','format'].map(key=>document.getElementById(prefix+key)).filter(Boolean);const disabled=fields.map(el=>el.disabled&&!el.hasAttribute('data-continuum-load-lock'));fields.forEach(el=>{el.disabled=true});try{return await load()}finally{fields.forEach((el,i)=>{el.disabled=disabled[i];el.removeAttribute('data-continuum-load-lock')})}};
   let writer;
   const appendMedia=(id,container)=>{document.getElementById('continuum-post-media')?.remove();const html=stores.posts.get(id)?.attachmentHtml;if(html&&container){const media=document.createElement('div');media.id='continuum-post-media';media.innerHTML=html;container.appendChild(media)}};
   const mediaStyle=document.createElement('style');mediaStyle.textContent='#continuum-post-media img,#continuum-post-media video{max-width:100%;height:auto}#continuum-post-media audio{width:100%}#continuum-post-media figure{margin:20px 0}#continuum-post-media figcaption{font-size:.8rem}#continuum-post-media .continuum-gallery{display:flex;gap:8px}#continuum-post-media .continuum-gallery>figure{flex:1;min-width:0}';document.head.appendChild(mediaStyle);
@@ -89,7 +100,7 @@ async function continuumNativeBoot(){
   document.querySelector('#home-title .t-beyond').textContent='Continuum';
   document.getElementById('home-credit').textContent='A Personal Digital Space.';
   const options=new URLSearchParams(location.search), page=options.get('page')||'blog';
-  navTo(page==='calendar'?'home':page);
+  navTo(page==='calendar'?'home':page==='appearance'?'diy':page);
   if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
   installDesktopSearch();
   const searchLabel=document.querySelector('#api-websearch-group label');if(searchLabel)searchLabel.title='免 Key 搜索。开启后发送“搜索 …”或“阅读 https://…”。只发送本次查询，不发送聊天历史。';
@@ -99,6 +110,7 @@ async function continuumNativeBoot(){
   window.IBCAL.buildTail=async cfg=>calendarSettingsReadFailed?'':calendarTail(cfg);
   window.IBCAL.processReply=async(text,cfg)=>calendarSettingsReadFailed?{clean:text,results:[]}:calendarReply(text,cfg);
   if(page==='calendar')await window.IBCAL.open();
+  if(page==='appearance'){await installDesktopAppearance();window.__continuumPreviewDesk=()=>{originalNav(currentPage==='diy'?'home':'diy')}};
   const bar=document.querySelector('#blog-edit-view .rift-sidebar');
   writer=installSourceWriter({container:bar,prefix:'ed-',getId:()=>editingPostId,setId:id=>{editingPostId=id},isPrivate:()=>diaryMode,clean:()=>{editorDirty=false},className:'btn',request,dbPut,stores});
   const originalSave=savePost,originalClose=closeEditor;
@@ -108,7 +120,7 @@ async function continuumNativeBoot(){
   openEditor=async(id)=>{
     const p=id?stores.posts.get(id):null;
     if(p&&p.richDocument){window.parent.location.href='/studio/content/'+id+'/advanced';return}
-    await writer.flush();await openOriginalEditor(id);writer.reset();
+    await writer.flush();await loadEditorLocked('ed-',async()=>{await openOriginalEditor(id);writer.reset()});
   };
   if(options.get('edit'))await openEditor(options.get('edit')==='new'?undefined:options.get('edit'));
   deletePost=function(){window.parent.location.href='/studio?section=manage'};
@@ -121,11 +133,13 @@ async function continuumNativeBoot(){
   const originalNav=navTo;
   navTo=function(next){
     if(next==='home'){window.parent.location.href='/';return}
-    if(next==='blog'||next==='chat'||next==='memory'||next==='api'||next==='about'){originalNav(next);return}
+    if(next==='blog'||next==='chat'||next==='memory'||next==='api'||next==='about'||next==='diy'&&page==='appearance'){originalNav(next);return}
     toast('此入口尚未接入站点，请使用顶栏的对应页面。');
   };
   window.addEventListener('unhandledrejection',e=>{toast(e.reason&&e.reason.message||'操作失败，请重试。')});
   window.__continuumNativeReady=true;
+  window.__continuumToggleTheme=()=>{if(document.getElementById('about-name')){toast('请先保存资料，再切换主题。');return}toggleTheme()};
+  window.__continuumFlush=async()=>{if(writer)await writer.flush();await storeQueue.run('apiSettings',async()=>{});await storeQueue.run('about',async()=>{});for(const [key,error] of failedSaves)if(key.startsWith('apiSettings:')||key.startsWith('about:'))throw error};
 }
 void continuumNativeBoot().catch(function(error){document.body.innerHTML='';const message=document.createElement('p');message.textContent='页面加载失败：'+error.message;document.body.appendChild(message)});
 `
@@ -147,7 +161,7 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
   const originalEditor=blogOpenEditor;
   blogOpenEditor=async(id)=>{
     if(id&&stores.posts.get(id)?.richDocument){window.parent.location.href='/studio/content/'+id+'/advanced';return}
-    if(writer)await writer.flush();await originalEditor(id);if(writer)writer.reset();
+    if(writer)await writer.flush();await loadEditorLocked('m-ed-',async()=>{await originalEditor(id);if(writer)writer.reset()});
   };
   const originalAset=openAset;
   const originalViewMobile=viewPostM;
@@ -157,8 +171,10 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
     await _lkBoot();document.title='Keleoz Continuum';
     installMobileSearch();
     document.getElementById('ib-splash')?.remove();
-    const query=new URLSearchParams(location.search),target=query.get('page')==='about'?'profile':query.get('page')||'blog';
+    const query=new URLSearchParams(location.search),target=query.get('page')==='about'?'profile':query.get('page')==='appearance'?'visual':query.get('page')||'blog';
+    if(target==='profile')_sec.profile='card';
     navTo(target==='calendar'?'profile':target);
+    if(target==='profile')await renderProfile();
     const calendarSettings=loadCS;
     loadCS=async function(force){await calendarSettings(force);if(calendarSettingsReadFailed)_cs.allowNotes=false;return _cs};
     const calendarBlock=buildCalBlock;
@@ -172,8 +188,15 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
     closeSub=function(id){if(id==='sub-blog-editor'){writer.flush().then(()=>{writer.close();originalCloseSub(id)}).catch(error=>toast(error.message));return}return originalCloseSub(id)};
     if(query.get('edit'))await blogOpenEditor(query.get('edit')==='new'?undefined:query.get('edit'));
     const originalNav=navTo;
-    navTo=function(page){if(page==='profile'&&target!=='profile'){window.parent.location.href='/';return}if(['chat','memory','blog','api','profile'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};
+    navTo=function(page){if(page==='profile'&&target!=='profile'&&target!=='visual'){window.parent.location.href='/';return}if(['chat','memory','blog','api','profile','visual'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};
+    if(target==='visual'){
+      ${PUBLIC_MOBILE_PATCH}
+      await deskApplyLayout();
+      window.__continuumPreviewDesk=()=>{_sec.profile='cal';navTo(document.getElementById('page-visual').classList.contains('active')?'profile':'visual')};
+    }
     window.__continuumNativeReady=true;
+    window.__continuumToggleTheme=()=>applyTheme(!document.body.classList.contains('theme-infernal'));
+    window.__continuumFlush=async()=>{if(writer)await writer.flush();await storeQueue.run('apiSettings',async()=>{});await storeQueue.run('about',async()=>{});for(const [key,error] of failedSaves)if(key.startsWith('apiSettings:')||key.startsWith('about:'))throw error};
   };
 }
 window.continuumStoreReady=continuumMobileBoot();

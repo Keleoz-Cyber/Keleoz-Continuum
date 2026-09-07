@@ -1,6 +1,14 @@
 .native-owner-frame{display:block;position:relative;z-index:2;width:100%;height:100svh;border:0;background:#cbd0d8}
+.source-studio:has(.native-profile-publish)>.native-owner-frame{height:calc(100svh - var(--native-publish-height,72px))!important}
+@media(min-width:901px){.native-owner-frame[data-surface="mobile"]{width:440px;max-width:100%;margin-inline:auto}}
 .native-profile-publish{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;padding:10px;background:rgba(235,244,255,.94);color:#274673;font-size:12px}.native-profile-publish form{margin:0}.source-studio:has(.native-profile-publish)>.native-owner-frame{height:calc(100svh - 72px)}
-.source-about-gallery a{display:block;overflow:hidden}.source-about-gallery img{width:100%;height:100%;object-fit:cover}
+.source-about-gallery a{display:block;position:relative;flex:1;min-width:0;overflow:hidden;transition:flex .45s var(--transition)}.source-about-gallery a:hover{flex:3}.source-about-gallery img{width:100%;height:100%;object-fit:cover}
+.source-about-card[data-profile-theme="infernal"]{background:rgba(18,28,52,.30);color:#e0e6f2;border-color:rgba(175,195,228,.25)}
+.source-about-card[data-profile-theme="infernal"] .source-about-bio,.source-about-card[data-profile-theme="infernal"] .source-about-bio p,.source-about-card[data-profile-theme="infernal"] .source-about-content{color:#e0e6f2}
+.source-about-card[data-profile-theme="infernal"] h1{color:#cdd6ea;text-shadow:none}.source-about-card[data-profile-theme="infernal"] .source-about-identity p,.source-about-card[data-profile-theme="infernal"] .source-about-bio small{color:#adb8d0}
+.source-about-page:has([data-profile-theme="infernal"]) .source-about-heading h2{color:#cdd6ea}.source-about-page:has([data-profile-theme="infernal"]) .source-about-heading span{color:#b2c0d8}
+.source-public-page:has(.source-about-card[data-profile-theme="infernal"]) .source-public-bg{background-image:url('/reference/internal-beyond/bg-infernal.jpg')}
+.source-public-page:has(.source-about-card[data-profile-theme="infernal"])::before{background:rgba(25,45,70,.18);backdrop-filter:blur(26px) saturate(1.15)}
 .source-about-card:not(:has(.source-about-gallery)) .source-about-bio{flex:1}
 .source-about-avatar{overflow:hidden}.source-about-avatar img{width:100%;height:100%;object-fit:cover}.source-about-identity:has(.source-about-avatar img){isolation:isolate}
 .source-about-identity{background-image:var(--profile-cover);background-size:cover;background-position:center}@media(max-width:760px){.source-about-identity{background-image:linear-gradient(160deg,rgba(160,197,239,.5),rgba(220,235,251,.42))}.source-about-identity::before{background-image:var(--profile-cover,url('/reference/internal-beyond/bg-internal.jpg'))}}

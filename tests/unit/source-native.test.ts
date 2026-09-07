@@ -5,8 +5,21 @@ import { parseAndRenderDocument } from '@/modules/content/document'
 import { nativeBootstrap, nativeMobileBootstrap } from '@/modules/source-native/bootstrap'
 import { getOriginalTarotFaces } from '@/modules/source-native/tarot-faces'
 import { getOriginalLetterArt } from '@/modules/source-native/letter-art'
+import { lockEditorMarkup } from '@/modules/source-native/editor-load'
 
 describe('original UI persistence boundary', () => {
+  it('locks initial offscreen editor fields until the source loading adapter is ready',()=>{
+    const html='<textarea id="m-ed-content"></textarea><input id="ed-title"><input id="chat-full-input">'
+    const output=lockEditorMarkup(html)
+    expect(output).toContain('id="m-ed-content" disabled data-continuum-load-lock')
+    expect(output).toContain('id="ed-title" disabled data-continuum-load-lock')
+    expect(output).toContain('<input id="chat-full-input">')
+  })
+  it('refreshes mutable private stores and sends record versions with every native write', () => {
+    expect(nativeBootstrap).toContain('expectedUpdatedAt:')
+    expect(nativeBootstrap).toContain("'memories','autoMemory','apiConfigs'")
+    expect(nativeBootstrap).toContain("response.headers.get('X-Source-Revision')")
+  })
   it('connects only the search adapter to both original Chat engines', () => {
     expect(nativeBootstrap).toContain('installDesktopSearch();')
     expect(nativeMobileBootstrap).toContain('installMobileSearch();')

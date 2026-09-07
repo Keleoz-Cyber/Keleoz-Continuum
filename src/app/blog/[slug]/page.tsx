@@ -43,7 +43,7 @@ export default async function BlogArticlePage({
       <SourcePublicNav current="blog" />
       <section className="source-page active" id="page-blog-reader">
         <div id="blog-read-view" className="fontsize-m">
-          <ReadingProgress />
+          <ReadingProgress key={article.slug} />
           <article className="post-view">
             <p className="post-view-kicker">{article.categoryLabel ?? 'Writing'}</p>
             <h1 className="post-view-title">{article.title}</h1>

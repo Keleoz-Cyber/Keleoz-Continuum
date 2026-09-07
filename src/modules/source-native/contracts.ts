@@ -5,6 +5,7 @@ export const sourceWrite = z.object({
   op: z.enum(['put', 'delete']), store: sourceStore,
   key: z.string().min(1).max(180),
   value: z.record(z.string(), z.unknown()).optional(),
+  expectedUpdatedAt: z.iso.datetime().nullable().optional(),
 })
 
 export function withoutProviderSecrets(value: Record<string, unknown>): Record<string, unknown> {

@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { getPublicSiteConfig } from '@/modules/site-config/runtime'
+import { serverEnv } from '@/shared/env'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Desktop', 'game')
 const contentTypes: Record<string, string> = {
@@ -15,6 +17,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pat
   const requested = path.resolve(sourceRoot, ...segments)
   const relative = path.relative(sourceRoot, requested)
   if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) return new Response('Not found', { status: 404 })
+  const asset=segments.join('/')
+  if(asset==='tarot_bg.png'||asset===`portraits/portrait_[${serverEnv.AI_COMPANION_NAME}].png`){
+    const {appearance}=await getPublicSiteConfig(),url=appearance.desktop[asset==='tarot_bg.png'?'tarot':'portrait']
+    if(url)return new Response(null,{status:307,headers:{location:url,'cache-control':'no-cache'}})
+  }
 
   try {
     const data = await readFile(requested)

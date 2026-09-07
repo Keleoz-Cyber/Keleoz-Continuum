@@ -1,6 +1,6 @@
 import { getCurrentOwner } from '@/modules/auth/dal'
 import { sourceStore, sourceWrite } from '@/modules/source-native/contracts'
-import { deleteSourceRecord, readSourceRecords, writeSourceRecord } from '@/modules/source-native/repository'
+import { deleteSourceRecord, readSourceRecords, writeSourceRecord, SourceRecordConflictError } from '@/modules/source-native/repository'
 import { hasAllowedOrigin } from '@/shared/same-origin'
 import { serverEnv } from '@/shared/env'
 
@@ -20,8 +20,17 @@ export async function POST(request: Request) {
   try { json = JSON.parse(raw) } catch { return Response.json({ error: 'invalid_json' }, { status: 400 }) }
   const parsed = sourceWrite.safeParse(json)
   if (!parsed.success) return Response.json({ error: 'invalid_record' }, { status: 400 })
-  const { op, store, key, value } = parsed.data
-  if (op === 'delete') { await deleteSourceRecord(store, key); return Response.json({ ok: true }) }
-  if (!value) return Response.json({ error: 'missing_value' }, { status: 400 })
-  return Response.json(await writeSourceRecord(store, key, value), { headers: { 'Cache-Control': 'private, no-store' } })
+  const { op, store, key, value, expectedUpdatedAt } = parsed.data
+  try {
+    if (op === 'delete') {
+      await deleteSourceRecord(store, key, expectedUpdatedAt)
+      return Response.json({ ok: true }, { headers: { 'Cache-Control': 'private, no-store' } })
+    }
+    if (!value) return Response.json({ error: 'missing_value' }, { status: 400 })
+    const saved = await writeSourceRecord(store, key, value, expectedUpdatedAt)
+    return Response.json(saved.value, { headers: { 'Cache-Control': 'private, no-store', 'X-Source-Revision': saved.updatedAt.toISOString() } })
+  } catch (error) {
+    if (error instanceof SourceRecordConflictError) return Response.json({ error: 'source_record_conflict' }, { status: 409, headers: { 'Cache-Control': 'private, no-store' } })
+    throw error
+  }
 }
