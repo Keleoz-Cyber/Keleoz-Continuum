@@ -12,13 +12,20 @@ describe('owner bootstrap input', () => {
     ).toEqual({ username: 'keleoz', password: 'a-strong-owner-password' })
   })
 
-  it('rejects passwords shorter than fourteen characters', () => {
+  it('accepts a password of exactly eight characters unchanged', () => {
+    expect(parseOwnerBootstrap({
+      CONTINUUM_OWNER_USERNAME: 'admin',
+      CONTINUUM_OWNER_PASSWORD: 'test1234',
+    })).toEqual({ username: 'admin', password: 'test1234' })
+  })
+
+  it('rejects passwords shorter than eight characters', () => {
     expect(() =>
       parseOwnerBootstrap({
         CONTINUUM_OWNER_USERNAME: 'keleoz',
-        CONTINUUM_OWNER_PASSWORD: 'too-short',
+        CONTINUUM_OWNER_PASSWORD: 'test123',
       }),
-    ).toThrow('14')
+    ).toThrow('at least 8 characters')
   })
 
   it('rejects a blank owner username', () => {

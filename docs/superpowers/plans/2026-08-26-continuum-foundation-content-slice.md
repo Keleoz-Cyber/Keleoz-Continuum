@@ -541,7 +541,7 @@ The test creates one Owner, creates a 30-day session row from a token hash, reso
 
 - [ ] **Step 5: Implement Owner bootstrap and session persistence**
 
-`scripts/create-owner.ts` reads `CONTINUUM_OWNER_USERNAME` and `CONTINUUM_OWNER_PASSWORD`, normalizes the username to lowercase, rejects passwords under 14 characters, refuses to create a second Owner, hashes the password, inserts the account, and prints only the created username. It never stores the bootstrap password in `.env.example`.
+`scripts/create-owner.ts` reads `CONTINUUM_OWNER_USERNAME` and `CONTINUUM_OWNER_PASSWORD`, normalizes the username to lowercase, rejects passwords under 8 characters (updated by explicit Owner request on 2026-09-07), refuses to create a second Owner, hashes the password, inserts the account, and prints only the created username. It never stores the bootstrap password in `.env.example`.
 
 Session cookies use:
 

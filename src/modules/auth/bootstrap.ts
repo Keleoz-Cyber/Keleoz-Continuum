@@ -11,8 +11,8 @@ export function parseOwnerBootstrap(source: Record<string, string | undefined>):
     throw new Error('Owner username is required')
   }
 
-  if (password.length < 14) {
-    throw new Error('Owner password must contain at least 14 characters')
+  if (password.length < 8) {
+    throw new Error('Owner password must contain at least 8 characters')
   }
 
   return {
