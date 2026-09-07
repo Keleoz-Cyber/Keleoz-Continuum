@@ -4,12 +4,55 @@ import {
   databaseUrlForName,
   pgDumpInvocation,
   pgRestoreInvocation,
+  pgCreateDatabaseInvocation,
+  pgDropDatabaseInvocation,
+  pgCountTablesInvocation,
   parsePostgresToolConfig,
   redactPostgresError,
   validatePostgresIdentifier,
 } from '@/modules/operations/postgres-tools'
 
 describe('PostgreSQL maintenance tool boundary', () => {
+  it.each(['dbname=continuum', '%64bname=continuum', 'dbname=first&dbname=continuum', 'service=production',
+    'options=-c%20search_path%3Dpublic', 'host=other-server', 'hostaddr=10.0.0.1', 'port=5433',
+    'user=other-owner', 'password=other-password', 'unknown_option=x', 'sslmode=require&sslmode=disable'])
+  ('rejects direct URI connection overrides before any invocation: %s', (query) => {
+    const databaseUrl = `postgres://continuum:secret@db:5432/continuum?${query}`
+    expect(() => parsePostgresToolConfig({ CONTINUUM_BACKUP_MODE: 'direct', DATABASE_URL: databaseUrl })).toThrow('maintenance')
+    expect(() => databaseUrlForName(databaseUrl, 'continuum_restore_1234_ab12cd34')).toThrow('maintenance')
+    const config = { mode: 'direct' as const, databaseUrl }
+    expect(() => pgDumpInvocation(config)).toThrow('maintenance')
+    for (const invocation of [pgRestoreInvocation, pgCreateDatabaseInvocation, pgDropDatabaseInvocation, pgCountTablesInvocation]) {
+      expect(() => invocation(config, 'continuum_restore_1234_ab12cd34')).toThrow('maintenance')
+    }
+  })
+  it.each(['PGSERVICE', 'PGSERVICEFILE', 'PGSYSCONFDIR', 'PGOPTIONS', 'PGDATABASE', 'PGHOST', 'PGHOSTADDR', 'PGPORT', 'PGUSER'])('rejects implicit %s maintenance configuration', (name) => {
+    expect(() => parsePostgresToolConfig({ CONTINUUM_BACKUP_MODE: 'direct',
+      DATABASE_URL: 'postgres://continuum:secret@db:5432/continuum', [name]: 'unexpected-override' })).toThrow('maintenance')
+  })
+  it.each(['postgres:///continuum', 'postgres://db/continuum', 'postgres://continuum@db/',
+    'postgres://continuum@db/continuum#dbname=live', 'postgres://continuum@db/continuum%00'])
+  ('requires explicit unambiguous direct connection identity: %s', (databaseUrl) => {
+    expect(() => parsePostgresToolConfig({ CONTINUUM_BACKUP_MODE: 'direct', DATABASE_URL: databaseUrl })).toThrow('maintenance')
+  })
+  it('preserves only reviewed TLS, timeout and application-name options when selecting the isolated database', () => {
+    const query = 'sslmode=verify-full&sslrootcert=%2Fcerts%2Froot.pem&sslcert=%2Fcerts%2Fclient.pem&sslkey=%2Fcerts%2Fclient.key&connect_timeout=10&application_name=continuum-maintenance&channel_binding=require'
+    const result = databaseUrlForName(`postgres://continuum:secret@db:5432/continuum?${query}`, 'continuum_restore_1234_ab12cd34')
+    expect(new URL(result).pathname).toBe('/continuum_restore_1234_ab12cd34')
+    expect(new URL(result).searchParams.toString()).toBe(query)
+  })
+  it('rejects live database names for every restore-drill action in Docker mode too', () => {
+    const config = { mode: 'docker' as const, container: 'continuum-db', database: 'continuum_test', user: 'continuum' }
+    for (const invocation of [pgRestoreInvocation, pgCreateDatabaseInvocation, pgDropDatabaseInvocation, pgCountTablesInvocation]) {
+      expect(() => invocation(config, 'continuum')).toThrow('restore')
+      expect(() => invocation(config, 'continuum_test')).toThrow('restore')
+    }
+  })
+  it('pins pg_dump to an exported snapshot and rejects option-like snapshot IDs', () => {
+    const config = { mode: 'docker' as const, container: 'continuum-db', database: 'continuum_test', user: 'continuum' }
+    expect(pgDumpInvocation(config, '00000003-0000004A-1').args).toContain('--snapshot=00000003-0000004A-1')
+    expect(() => pgDumpInvocation(config, '--help')).toThrow('snapshot')
+  })
   it('uses explicit Docker execution only when a safe container is configured', () => {
     expect(parsePostgresToolConfig({
       DATABASE_URL: 'postgres://continuum:secret@db:5432/continuum',

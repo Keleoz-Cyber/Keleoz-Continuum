@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { getPublicSiteConfig } from '@/modules/site-config/runtime'
 import { serverEnv } from '@/shared/env'
+import { localizeSourceFonts } from '@/modules/source-native/fonts'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Desktop', 'game')
 const contentTypes: Record<string, string> = {
@@ -26,10 +27,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pat
   try {
     const data = await readFile(requested)
     const extension = path.extname(requested).toLowerCase()
-    return new Response(new Uint8Array(data), {
+    const adapted = asset === 'game_module.js'
+    return new Response(adapted ? localizeSourceFonts(data.toString('utf8')) : new Uint8Array(data), {
       headers: {
         'content-type': contentTypes[extension] ?? 'application/octet-stream',
-        'cache-control': 'public, max-age=31536000, immutable',
+        'cache-control': adapted ? 'no-cache' : 'public, max-age=31536000, immutable',
         'x-content-source': 'InternalBeyond-Desktop immutable snapshot',
       },
     })

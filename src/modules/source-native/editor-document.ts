@@ -7,6 +7,7 @@ function divAt(source:string,marker:string) {
   throw new Error('Original editor closing boundary missing')
 }
 export function originalEditorDocument(source:string,mobile:boolean):string {
+  source=localizeSourceFonts(source)
   const head=source.slice(0,source.indexOf('</head>'))
   const staticSource=source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'')
   const styles=[...staticSource.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/g)].map(match=>match[0]).join('\n')
@@ -22,3 +23,4 @@ export function originalEditorDocument(source:string,mobile:boolean):string {
   ${mobile?'.source-block-body{min-height:42vh;flex:none}.ed-page{height:auto;min-height:calc(100dvh - 58px - var(--sat));padding-bottom:60px}':'.page{position:relative;z-index:2}#rift-mdbar{display:flex!important}'}
   </style></head><body class="${mobile?'on-sub':''}">${mobile?editor:'<div id="bg-internal-img" class="active bg-blur-active"></div><div id="bg-overlay"></div><div id="page-overlay" class="page-overlay show"></div><div class="page active">'+editor+'</div>'}</body></html>`
 }
+import { localizeSourceFonts } from '@/modules/source-native/fonts'

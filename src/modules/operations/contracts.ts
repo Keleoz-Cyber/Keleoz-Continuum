@@ -6,6 +6,9 @@ export type BackupRecord = {
   createdAt: string
   byteSize: number
   sha256: string
+  media?:
+    | { driver: 'local'; file: string; byteSize: number; sha256: string; fileCount: number }
+    | { driver: 'lightcos'; status: 'external-not-covered'; referencedFileCount: number }
 }
 
 export type RestoreDrillRecord = {
@@ -14,6 +17,8 @@ export type RestoreDrillRecord = {
   checkedAt: string
   tableCount: number | null
   error: string | null
+  mediaStatus?: 'verified-local' | 'external-not-covered' | 'legacy-not-covered'
+  mediaFileCount?: number
 }
 
 export type PortableExportRecord = {
@@ -84,7 +89,7 @@ export function summarizeBackupManifest(manifest: BackupManifest, now = new Date
       monthly: manifest.backups.filter((record) => record.kind === 'monthly').length,
     },
     lastRestoreDrill: manifest.lastRestoreDrill,
-    restoreVerified: manifest.lastRestoreDrill?.status === 'passed',
+    restoreVerified: manifest.lastRestoreDrill?.status === 'passed' && manifest.lastRestoreDrill.backupFile === latestBackup?.file,
     lastIndependentDownloadAt: manifest.lastIndependentDownloadAt,
     independentDownloadDue: !lastDownloadAt || now.getTime() - lastDownloadAt.getTime() >= MONTH_MS,
   }
@@ -97,4 +102,11 @@ export function describeLatestBackupStatus(record: BackupRecord | null, fileExis
     ? `${(record.byteSize / 1_024).toFixed(1)} KB`
     : `${record.byteSize} B`
   return `${size} · SHA-256 ${record.sha256.slice(0, 12)}…`
+}
+
+export function describeMediaCoverage(record: BackupRecord | null): string {
+  if (!record) return '尚无媒体备份。'
+  if (!record.media) return '旧版备份未包含媒体文件，仅包含数据库。'
+  if (record.media.driver === 'lightcos') return 'LightCOS 对象未备份；需要单独的对象存储备份。'
+  return `已配对本地媒体快照：${record.media.fileCount} 个文件；恢复结果见下方校验。`
 }

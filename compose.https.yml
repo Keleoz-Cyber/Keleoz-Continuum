@@ -1,0 +1,22 @@
+# OPTIONAL: use only when this nginx should terminate TLS instead of an existing proxy.
+# Compose >= 2.24.4 is required for !override. Supply existing PEM files via the env file.
+# docker compose --env-file deploy/production.env -f compose.prod.yml -f compose.https.yml config
+services:
+  nginx:
+    ports: !override
+      - "${CONTINUUM_TLS_BIND:-0.0.0.0}:${CONTINUUM_TLS_HTTP_PORT:-80}:80"
+      - "${CONTINUUM_TLS_BIND:-0.0.0.0}:${CONTINUUM_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./deploy/nginx/https.example.conf:/etc/nginx/conf.d/default.conf:ro
+      - type: bind
+        source: ${CONTINUUM_TLS_CERT_FILE:?Set CONTINUUM_TLS_CERT_FILE to an existing full-chain PEM file}
+        target: /etc/nginx/certs/fullchain.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CONTINUUM_TLS_KEY_FILE:?Set CONTINUUM_TLS_KEY_FILE to an existing private-key PEM file}
+        target: /etc/nginx/certs/privkey.pem
+        read_only: true
+        bind:
+          create_host_path: false

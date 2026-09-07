@@ -6,7 +6,10 @@ import { createSourceStoreQueue } from './store-queue'
 import { searchRuntime } from './search-runtime'
 import { desktopAppearanceRuntime } from './appearance-runtime'
 import { PUBLIC_MOBILE_PATCH } from '@/modules/home/mobile-public-patch'
+import { nativeExternalRoute } from './navigation'
 export const nativeBootstrap = String.raw`
+const nativeExternalRoute=${nativeExternalRoute.toString()};
+function continuumNavigateExternal(page){const route=nativeExternalRoute(page);if(!route)return false;Promise.resolve().then(()=>window.__continuumFlush?.()).then(()=>{window.parent.location.href=route}).catch(error=>toast(error.message||'请先处理保存错误。'));return true}
 ${writerRuntime}
 ${searchRuntime}
 ${desktopAppearanceRuntime}
@@ -132,9 +135,9 @@ async function continuumNativeBoot(){
   if(page==='chat'&&apiConfigs.length)await selectFriend(apiConfigs[0].id);
   const originalNav=navTo;
   navTo=function(next){
-    if(next==='home'){window.parent.location.href='/';return}
+    if(next==='home'){continuumNavigateExternal(next);return}
     if(next==='blog'||next==='chat'||next==='memory'||next==='api'||next==='about'||next==='diy'&&page==='appearance'){originalNav(next);return}
-    toast('此入口尚未接入站点，请使用顶栏的对应页面。');
+    if(!continuumNavigateExternal(next))toast('此能力不在当前版本范围内。');
   };
   window.addEventListener('unhandledrejection',e=>{toast(e.reason&&e.reason.message||'操作失败，请重试。')});
   window.__continuumNativeReady=true;
@@ -188,7 +191,7 @@ export const nativeMobileBootstrap = nativeBootstrap.slice(0, nativeBootstrap.in
     closeSub=function(id){if(id==='sub-blog-editor'){writer.flush().then(()=>{writer.close();originalCloseSub(id)}).catch(error=>toast(error.message));return}return originalCloseSub(id)};
     if(query.get('edit'))await blogOpenEditor(query.get('edit')==='new'?undefined:query.get('edit'));
     const originalNav=navTo;
-    navTo=function(page){if(page==='profile'&&target!=='profile'&&target!=='visual'){window.parent.location.href='/';return}if(['chat','memory','blog','api','profile','visual'].includes(page)){originalNav(page);return}const routes={letters:'/letters',beyond:'/moments',guide:'/search'};if(routes[page])window.parent.location.href=routes[page];else toast('此入口尚未接入站点。')};
+    navTo=function(page){if(page==='profile'&&target!=='profile'&&target!=='visual'){continuumNavigateExternal('home');return}if(page==='visual'&&target!=='visual'){continuumNavigateExternal(page);return}if(['chat','memory','blog','api','profile','visual'].includes(page)){originalNav(page);return}if(!continuumNavigateExternal(page))toast('此能力不在当前版本范围内。')};
     if(target==='visual'){
       ${PUBLIC_MOBILE_PATCH}
       await deskApplyLayout();

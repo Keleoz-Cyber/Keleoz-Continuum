@@ -1,6 +1,6 @@
 import { requireOwner } from '@/modules/auth/dal'
 import { recordIndependentDownloadAction, setGuestAiEnabledAction } from '@/modules/operations/actions'
-import { describeLatestBackupStatus } from '@/modules/operations/contracts'
+import { describeLatestBackupStatus, describeMediaCoverage } from '@/modules/operations/contracts'
 import { getBackupOverview, operationsRepository } from '@/modules/operations/runtime'
 import { serverEnv } from '@/shared/env'
 
@@ -97,12 +97,16 @@ export default async function StudioOperationsPage({ searchParams }: { searchPar
           <article>
             <small>Latest PostgreSQL backup</small><strong>{backup.latestBackup && backup.latestFileExists ? formatDate(backup.latestBackup.createdAt) : 'No verified file'}</strong>
             <p>{backup.manifestError ?? describeLatestBackupStatus(backup.latestBackup, backup.latestFileExists)}</p>
+            <p>{describeMediaCoverage(backup.latestBackup)}</p>
             <span>Daily {backup.counts.daily}/7 · Weekly {backup.counts.weekly}/4 · Monthly {backup.counts.monthly}/6</span>
           </article>
           <article>
-            <small>Restore drill</small><strong>{backup.restoreVerified ? 'Passed' : 'Not verified'}</strong>
+            <small>Latest backup restore</small><strong>{backup.restoreVerified ? 'Passed' : 'Not verified'}</strong>
             <p>{backup.lastRestoreDrill ? `${formatDate(backup.lastRestoreDrill.checkedAt)} · ${backup.lastRestoreDrill.tableCount ?? 0} tables` : 'No restore drill has been recorded yet.'}</p>
             <span>{backup.lastRestoreDrill?.error ?? 'Restore checks run against an isolated temporary database.'}</span>
+            <p>{backup.restoreVerified && backup.lastRestoreDrill?.mediaStatus === 'verified-local'
+              ? `数据库及 ${backup.lastRestoreDrill.mediaFileCount ?? 0} 个本地媒体文件已通过隔离恢复校验。`
+              : '尚未验证当前备份的完整媒体恢复；数据库恢复通过不代表媒体已备份。'}</p>
           </article>
           <article>
             <small>Independent copy</small><strong>{backup.independentDownloadDue ? 'Download due' : 'Current'}</strong>

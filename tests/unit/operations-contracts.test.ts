@@ -3,12 +3,20 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateMeasuredAiCostMicroUsd,
   describeLatestBackupStatus,
+  describeMediaCoverage,
   planBackupRetention,
   planPortableExportRetention,
   summarizeBackupManifest,
 } from '@/modules/operations/contracts'
 
 describe('operations contracts', () => {
+  it('does not confuse an older DB drill with current complete media coverage', () => {
+    const latest = { kind: 'daily' as const, file: 'new.dump', createdAt: '2026-09-07T00:00:00Z', byteSize: 1, sha256: 'a'.repeat(64) }
+    expect(summarizeBackupManifest({ schemaVersion: 1, backups: [latest], lastRestoreDrill: { status: 'passed', backupFile: 'old.dump', checkedAt: '2026-09-06T00:00:00Z', tableCount: 20, error: null }, lastIndependentDownloadAt: null }).restoreVerified).toBe(false)
+    expect(describeMediaCoverage(latest)).toContain('未包含媒体')
+    expect(describeMediaCoverage({ ...latest, media: { driver: 'lightcos', status: 'external-not-covered', referencedFileCount: 2 } })).toContain('未备份')
+    expect(describeMediaCoverage({ ...latest, media: { driver: 'local', file: 'media.json', byteSize: 1, sha256: latest.sha256, fileCount: 3 } })).toContain('3')
+  })
   it('calculates measured provider cost from completed token counts only', () => {
     expect(calculateMeasuredAiCostMicroUsd({
       promptTokens: 1_250,

@@ -1,4 +1,7 @@
+import { localizeSourceFonts } from '@/modules/source-native/fonts'
+
 export function adaptDesktopSourceForPublicHome(html: string) {
+  html = localizeSourceFonts(html)
   const head = '<head>'
   const index = html.indexOf(head)
   if (index < 0) throw new Error('Desktop source is missing its <head> boundary')

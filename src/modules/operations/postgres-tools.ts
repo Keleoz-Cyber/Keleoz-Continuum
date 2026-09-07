@@ -23,9 +23,19 @@ function validateDatabaseUrl(value: string | undefined): string {
   try {
     const url = new URL(value)
     if (url.protocol !== 'postgres:' && url.protocol !== 'postgresql:') throw new Error('protocol')
-    return value
+    // libpq query fields override URI authority/path fields. Keep a small reviewed
+    // allowlist so dbname, service, options, hostaddr and future fields fail closed.
+    const allowed = new Set(['sslmode', 'sslrootcert', 'sslcert', 'sslkey', 'connect_timeout', 'application_name', 'channel_binding'])
+    const seen = new Set<string>()
+    for (const [key, parameter] of url.searchParams) {
+      if (!allowed.has(key) || seen.has(key) || /[\u0000-\u001f\u007f]/.test(parameter)) throw new Error('parameter')
+      seen.add(key)
+    }
+    if (!url.hostname || !url.username || url.hash || /[\u0000-\u0020\u007f]/.test(value) ||
+      !/^\/[a-zA-Z_][a-zA-Z0-9_]{0,62}$/.test(decodeURIComponent(url.pathname))) throw new Error('identity')
+    return url.toString()
   } catch {
-    throw new Error('DATABASE_URL must use postgres:// or postgresql://')
+    throw new Error('Unsafe PostgreSQL maintenance URL: require explicit postgres:// user, host and database; only unique TLS, timeout and application-name query options are supported')
   }
 }
 
@@ -41,6 +51,9 @@ export function parsePostgresToolConfig(source: Record<string, string | undefine
     }
   }
   if (mode !== 'direct') throw new Error('CONTINUUM_BACKUP_MODE must be docker or direct')
+  for (const name of ['PGSERVICE', 'PGSERVICEFILE', 'PGSYSCONFDIR', 'PGOPTIONS', 'PGDATABASE', 'PGHOST', 'PGHOSTADDR', 'PGPORT', 'PGUSER']) {
+    if (source[name]) throw new Error(`PostgreSQL maintenance does not permit implicit ${name} overrides; use an explicit DATABASE_URL`)
+  }
   return { mode: 'direct', databaseUrl: validateDatabaseUrl(source.DATABASE_URL) }
 }
 
@@ -53,20 +66,23 @@ export function databaseUrlForName(databaseUrl: string, databaseName: string): s
   return url.toString()
 }
 
-export function pgDumpInvocation(config: PostgresToolConfig): CommandInvocation {
+export function pgDumpInvocation(config: PostgresToolConfig, snapshot?: string): CommandInvocation {
+  if (snapshot !== undefined && !/^[a-fA-F0-9]+-[a-fA-F0-9]+-[0-9]+$/.test(snapshot)) throw new Error('Invalid PostgreSQL snapshot ID')
+  const snapshotArgs = snapshot ? [`--snapshot=${snapshot}`] : []
   if (config.mode === 'docker') {
     return {
       command: 'docker',
-      args: ['exec', config.container, 'pg_dump', '--username', config.user, '--dbname', config.database, '--format=custom', '--no-owner', '--no-privileges'],
+      args: ['exec', config.container, 'pg_dump', '--username', config.user, '--dbname', config.database, '--format=custom', '--no-owner', '--no-privileges', ...snapshotArgs],
     }
   }
   return {
     command: 'pg_dump',
-    args: ['--dbname', config.databaseUrl, '--format=custom', '--no-owner', '--no-privileges'],
+    args: ['--dbname', validateDatabaseUrl(config.databaseUrl), '--format=custom', '--no-owner', '--no-privileges', ...snapshotArgs],
   }
 }
 
 export function pgRestoreInvocation(config: PostgresToolConfig, databaseName: string): CommandInvocation {
+  assertRestoreDatabaseName(databaseName)
   if (config.mode === 'docker') {
     validatePostgresIdentifier(databaseName, 'restore database')
     return {
@@ -81,13 +97,15 @@ export function pgRestoreInvocation(config: PostgresToolConfig, databaseName: st
 }
 
 export function pgCreateDatabaseInvocation(config: PostgresToolConfig, databaseName: string): CommandInvocation {
+  assertRestoreDatabaseName(databaseName)
   validatePostgresIdentifier(databaseName, 'restore database')
   return config.mode === 'docker'
     ? { command: 'docker', args: ['exec', config.container, 'createdb', '--username', config.user, databaseName] }
-    : { command: 'createdb', args: ['--maintenance-db', config.databaseUrl, databaseName] }
+    : { command: 'createdb', args: ['--maintenance-db', validateDatabaseUrl(config.databaseUrl), databaseName] }
 }
 
 export function pgCountTablesInvocation(config: PostgresToolConfig, databaseName: string): CommandInvocation {
+  assertRestoreDatabaseName(databaseName)
   const statement = "select count(*) from information_schema.tables where table_schema='public'"
   validatePostgresIdentifier(databaseName, 'restore database')
   return config.mode === 'docker'
@@ -96,12 +114,17 @@ export function pgCountTablesInvocation(config: PostgresToolConfig, databaseName
 }
 
 export function pgDropDatabaseInvocation(config: PostgresToolConfig, databaseName: string): CommandInvocation {
+  assertRestoreDatabaseName(databaseName)
   validatePostgresIdentifier(databaseName, 'restore database')
   return config.mode === 'docker'
     ? { command: 'docker', args: ['exec', config.container, 'dropdb', '--username', config.user, '--if-exists', databaseName] }
-    : { command: 'dropdb', args: ['--maintenance-db', config.databaseUrl, '--if-exists', databaseName] }
+    : { command: 'dropdb', args: ['--maintenance-db', validateDatabaseUrl(config.databaseUrl), '--if-exists', databaseName] }
 }
 
 export function redactPostgresError(message: string, databaseUrl?: string): string {
   return (databaseUrl ? message.replaceAll(databaseUrl, '[DATABASE_URL]') : message).slice(0, 400)
+}
+
+function assertRestoreDatabaseName(databaseName: string) {
+  if (!/^continuum_restore_\d+_[a-f0-9]{8}$/.test(databaseName)) throw new Error('Unsafe restore database name')
 }

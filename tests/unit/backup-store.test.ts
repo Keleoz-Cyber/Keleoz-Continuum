@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -19,6 +19,30 @@ afterEach(async () => {
 })
 
 describe('backup manifest store', () => {
+  it('does not overwrite a maintenance manifest while another backup or restore owns the lock', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'continuum-backup-'))
+    roots.push(root)
+    await mkdir(join(root, '.maintenance.lock'))
+    await expect(recordIndependentDownload(root)).rejects.toThrow()
+    expect(await readBackupManifest(root)).toEqual(emptyBackupManifest())
+  })
+  it('refuses configured backup roots pointing through a directory symlink', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'continuum-backup-'))
+    roots.push(root)
+    await mkdir(join(root, 'outside'))
+    await symlink(join(root, 'outside'), join(root, 'linked'), 'junction')
+    await expect(writeBackupManifest(join(root, 'linked'), emptyBackupManifest())).rejects.toThrow('symbolic')
+  })
+  it('preserves optional local media coverage metadata alongside legacy v1 records', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'continuum-backup-'))
+    roots.push(root)
+    const manifest = { ...emptyBackupManifest(), backups: [{ kind: 'daily' as const,
+      file: 'bundles/abc/dump.dump', createdAt: '2026-09-07T10:00:00.000Z', byteSize: 5, sha256: 'a'.repeat(64),
+      media: { driver: 'local' as const, file: 'bundles/abc/media-manifest.json', byteSize: 20, sha256: 'b'.repeat(64), fileCount: 1 },
+    }] }
+    await writeBackupManifest(root, manifest)
+    expect(await readBackupManifest(root)).toEqual(manifest)
+  })
   it('returns an honest empty state until the first backup exists', async () => {
     const root = await mkdtemp(join(tmpdir(), 'continuum-backup-'))
     roots.push(root)

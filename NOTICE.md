@@ -26,7 +26,9 @@ Full upstream terms and copyright notices remain in:
 
 ## Modifications
 
-Keleoz Continuum uses a new public architecture, its own brand, and an original digital Keleoz character while reusing or adapting documented upstream behavior and visual material. Modified upstream components must retain the applicable notices, indicate changes, remain noncommercial, and comply with the applicable share-alike or distribution conditions.
+Keleoz Continuum uses a new public architecture and its own site brand while reusing or adapting documented upstream behavior and visual material. The default companion artwork still includes upstream reference assets; it is not original Keleoz character artwork. Modified upstream components must retain the applicable notices, indicate changes, remain noncommercial, and comply with the applicable share-alike or distribution conditions.
+
+The original interface's Google Fonts families are self-hosted under `public/fonts/`. Each family's SIL Open Font License and the original download URLs and hashes are retained there. No font family is replaced by this delivery adaptation.
 
 ## Original Keleoz Continuum contributions
 

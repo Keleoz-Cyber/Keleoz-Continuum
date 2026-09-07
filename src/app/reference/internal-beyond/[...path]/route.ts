@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import { adaptDesktopSourceForPublicHome } from '@/modules/home/source-html-adapter'
 import { getPublicSiteConfig } from '@/modules/site-config/runtime'
+import { localizeSourceFonts } from '@/modules/source-native/fonts'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Desktop')
 const types: Record<string, string> = {
@@ -46,7 +47,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     const data = await readFile(requested)
     const adaptHome = path.basename(requested) === 'InternalBeyond.html'
       && new URL(request.url).searchParams.get('continuum-gloss') === '2'
+    const adaptGame = segments.join('/') === 'game/game_module.js' && new URL(request.url).searchParams.get('continuum-local') === '1'
     let body = adaptHome ? adaptDesktopSourceForPublicHome(data.toString('utf8')) : new Uint8Array(data)
+    if(adaptGame)body=localizeSourceFonts(data.toString('utf8'))
     if(adaptHome&&typeof body==='string'){
       const {appearance}=await getPublicSiteConfig()
       for(const [key,file] of [['internal','bg-internal.jpg'],['infernal','bg-infernal.jpg'],['canvas','bg-canvas.png'],['canvas','bg-canvas.jpg']])if(appearance.desktop[key])body=body.replaceAll(file,appearance.desktop[key])
@@ -54,7 +57,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     return new Response(body, {
       headers: {
         'content-type': types[path.extname(requested).toLowerCase()] ?? 'application/octet-stream',
-        'cache-control': adaptHome ? 'no-cache' : 'public, max-age=31536000, immutable',
+        'cache-control': adaptHome || adaptGame ? 'no-cache' : 'public, max-age=31536000, immutable',
         'x-content-source': 'InternalBeyond-Desktop immutable snapshot',
         ...(adaptHome ? { 'x-content-adapter': 'Continuum source gloss fallback v2' } : {}),
       },

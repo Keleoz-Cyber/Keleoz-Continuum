@@ -63,7 +63,7 @@ export function RoomClient({ companionName,defaultOutfit=2 }: { companionName: s
         document.getElementById(`page-${page}`)?.classList.add('active')
       }
       const script = document.createElement('script')
-      script.src = '/game/game_module.js'
+      script.src = '/game/game_module.js?continuum-local=1'
       script.async = false
       script.onload = () => {
         if(window.G)window.G.outfitIdx=defaultOutfit;

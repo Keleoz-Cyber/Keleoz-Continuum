@@ -4,11 +4,12 @@ import { getCurrentOwner } from '@/modules/auth/dal'
 import { nativeBootstrap, nativeMobileBootstrap } from '@/modules/source-native/bootstrap'
 import { calendarVisibleTo, getCalendarRecurrenceScript } from '@/modules/source-native/calendar'
 import { lockEditorMarkup } from '@/modules/source-native/editor-load'
+import { localizeSourceFonts } from '@/modules/source-native/fonts'
 
 export async function GET(request: Request) {
   if (!await getCurrentOwner()) return new Response('请先登录。', { status: 401 })
   if (new URL(request.url).searchParams.get('mobile') === '1') {
-    const source = await readFile(path.resolve(process.cwd(), 'upstream/InternalBeyond-Mobile/index.html'), 'utf8')
+    const source = localizeSourceFonts(await readFile(path.resolve(process.cwd(), 'upstream/InternalBeyond-Mobile/index.html'), 'utf8'))
     const start = '(async function init(){'
     if (!source.includes(start)) throw new Error('Original Mobile init boundary missing')
     const html = source.replace('<head>', '<head><base href="/reference/internal-beyond-mobile/">')
@@ -28,7 +29,7 @@ export async function GET(request: Request) {
       .replace('</head>', '<style>#lockscr,#lk-preveil{display:none!important}.dw-item[data-page="icode"],.dw-item[data-page="diy"]{display:none!important}</style></head>')
     return new Response(lockEditorMarkup(html), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'private, no-store', 'Content-Security-Policy': "connect-src 'self'; frame-ancestors 'self'; object-src 'none'", 'X-Content-Source': 'InternalBeyond-Mobile original runtime with Owner data adapter' } })
   }
-  const original = await readFile(path.resolve(process.cwd(), 'upstream/InternalBeyond-Desktop/InternalBeyond.html'), 'utf8')
+  const original = localizeSourceFonts(await readFile(path.resolve(process.cwd(), 'upstream/InternalBeyond-Desktop/InternalBeyond.html'), 'utf8'))
   if (!original.includes('\ninit();')) throw new Error('Original init boundary missing')
   const html = original.replace('<head>', '<head><base href="/reference/internal-beyond/">').replace('\ninit();', `\n${nativeBootstrap}`)
     .replace("if(m.role!=='user'&&_mm.role==='user')", "_mm._continuumRawUser=m.role==='user'?m.content:'';if(m.role!=='user'&&_mm.role==='user')")

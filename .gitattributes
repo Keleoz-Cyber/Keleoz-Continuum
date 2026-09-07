@@ -19,5 +19,8 @@
 *.woff binary
 *.woff2 binary
 
+# Preserve the upstream license bytes recorded in the font provenance manifest.
+public/fonts/*-OFL.txt -text -whitespace
+
 # This rule must stay last so extension rules cannot normalize evidence files.
 upstream/** -text

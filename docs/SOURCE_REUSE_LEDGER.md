@@ -2,6 +2,14 @@
 
 This ledger is a required implementation gate. Update source pointers and evidence as modules are extracted or adapted.
 
+## Pre-deployment delivery and recovery adapters — 2026-09-07
+
+- **Exact typography / delivery adapter:** Desktop `InternalBeyond.html:35`, Mobile `index.html:115` and Room `game/game_module.js:283` define the authoritative Google Fonts requests. `scripts/vendor-source-fonts.mjs` vendors the same eight families, weights, italics and unicode subsets with hashes and per-family OFL notices. `source-native/fonts.ts` only rewrites delivery URLs in adapted Home/Owner/editor documents and the Room loader; raw reference responses and upstream snapshots remain untouched. No new font or visual redesign.
+- **Navigation adapter:** original Desktop `navTo` and Mobile drawer/Desk data/visual entries (`index.html:2048–2057`, `:2536–2539`) route to existing public or authenticated server pages. Cross-page navigation flushes queued edits; local-only backup tools are not exposed as server backup controls. Excluded ICode/image generation/general MCP remain excluded.
+- **Server backup reimplementation required:** Desktop export (`InternalBeyond.html:9481–9507`) and Mobile export (`index.html:11373+`) establish data ownership/export intent, but browser JSON cannot snapshot PostgreSQL and server media atomically. The operations adapter holds one exported PostgreSQL snapshot for dump, ready-media inventory and weekly JSON; stream-copies local media with hashes, publishes complete bundles, retains shared cadence references, and verifies in isolated DB/filesystem targets. Cloud objects and legacy DB-only backups explicitly remain outside media coverage. Restore status must match the newest backup, not an old successful drill.
+- **Production configuration:** optional existing-proxy versus direct-TLS templates preserve current DNS/certificates until SSH inspection. Validated AI output caps include provider-default thinking; production gateway stays off until credentials, rates and budget are explicitly configured. No online deployment or certificate issuance occurs in this batch.
+- **Evidence:** source-font hash/license/local-URL contracts, native navigation contracts, snapshot concurrency/failed-publication/corruption/isolation tests, and deployment merge tests. Runtime browser and final regression results are reported with the batch, not inferred from route existence.
+
 | Product area | Desktop source | Mobile source | V1 strategy | Preservation contract |
 |---|---|---|---|---|
 | Home scene | `InternalBeyond.html` background, splash, rain, frost, theme sections | Mobile theme and safe-area patterns | Adapter reuse | Preserve atmosphere and motion; replace brand and content hierarchy |

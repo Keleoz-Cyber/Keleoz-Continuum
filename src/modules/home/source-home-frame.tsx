@@ -80,7 +80,7 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
   return (
     <section className="source-home-frame" aria-label="Continuum scene">
       {!loaded ? <div className="source-home-frame-loading">Loading Continuum…</div> : null}
-      <iframe key={mobile ? 'mobile' : 'desktop'} ref={frameRef} title="Keleoz Continuum Home" src={mobile ? '/reference/internal-beyond-mobile/index.html' : '/reference/internal-beyond/InternalBeyond.html?continuum-gloss=2'} />
+      <iframe key={mobile ? 'mobile' : 'desktop'} ref={frameRef} title="Keleoz Continuum Home" src={mobile ? '/reference/internal-beyond-mobile/index.html?continuum-local=1' : '/reference/internal-beyond/InternalBeyond.html?continuum-gloss=2'} />
     </section>
   )
 }
