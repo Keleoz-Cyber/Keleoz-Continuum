@@ -6,6 +6,16 @@ import { describe, expect, it } from 'vitest'
 const root = process.cwd()
 
 describe('production deployment configuration', () => {
+  it('uses only a loopback app port behind the existing host TLS boundary', () => {
+    const host = readFileSync(join(root, 'compose.host.yml'), 'utf8')
+    expect(host).toContain('127.0.0.1:${CONTINUUM_HTTP_PORT:-8080}:3000')
+    expect(host).toContain('profiles: ["standalone-proxy"]')
+    const nginx = readFileSync(join(root, 'deploy/nginx/host-keleoz.conf'), 'utf8')
+    expect(nginx).toContain('proxy_set_header X-Forwarded-For $remote_addr;')
+    expect(nginx).toContain('proxy_set_header X-Real-IP $remote_addr;')
+    expect(nginx).toContain('proxy_set_header X-Forwarded-Proto https;')
+    expect(nginx).toContain('return 308 https://keleoz.com$request_uri;')
+  })
   it('keeps production AI output and timeout budgets aligned with the validated environment example', () => {
     const local = readFileSync(join(root, '.env.example'), 'utf8')
     const production = readFileSync(join(root, 'deploy/production.env.example'), 'utf8')

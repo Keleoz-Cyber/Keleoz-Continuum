@@ -6,4 +6,5 @@ After=docker.service
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/keleoz-continuum
-ExecStart=/usr/bin/docker compose --env-file deploy/production.env -f compose.prod.yml --profile maintenance run --rm --no-deps backup
+Environment=COMPOSE_FILE=compose.prod.yml
+ExecStart=/usr/bin/docker compose --env-file deploy/production.env --profile maintenance run --rm --no-deps backup

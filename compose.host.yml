@@ -1,0 +1,7 @@
+# Existing host Nginx terminates TLS; do not run a second proxy container.
+services:
+  app:
+    ports:
+      - "127.0.0.1:${CONTINUUM_HTTP_PORT:-8080}:3000"
+  nginx:
+    profiles: ["standalone-proxy"]
