@@ -4,6 +4,8 @@ import path from 'node:path'
 import { adaptDesktopSourceForPublicHome } from '@/modules/home/source-html-adapter'
 import { getPublicSiteConfig } from '@/modules/site-config/runtime'
 import { localizeSourceFonts } from '@/modules/source-native/fonts'
+import { prioritizeHomeCanvas } from '@/modules/home/delivery'
+import { publicSourceResponse } from '@/modules/home/response-cache'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Desktop')
 const types: Record<string, string> = {
@@ -52,15 +54,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     if(adaptGame)body=localizeSourceFonts(data.toString('utf8'))
     if(adaptHome&&typeof body==='string'){
       const {appearance}=await getPublicSiteConfig()
-      for(const [key,file] of [['internal','bg-internal.jpg'],['infernal','bg-infernal.jpg'],['canvas','bg-canvas.png'],['canvas','bg-canvas.jpg']])if(appearance.desktop[key])body=body.replaceAll(file,appearance.desktop[key])
+      for(const [key,file] of [['internal','bg-internal.jpg'],['infernal','bg-infernal.jpg']])if(appearance.desktop[key])body=body.replaceAll(file,appearance.desktop[key])
+      body=prioritizeHomeCanvas(body,appearance.desktop.canvas || undefined)
     }
-    return new Response(body, {
-      headers: {
+    return publicSourceResponse(body, request, {
         'content-type': types[path.extname(requested).toLowerCase()] ?? 'application/octet-stream',
         'cache-control': adaptHome || adaptGame ? 'no-cache' : 'public, max-age=31536000, immutable',
         'x-content-source': 'InternalBeyond-Desktop immutable snapshot',
         ...(adaptHome ? { 'x-content-adapter': 'Continuum source gloss fallback v2' } : {}),
-      },
     })
   } catch {
     return new Response('Not found', { status: 404 })

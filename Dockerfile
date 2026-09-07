@@ -27,7 +27,8 @@ ENV SITE_ORIGIN=http://127.0.0.1:3000
 ENV MEDIA_DRIVER=local
 ENV MEDIA_LOCAL_ROOT=/app/var/media
 ENV AI_GATEWAY_ENABLED=false
-RUN pnpm build
+# Preserve valid source CSS (including ::highlight) across builder environments.
+RUN pnpm exec next build --webpack
 
 FROM base AS tooling
 USER root

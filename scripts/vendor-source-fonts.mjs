@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises'
 import path from 'node:path'
+import { brotliCompressSync, gzipSync } from 'node:zlib'
 
 const root = process.cwd()
 const output = path.join(root, 'public/fonts')
@@ -75,4 +76,6 @@ await writeFile(path.join(output, 'source.css.tmp'), css)
 await writeFile(path.join(output, 'manifest.json.tmp'), JSON.stringify(manifest, null, 2) + '\n')
 await rename(path.join(output, 'source.css.tmp'), path.join(output, 'source.css'))
 await rename(path.join(output, 'manifest.json.tmp'), path.join(output, 'manifest.json'))
+await writeFile(path.join(output, 'source.css.br'), brotliCompressSync(Buffer.from(css)))
+await writeFile(path.join(output, 'source.css.gz'), gzipSync(Buffer.from(css), { level: 9 }))
 console.log(JSON.stringify({ families: manifest.families, files: assets.size, totalBytes: total, cssBytes: Buffer.byteLength(css) }))

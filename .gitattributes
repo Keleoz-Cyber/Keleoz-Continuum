@@ -18,6 +18,8 @@
 *.ico binary
 *.woff binary
 *.woff2 binary
+*.br binary
+*.gz binary
 
 # Preserve the upstream license bytes recorded in the font provenance manifest.
 public/fonts/*-OFL.txt -text -whitespace

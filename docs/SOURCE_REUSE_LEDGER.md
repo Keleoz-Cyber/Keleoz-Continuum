@@ -4,6 +4,8 @@ This ledger is a required implementation gate. Update source pointers and eviden
 
 ## Pre-deployment delivery and recovery adapters — 2026-09-07
 
+- **Cold-load delivery — 2026-09-08:** prioritize the ORIGINAL Desktop `bg-canvas.png` (including Owner overrides). A WebP trial preserved decoded RGBA, but Chrome canvas comparison found 16,027 transparent RGB channels with differences up to 2; opaque pixels and alpha were identical. Reject the format change to preserve the original presentation. Original font CSS is compressed byte-for-byte with Brotli/gzip and served by host Nginx with HTTP/2. Public adapted HTML gains ETag revalidation; no water/rain/rendering parameters or source transition durations change.
+
 - **Public filing notice:** preserve the existing `keleoz.com` placeholder's `皖ICP备2026007914号-2` link to the MIIT site as a static Home footer. This public-hosting addition has no offline upstream equivalent; original scene, player and mobile interaction surfaces are unchanged.
 - **Mobile public lock adapter correction:** production first-load screenshot exposed a remaining `#lk-preveil` layer after `#lockscr` removal. Public Home removes/hides both source-local lock layers; Owner server authentication remains unchanged. The original Mobile runtime/layout is retained and the immutable snapshot is not edited.
 

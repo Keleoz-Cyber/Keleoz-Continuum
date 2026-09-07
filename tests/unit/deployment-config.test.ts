@@ -15,6 +15,10 @@ describe('production deployment configuration', () => {
     expect(nginx).toContain('proxy_set_header X-Real-IP $remote_addr;')
     expect(nginx).toContain('proxy_set_header X-Forwarded-Proto https;')
     expect(nginx).toContain('return 308 https://keleoz.com$request_uri;')
+    expect(nginx).toContain('listen 443 ssl http2;')
+    expect(nginx).toContain('add_header Content-Encoding $continuum_font_encoding;')
+    expect(nginx).toContain('add_header Vary Accept-Encoding always;')
+    expect(nginx).toContain('root /var/www/keleoz-static;')
   })
   it('keeps production AI output and timeout budgets aligned with the validated environment example', () => {
     const local = readFileSync(join(root, '.env.example'), 'utf8')
