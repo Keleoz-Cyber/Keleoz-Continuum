@@ -6,6 +6,11 @@ import { describe, expect, it } from 'vitest'
 import { adaptDesktopSourceForPublicHome } from '@/modules/home/source-html-adapter'
 
 describe('source visual parity adapters', () => {
+  it('removes both original Mobile lock layers from the public home', () => {
+    const patch = readFileSync('src/modules/home/mobile-public-patch.ts', 'utf8')
+    expect(patch).toContain("querySelectorAll('#lockscr,#lk-preveil')")
+    expect(patch).toContain('#lockscr,#lk-preveil{display:none!important}')
+  })
   it('injects the source gloss fallback before the immutable source scripts run', () => {
     const html = '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>'
     const adapted = adaptDesktopSourceForPublicHome(html)
