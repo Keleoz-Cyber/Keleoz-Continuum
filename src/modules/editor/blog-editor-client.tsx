@@ -162,7 +162,7 @@ export function BlogEditorClient(props: {
     setSelectedBlockIndex(selectedBlockIndex + direction)
   }
 
-  const saveAndGo=async(destination:string)=>{try{await autosave.flush();window.location.href=destination}catch{setNotice('保存失败或版本冲突，当前内容仍保留。请重试；冲突时请先备份当前内容再重新打开。')}}
+  const saveAndGo=async(destination:string)=>{try{await autosave.flush();if(!window.__continuumNavigate?.(destination))window.location.href=destination}catch{setNotice('保存失败或版本冲突，当前内容仍保留。请重试；冲突时请先备份当前内容再重新打开。')}}
   const importText=async(file:File)=>{
     try{
       if(file.size>500_000||! /\.(txt|md|markdown)$/i.test(file.name))throw new Error('请选择不超过 500 KB 的文本或 Markdown 文件。')

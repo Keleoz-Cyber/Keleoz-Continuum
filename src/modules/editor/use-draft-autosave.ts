@@ -2,6 +2,7 @@
 import { useCallback,useEffect,useState } from 'react'
 import type { DraftSnapshot } from '@/modules/content/schemas'
 import { DraftSaveQueue,type SaveState } from './draft-save-queue'
+import { registerLeaveGuard } from '@/modules/home/leave-guards'
 export type AutosaveState=SaveState
 export function useDraftAutosave(input:{entryId:string;initialRevision:number;snapshot:DraftSnapshot;delayMs?:number}){
   const [state,setState]=useState<SaveState>('idle')
@@ -25,13 +26,14 @@ export function useDraftAutosave(input:{entryId:string;initialRevision:number;sn
       const link=(event.target as Element).closest?.('a[href]') as HTMLAnchorElement|null
       if(!queue.dirty()||!link||event.button!==0||event.metaKey||event.ctrlKey||link.target==='_blank')return
       event.preventDefault();event.stopImmediatePropagation()
-      queue.flush().then(()=>{window.location.href=link.href}).catch(()=>{})
+      queue.flush().then(()=>{if(!window.__continuumNavigate?.(link.href))window.location.href=link.href}).catch(()=>{})
     }
     window.addEventListener('beforeunload',warn)
     document.addEventListener('click',navigate,true)
     return()=>{window.removeEventListener('beforeunload',warn);document.removeEventListener('click',navigate,true)}
   },[queue])
   const flush=useCallback(()=>{queue.update(input.snapshot);return queue.flush()},[queue,input.snapshot])
+  useEffect(()=>registerLeaveGuard(flush),[flush])
   const retry=useCallback(()=>{void flush().catch(()=>{})},[flush])
   return {state,revision,retry,flush}
 }

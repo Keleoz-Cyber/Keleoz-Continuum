@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { PersistentScene } from '@/modules/home/persistent-scene'
 
 import './globals.css'
 import './source-home.css'
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link rel="stylesheet" href="/fonts/source.css" />
       </head>
-      <body>{children}</body>
+      <body><PersistentScene>{children}</PersistentScene></body>
     </html>
   )
 }

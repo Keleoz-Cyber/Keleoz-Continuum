@@ -680,3 +680,22 @@
 - 2026-09-05 Phase 32: two attempts to add a redundant `.source-chat-search{margin:0}` rule did not match the minified one-line stylesheet; no CSS changed. Browser defaults already give forms zero margin, so the functional search does not require this rule and the unnecessary edit was dropped.
 - 2026-09-05 Phase 32: immutable-source hash verification used the wrong Desktop game filename (`game.html`) and failed only for that path; Desktop HTML and both Mobile hashes matched. Located the actual source game path and rechecked it separately.
 - 2026-09-05 Phase 32 final: source-first Studio/Rift, private Owner Chat, Memory/Auto Memory, mobile public-entry cleanup and knowledge export are complete. Final evidence: 73 Vitest files / 267 tests, focused real-Chrome Owner flow including create/delete Memory and draft lifecycle, ESLint, TypeScript, fresh Next standalone build, applied migrations, health 200 on port 3100, exact QA residue 0/0, preserved `admin` count 1, and all four immutable upstream hashes unchanged.
+# Current batch 2026-09-08
+
+- Native and advanced dirty-editor Back QA passed: intentional 500 retains route/text, restored save persists then returns to Blog fragment, root identity unchanged. Full suite now 101 files / 408 tests passed.
+- Transparent native player overlay required matching iframe color-scheme to the source document; parent inherited dark while source was normal, which made Chromium paint an opaque canvas. Live local CSS probe confirmed the cause and corrected transparency. Final build and live deployment pending.
+
+- Independent review found advanced editor hard save-and-go navigation and unguarded Back. Added shared flush registration and guarded history traversal, preserving existing source/structured autosave. Review further identified native fragment entries; use browser Navigation API indices when available and explicitly tag same-page fragment links. Browser guard verification still pending.
+
+- Desktop/mobile real-browser fixture pass: same native media identity and increasing time across Home→Blog→History→browser back; three legacy-shaped records read/exported; no transcript marker in network requests. Full suite 100 files / 406 tests passed.
+- Screenshot review found original explicit child visibility leaking Home behind player-only overlay; strengthened only the off-Home isolation selector and wait for finite native opening transitions before visual capture. Reverification pending.
+
+- First build found Docker engine stopped. Continue static tests and start Docker Desktop hidden once. Lint found synchronous effect state initialization; changed to async IndexedDB completion and one-time useSyncExternalStore surface selection.
+
+- Added history validation/read-only IndexedDB reader/UI and same-origin route filtering. Unit RED then GREEN verified. Initial RED had missing modules; added stubs to observe assertion failures before implementation.
+- Added shared scene host and adapted static navigation bridges. A combined patch targeted one file twice and was rejected atomically; reapplied merged hunks.
+- Browser/production verification remains pending; no deployment yet.
+
+- User approved the first two gaps from the source audit: local history access and cross-page native playback.
+- Design preserves the original iframe/audio runtime in a shared client shell, activated lazily by Home. History remains read-only local storage with explicit export actions.
+- Product implementation not started at this checkpoint.

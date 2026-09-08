@@ -5,6 +5,7 @@ import { nativeBootstrap, nativeMobileBootstrap } from '@/modules/source-native/
 import { calendarVisibleTo, getCalendarRecurrenceScript } from '@/modules/source-native/calendar'
 import { lockEditorMarkup } from '@/modules/source-native/editor-load'
 import { localizeSourceFonts } from '@/modules/source-native/fonts'
+import { adaptSourceNavigation } from '@/modules/home/source-navigation'
 
 export async function GET(request: Request) {
   if (!await getCurrentOwner()) return new Response('请先登录。', { status: 401 })
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
     const start = '(async function init(){'
     if (!source.includes(start)) throw new Error('Original Mobile init boundary missing')
     const html = source.replace('<head>', '<head><base href="/reference/internal-beyond-mobile/">')
-      .replace(start, 'const continuumCalendarVisibleTo='+calendarVisibleTo.toString()+';\n'+getCalendarRecurrenceScript() + '\n' + nativeMobileBootstrap + '\n' + start + '\n await window.continuumStoreReady;')
+      .replace(start, 'const continuumCalendarVisibleTo='+calendarVisibleTo.toString()+';\n'+getCalendarRecurrenceScript() + '\n' + adaptSourceNavigation(nativeMobileBootstrap) + '\n' + start + '\n await window.continuumStoreReady;')
       .replaceAll("if(ev.vis!=='all')return;", 'if(!continuumCalendarVisibleTo(ev,cfg.id))return;')
       .replace('sameConv,usage:_ru,truncated:', 'sameConv,wsSearches:r.wsSearches,usage:_ru,truncated:')
       .replace("out[out.length-1].content+='\\n\\n'+c", "out[out.length-1].content+='\\n\\n'+c;out[out.length-1]._continuumRawUser=m.role==='user'?m.content:''")
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
   }
   const original = localizeSourceFonts(await readFile(path.resolve(process.cwd(), 'upstream/InternalBeyond-Desktop/InternalBeyond.html'), 'utf8'))
   if (!original.includes('\ninit();')) throw new Error('Original init boundary missing')
-  const html = original.replace('<head>', '<head><base href="/reference/internal-beyond/">').replace('\ninit();', `\n${nativeBootstrap}`)
+  const html = original.replace('<head>', '<head><base href="/reference/internal-beyond/">').replace('\ninit();', `\n${adaptSourceNavigation(nativeBootstrap)}`)
     .replace("if(m.role!=='user'&&_mm.role==='user')", "_mm._continuumRawUser=m.role==='user'?m.content:'';if(m.role!=='user'&&_mm.role==='user')")
     .replace('与 <span class="ibn-int">Internal</span><span class="ibn-inf">Infernal</span> Beyond 的相遇纪念日', '与 <span class="ibn-int">Keleoz</span><span class="ibn-inf">Keleoz</span> Continuum 的相遇纪念日')
     .replaceAll('公开 — 所有 AI', '所有同行者 — 不对访客公开')

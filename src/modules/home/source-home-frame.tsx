@@ -1,10 +1,11 @@
 'use client'
 import { PUBLIC_MOBILE_PATCH } from './mobile-public-patch'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { PublicSiteConfig } from '@/modules/site-config/contracts'
 import { siteConfigScript } from '@/modules/site-config/source-patch'
 import { loadingFeedbackCss } from './loading-feedback'
+import { adaptSourceNavigation } from './source-navigation'
 
 const PUBLIC_HOME_PATCH = `
   document.title = 'Keleoz Continuum';
@@ -32,8 +33,8 @@ const PUBLIC_HOME_PATCH = `
   route('blog','/blog','Blog'); route('guide','/projects','Projects'); route('chat','/chat','Chat'); route('memory','/memory','Memory'); route('about','/about','About'); route('game','/room','Room'); route('api','/search','Search'); route('letters','/letters','Letters');
   var navList=document.querySelector('#navbar .nav-links'); if(navList){['blog','guide','chat','memory','about','game','api','letters'].forEach(function(page){var link=navList.querySelector('a[data-page="'+page+'"]');if(link&&link.parentElement)navList.appendChild(link.parentElement);});}
   if(navList){
-    [['moments','/moments','Moments'],['timeline','/timeline','Timeline'],['calendar','/calendar','Calendar']].forEach(function(item){var li=document.createElement('li'),a=document.createElement('a');a.dataset.page='continuum-'+item[0];a.href=item[1];a.textContent=item[2];a.onclick=function(e){e.preventDefault();window.parent.location.href=item[1]};li.appendChild(a);navList.appendChild(li)});
-    ['blog','guide','continuum-moments','continuum-timeline','about','game','api','letters','chat','memory','continuum-calendar'].forEach(function(page){var a=navList.querySelector('a[data-page="'+page+'"]');if(a)navList.appendChild(a.parentElement)});
+    [['moments','/moments','Moments'],['timeline','/timeline','Timeline'],['calendar','/calendar','Calendar'],['history','/history','本机存档']].forEach(function(item){var li=document.createElement('li'),a=document.createElement('a');a.dataset.page='continuum-'+item[0];a.href=item[1];a.textContent=item[2];a.onclick=function(e){e.preventDefault();window.parent.location.href=item[1]};li.appendChild(a);navList.appendChild(li)});
+    ['blog','guide','continuum-moments','continuum-timeline','about','game','api','letters','chat','memory','continuum-calendar','continuum-history'].forEach(function(page){var a=navList.querySelector('a[data-page="'+page+'"]');if(a)navList.appendChild(a.parentElement)});
     var studio=document.createElement('a');studio.href='/studio';studio.textContent='Studio';studio.style.cssText='margin-left:auto;color:#233e6c;font-size:.65rem';studio.onclick=function(e){e.preventDefault();window.parent.location.href='/studio'};document.getElementById('navbar').appendChild(studio);
   }
   var warning = document.getElementById('ib-guard-overlay'); if (warning) warning.remove();
@@ -45,11 +46,13 @@ const PUBLIC_HOME_PATCH = `
 `
 
 
-export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
+function subscribeSurface(){return()=>{}}
+export function SourceHomeFrame({settings,playerOnly=false,requestPlayer=false,onPlayerClosed}:{settings:PublicSiteConfig;playerOnly?:boolean;requestPlayer?:boolean;onPlayerClosed?:()=>void}) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [loadedSurface, setLoadedSurface] = useState<string | null>(null)
   const [slowSurface, setSlowSurface] = useState<string | null>(null)
-  const [mobile, setMobile] = useState<boolean | null>(null)
+  const surfaceSnapshot=useMemo(()=>{let selected:boolean|null=null;return()=>selected??=(window.matchMedia('(max-width: 900px)').matches)},[])
+  const mobile=useSyncExternalStore(subscribeSurface,surfaceSnapshot,()=>null)
   const surface = mobile === null ? null : mobile ? 'mobile' : 'desktop'
   const loaded = surface !== null && loadedSurface === surface
 
@@ -58,14 +61,6 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
     const timer = window.setTimeout(() => setSlowSurface(surface), 12000)
     return () => window.clearTimeout(timer)
   }, [surface, loaded])
-
-  useEffect(() => {
-    const query = window.matchMedia('(max-width: 900px)')
-    const sync = () => { setLoadedSurface(null); setSlowSurface(null); setMobile(query.matches) }
-    sync()
-    query.addEventListener('change', sync)
-    return () => query.removeEventListener('change', sync)
-  }, [])
 
   useEffect(() => {
     const frameNode = frameRef.current
@@ -91,7 +86,7 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
       if (!sourceWindow || !sourceDocument || sourceDocument.getElementById('continuum-public-home-patch') || sourceDocument.getElementById('continuum-public-mobile-patch')) return
       const script = sourceDocument.createElement('script')
       script.id = mobile ? 'continuum-public-mobile-patch' : 'continuum-public-home-patch'
-      script.textContent = 'window.__continuumPublishedName='+JSON.stringify(settings.name).replaceAll('<','\\u003c')+';' + (mobile ? PUBLIC_MOBILE_PATCH.replaceAll("'Keleoz'",'window.__continuumPublishedName') : PUBLIC_HOME_PATCH) + siteConfigScript(settings,mobile === true)
+      script.textContent = 'window.__continuumPublishedName='+JSON.stringify(settings.name).replaceAll('<','\\u003c')+';' + adaptSourceNavigation(mobile ? PUBLIC_MOBILE_PATCH.replaceAll("'Keleoz'",'window.__continuumPublishedName') : PUBLIC_HOME_PATCH) + siteConfigScript(settings,mobile === true)
       sourceDocument.body.appendChild(script)
     }
     // `load` alone precedes source preparation (especially the mobile startup sequence).
@@ -103,6 +98,37 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
       window.clearInterval(readinessTimer)
     }
   }, [mobile,settings])
+
+  useEffect(()=>{
+    if(!loaded)return
+    const doc=frameRef.current?.contentDocument,win=frameRef.current?.contentWindow as (Window&{openMusicPanel?:()=>void;openMusicApp?:()=>void})|null
+    if(!doc||!win)return
+    if(!doc.getElementById('continuum-player-only-style')){
+      const style=doc.createElement('style');style.id='continuum-player-only-style'
+      style.textContent=`
+        html[data-continuum-player-only],html[data-continuum-player-only] body{background:transparent!important}
+        html[data-continuum-player-only]::before,html[data-continuum-player-only]::after,html[data-continuum-player-only] body::before,html[data-continuum-player-only] body::after{display:none!important}
+        html[data-continuum-player-only] body :not(#music-panel,#music-panel *,#music-app,#music-app *,#sheet-music,#sheet-music *):not(:has(#music-panel,#music-app,#sheet-music)){display:none!important}
+        html[data-continuum-player-only] body :has(#music-panel,#music-app,#sheet-music){background:transparent!important;backdrop-filter:none!important;box-shadow:none!important}
+        html[data-continuum-player-only] #music-panel,html[data-continuum-player-only] #music-panel *,html[data-continuum-player-only] #music-app,html[data-continuum-player-only] #music-app *,html[data-continuum-player-only] #sheet-music,html[data-continuum-player-only] #sheet-music *{visibility:visible!important}
+      `
+      doc.head.appendChild(style)
+    }
+    doc.documentElement.toggleAttribute('data-continuum-player-only',playerOnly)
+    if(requestPlayer){if(mobile)win.openMusicApp?.();else win.openMusicPanel?.()}
+    if(!requestPlayer&&!playerOnly)return
+    const panel=doc.getElementById(mobile?'music-app':'music-panel')
+    let opened=panel?.classList.contains(mobile?'open':'show')??false
+    const observer=new MutationObserver(()=>{
+      const visible=panel?.classList.contains(mobile?'open':'show')??false
+      if(opened&&!visible)onPlayerClosed?.()
+      opened=visible
+    })
+    if(panel)observer.observe(panel,{attributes:true,attributeFilter:['class']})
+    const escape=(e:KeyboardEvent)=>{if(e.key==='Escape')onPlayerClosed?.()}
+    doc.addEventListener('keydown',escape)
+    return()=>{observer.disconnect();doc.removeEventListener('keydown',escape)}
+  },[loaded,mobile,playerOnly,requestPlayer,onPlayerClosed])
 
   return (
     <section className="source-home-frame" data-default-theme={settings.theme} aria-label="Continuum scene" aria-busy={!loaded}>

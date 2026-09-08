@@ -507,3 +507,13 @@ Phase 32 complete: source-first Studio, Owner Chat, Memory and Auto Memory recov
 ## Notes
 - Do not edit, rename, format, or generate files inside either upstream snapshot.
 - Before every feature task, search both snapshots and update the reuse ledger.
+# Active batch 2026-09-08: local history + continuous native music
+
+- Scope: view/search/filter/open/export existing local Tea/Story/Tarot records; no upload, delete, import or game-resume claim.
+- Keep one Home source iframe in the shared client layout after first visiting Home. Internal navigation preserves its audio instance; other pages can reopen the same original music UI. No second audio engine. Hard reload/tab close remain boundaries.
+- [x] Data contracts and read-only browser history + tests.
+- [x] Source-styled history page and discoverable entry links.
+- [x] Shared scene lifecycle and safe internal navigation + tests.
+- [x] Browser checks: desktop/mobile synthetic local records/audio, back navigation and privacy; real native/advanced editor rejected-save Back guards including fragment history.
+- [ ] Build, deployment, live verification, accurate handoff.
+- Existing original snapshots, real visitor data, local account and production database remain unchanged.

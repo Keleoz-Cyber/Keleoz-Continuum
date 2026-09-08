@@ -15,7 +15,7 @@ it('delegates native loading presentation without changing source exit timing', 
 
 it('waits for a responsive surface before starting an iframe and shows a retry affordance', () => {
   const frame = readFileSync('src/modules/home/source-home-frame.tsx', 'utf8')
-  expect(frame.includes('useState<boolean | null>(null)')).toBe(true)
+  expect(frame.includes('useSyncExternalStore(subscribeSurface,surfaceSnapshot,()=>null)')).toBe(true)
   expect(frame).toContain('mobile === null ? null :')
   expect(frame).toContain('role="progressbar"')
   expect(frame).toContain('重新加载')
