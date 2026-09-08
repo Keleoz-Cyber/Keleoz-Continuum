@@ -111,7 +111,19 @@ export function RoomClient({ companionName,defaultOutfit=2 }: { companionName: s
   }, [companionName,defaultOutfit])
 
   if (mobile) {
-    return <main className="source-room-page source-room-mobile-note"><div><h1>Room</h1><p>Room 是桌面端的像素空间，请在较宽屏幕上打开。</p><small>Mobile 端的 Tea、Story、Tarot 与 Character 入口会以独立 App 形式提供。</small></div></main>
+    return <main className="source-public-page source-room-page source-room-mobile-note">
+      <div className="source-public-bg" aria-hidden="true" />
+      <div className="module-intro source-room-mobile-content">
+        <h1>Room</h1>
+        <p>像素房间请在电脑上探索。手机可以直接进入下面的独立体验。</p>
+        <nav className="source-room-mobile-links" aria-label="手机互动体验">
+          <a className="btn" href="/tea">Tea · 茶歇</a>
+          <a className="btn" href="/story">Story · 故事</a>
+          <a className="btn" href="/tarot">Tarot · 占卜</a>
+          <a className="btn" href="/character">Character · 角色</a>
+        </nav>
+      </div>
+    </main>
   }
 
   return (

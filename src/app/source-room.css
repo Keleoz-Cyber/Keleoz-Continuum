@@ -30,7 +30,10 @@
   .source-room-page { overflow: auto; }
   .source-room-page #app,
   .source-room-page .source-room-loading { display: none; }
-  .source-room-mobile-note { display: grid; place-items: center; padding: 28px; background: linear-gradient(rgba(229,240,252,.2), rgba(210,228,248,.38)), url('/reference/internal-beyond/bg-canvas.png') center / cover no-repeat; text-align: center; }
+  .source-room-mobile-note { display: grid; place-items: center; padding: 80px 20px 28px; text-align: center; }
+  .source-room-mobile-content { position: relative; z-index: 2; width: 100%; max-width: 440px; }
+  .source-room-mobile-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .source-room-mobile-links .btn { color: #274673; background: rgba(237,246,255,.8); text-decoration: none; }
   .source-room-mobile-note h1 { margin: 0; color: #16325e; font-family: "Cormorant Garamond", serif; font-size: 2.2rem; font-weight: 400; letter-spacing: .08em; }
   .source-room-mobile-note p { margin: 18px 0 8px; color: #274673; font-size: .9rem; }
   .source-room-mobile-note small { color: #4a6896; font-size: .72rem; line-height: 1.7; }
