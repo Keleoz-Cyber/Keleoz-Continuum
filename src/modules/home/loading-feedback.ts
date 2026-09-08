@@ -6,9 +6,9 @@ export const loadingFeedbackCss = `
 @media(prefers-reduced-motion:reduce){.continuum-loading-track>span{animation:none;transform:translateX(80%);will-change:auto}}
 `
 
-export function addDesktopLoadingFeedback(html: string): string {
-  const marker = '<p class="preloader-sub">preparing your space</p>'
-  if (!html.includes(marker) || html.includes('id="continuum-loading-feedback-style"')) return html
-  return html.replace('</head>', `<style id="continuum-loading-feedback-style">${loadingFeedbackCss}</style></head>`)
-    .replace(marker, '<div class="continuum-loading-track" role="progressbar" aria-label="首页正在加载" aria-valuetext="正在准备资源与画面"><span></span></div>' + marker)
+// The parent owns the only visible loader. Keep source controllers and exit timing intact.
+export function delegateSourceLoading(html: string, mobile = false): string {
+  if (html.includes('id="continuum-loading-feedback-style"')) return html
+  const selector = mobile ? '#ib-splash' : '#preloader'
+  return html.replace('</head>', `<style id="continuum-loading-feedback-style">${selector}{visibility:hidden!important;pointer-events:none!important}</style></head>`)
 }

@@ -2,6 +2,10 @@
 .source-home-frame iframe { display: block; width: 100%; height: 100svh; min-height: 680px; border: 0; }
 .source-home-frame-loading { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: rgba(225,235,250,.85); background: #18233d; font: italic 20px "Cormorant Garamond", serif; letter-spacing: .15em; contain: layout paint; }
 .source-loading-title { margin: 0; }
+.source-home-frame-loading.is-ready { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 1.2s ease, visibility 0s 1.2s; }
+.source-home-frame-loading.is-ready .continuum-loading-track > span { animation-play-state: paused; will-change: auto; }
+@media (max-width: 900px) { .source-home-frame-loading.is-ready { transition: opacity .72s ease, visibility 0s .72s; } }
+@media (prefers-reduced-motion: reduce) { .source-home-frame-loading.is-ready { transition: none; } }
 .source-loading-caption { margin: 0; font: 400 11px "Noto Sans SC",sans-serif; letter-spacing: .1em; opacity: .8; }
 .source-home-frame-loading button { padding: 6px 15px; color: inherit; background: transparent; border: 1px solid currentColor; border-radius: 20px; font: 400 12px "Noto Sans SC",sans-serif; cursor: pointer; }
 @media(max-width:900px){.source-home-frame-loading{background:#dfe9f6;color:rgba(31,53,82,.92);padding-bottom:6vh;font:italic 600 15px "Noto Sans SC",sans-serif;letter-spacing:.01em}.source-home-frame[data-default-theme="infernal"] .source-home-frame-loading{background:#141a2e;color:rgba(255,255,255,.96)}}

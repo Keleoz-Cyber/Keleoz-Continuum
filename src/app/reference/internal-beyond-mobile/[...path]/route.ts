@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { localizeSourceFonts } from '@/modules/source-native/fonts'
+import { delegateSourceLoading } from '@/modules/home/loading-feedback'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Mobile')
 const types: Record<string, string> = {
@@ -23,7 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
   try {
     const data = await readFile(requested)
     const adapted = relative === 'index.html' && new URL(request.url).searchParams.get('continuum-local') === '1'
-    return new Response(adapted ? localizeSourceFonts(data.toString('utf8')) : new Uint8Array(data), {
+    return new Response(adapted ? delegateSourceLoading(localizeSourceFonts(data.toString('utf8')), true) : new Uint8Array(data), {
       headers: {
         'content-type': types[path.extname(requested).toLowerCase()] ?? 'application/octet-stream',
         'cache-control': adapted ? 'no-cache' : 'public, max-age=31536000, immutable',

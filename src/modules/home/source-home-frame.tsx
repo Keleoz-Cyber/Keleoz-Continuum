@@ -71,6 +71,18 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
     const frameNode = frameRef.current
     if (!frameNode) return
     const frame: HTMLIFrameElement = frameNode
+    const expectedPath = mobile ? '/reference/internal-beyond-mobile/index.html' : '/reference/internal-beyond/InternalBeyond.html'
+    const patchId = mobile ? 'continuum-public-mobile-patch' : 'continuum-public-home-patch'
+    function checkReady() {
+      const doc = frame.contentDocument
+      const sourceWindow = frame.contentWindow as (Window & { __continuumSiteApplied?: boolean }) | null
+      if (frameRef.current !== frame || !doc || doc.location.pathname !== expectedPath) return
+      if (!doc.getElementById(patchId) || !sourceWindow?.__continuumSiteApplied) return
+      const nativeLoader = doc.getElementById(mobile ? 'ib-splash' : 'preloader')
+      if (nativeLoader && !nativeLoader.classList.contains(mobile ? 'done' : 'fade-out')) return
+      window.clearInterval(readinessTimer)
+      setLoadedSurface(mobile ? 'mobile' : 'desktop')
+    }
     function patchSource() {
       const sourceWindow = frame.contentWindow
       const sourceDocument = frame.contentDocument
@@ -80,22 +92,26 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
       script.id = mobile ? 'continuum-public-mobile-patch' : 'continuum-public-home-patch'
       script.textContent = 'window.__continuumPublishedName='+JSON.stringify(settings.name).replaceAll('<','\\u003c')+';' + (mobile ? PUBLIC_MOBILE_PATCH.replaceAll("'Keleoz'",'window.__continuumPublishedName') : PUBLIC_HOME_PATCH) + siteConfigScript(settings,mobile === true)
       sourceDocument.body.appendChild(script)
-      setLoadedSurface(mobile ? 'mobile' : 'desktop')
     }
+    // `load` alone precedes source preparation (especially the mobile startup sequence).
+    const readinessTimer = window.setInterval(checkReady, 100)
     frame.addEventListener('load', patchSource)
     if (frame.contentDocument?.readyState === 'complete') patchSource()
-    return () => frame.removeEventListener('load', patchSource)
+    return () => {
+      frame.removeEventListener('load', patchSource)
+      window.clearInterval(readinessTimer)
+    }
   }, [mobile,settings])
 
   return (
     <section className="source-home-frame" data-default-theme={settings.theme} aria-label="Continuum scene" aria-busy={!loaded}>
       <style>{loadingFeedbackCss}</style>
-      {!loaded ? <div className="source-home-frame-loading">
+      <div className={'source-home-frame-loading' + (loaded ? ' is-ready' : '')} aria-hidden={loaded}>
         <p className="source-loading-title">Now Loading…</p>
         <div className="continuum-loading-track" role="progressbar" aria-label="首页正在加载" aria-valuetext="正在准备资源与画面"><span /></div>
         <p className="source-loading-caption" role="status">{slowSurface === surface && surface ? '加载时间较长，请稍候或重试。' : '正在准备资源与画面'}</p>
         {slowSurface === surface && surface ? <button type="button" onClick={() => window.location.reload()}>重新加载</button> : null}
-      </div> : null}
+      </div>
       {mobile === null ? null : <iframe key={mobile ? 'mobile' : 'desktop'} ref={frameRef} title="Keleoz Continuum Home" src={mobile ? '/reference/internal-beyond-mobile/index.html?continuum-local=1' : '/reference/internal-beyond/InternalBeyond.html?continuum-gloss=2'} />}
     </section>
   )
