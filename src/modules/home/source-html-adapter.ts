@@ -1,7 +1,8 @@
 import { localizeSourceFonts } from '@/modules/source-native/fonts'
+import { addDesktopLoadingFeedback } from './loading-feedback'
 
 export function adaptDesktopSourceForPublicHome(html: string) {
-  html = localizeSourceFonts(html)
+  html = addDesktopLoadingFeedback(localizeSourceFonts(html))
   const head = '<head>'
   const index = html.indexOf(head)
   if (index < 0) throw new Error('Desktop source is missing its <head> boundary')

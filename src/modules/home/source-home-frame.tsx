@@ -4,6 +4,7 @@ import { PUBLIC_MOBILE_PATCH } from './mobile-public-patch'
 import { useEffect, useRef, useState } from 'react'
 import type { PublicSiteConfig } from '@/modules/site-config/contracts'
 import { siteConfigScript } from '@/modules/site-config/source-patch'
+import { loadingFeedbackCss } from './loading-feedback'
 
 const PUBLIC_HOME_PATCH = `
   document.title = 'Keleoz Continuum';
@@ -46,12 +47,21 @@ const PUBLIC_HOME_PATCH = `
 
 export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
-  const [loaded, setLoaded] = useState(false)
-  const [mobile, setMobile] = useState(false)
+  const [loadedSurface, setLoadedSurface] = useState<string | null>(null)
+  const [slowSurface, setSlowSurface] = useState<string | null>(null)
+  const [mobile, setMobile] = useState<boolean | null>(null)
+  const surface = mobile === null ? null : mobile ? 'mobile' : 'desktop'
+  const loaded = surface !== null && loadedSurface === surface
+
+  useEffect(() => {
+    if (!surface || loaded) return
+    const timer = window.setTimeout(() => setSlowSurface(surface), 12000)
+    return () => window.clearTimeout(timer)
+  }, [surface, loaded])
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 900px)')
-    const sync = () => setMobile(query.matches)
+    const sync = () => { setLoadedSurface(null); setSlowSurface(null); setMobile(query.matches) }
     sync()
     query.addEventListener('change', sync)
     return () => query.removeEventListener('change', sync)
@@ -68,9 +78,9 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
       if (!sourceWindow || !sourceDocument || sourceDocument.getElementById('continuum-public-home-patch') || sourceDocument.getElementById('continuum-public-mobile-patch')) return
       const script = sourceDocument.createElement('script')
       script.id = mobile ? 'continuum-public-mobile-patch' : 'continuum-public-home-patch'
-      script.textContent = 'window.__continuumPublishedName='+JSON.stringify(settings.name).replaceAll('<','\\u003c')+';' + (mobile ? PUBLIC_MOBILE_PATCH.replaceAll("'Keleoz'",'window.__continuumPublishedName') : PUBLIC_HOME_PATCH) + siteConfigScript(settings,mobile)
+      script.textContent = 'window.__continuumPublishedName='+JSON.stringify(settings.name).replaceAll('<','\\u003c')+';' + (mobile ? PUBLIC_MOBILE_PATCH.replaceAll("'Keleoz'",'window.__continuumPublishedName') : PUBLIC_HOME_PATCH) + siteConfigScript(settings,mobile === true)
       sourceDocument.body.appendChild(script)
-      setLoaded(true)
+      setLoadedSurface(mobile ? 'mobile' : 'desktop')
     }
     frame.addEventListener('load', patchSource)
     if (frame.contentDocument?.readyState === 'complete') patchSource()
@@ -78,9 +88,15 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
   }, [mobile,settings])
 
   return (
-    <section className="source-home-frame" aria-label="Continuum scene">
-      {!loaded ? <div className="source-home-frame-loading">Loading Continuum…</div> : null}
-      <iframe key={mobile ? 'mobile' : 'desktop'} ref={frameRef} title="Keleoz Continuum Home" src={mobile ? '/reference/internal-beyond-mobile/index.html?continuum-local=1' : '/reference/internal-beyond/InternalBeyond.html?continuum-gloss=2'} />
+    <section className="source-home-frame" data-default-theme={settings.theme} aria-label="Continuum scene" aria-busy={!loaded}>
+      <style>{loadingFeedbackCss}</style>
+      {!loaded ? <div className="source-home-frame-loading">
+        <p className="source-loading-title">Now Loading…</p>
+        <div className="continuum-loading-track" role="progressbar" aria-label="首页正在加载" aria-valuetext="正在准备资源与画面"><span /></div>
+        <p className="source-loading-caption" role="status">{slowSurface === surface && surface ? '加载时间较长，请稍候或重试。' : '正在准备资源与画面'}</p>
+        {slowSurface === surface && surface ? <button type="button" onClick={() => window.location.reload()}>重新加载</button> : null}
+      </div> : null}
+      {mobile === null ? null : <iframe key={mobile ? 'mobile' : 'desktop'} ref={frameRef} title="Keleoz Continuum Home" src={mobile ? '/reference/internal-beyond-mobile/index.html?continuum-local=1' : '/reference/internal-beyond/InternalBeyond.html?continuum-gloss=2'} />}
     </section>
   )
 }
