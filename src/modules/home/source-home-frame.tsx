@@ -79,7 +79,8 @@ export function SourceHomeFrame({settings}:{settings:PublicSiteConfig}) {
       if (frameRef.current !== frame || !doc || doc.location.pathname !== expectedPath) return
       if (!doc.getElementById(patchId) || !sourceWindow?.__continuumSiteApplied) return
       const nativeLoader = doc.getElementById(mobile ? 'ib-splash' : 'preloader')
-      if (nativeLoader && !nativeLoader.classList.contains(mobile ? 'done' : 'fade-out')) return
+      if (!mobile && nativeLoader && !nativeLoader.classList.contains('fade-out')) return
+      if (mobile) sourceWindow.dispatchEvent(new Event('continuum:home-ready'))
       window.clearInterval(readinessTimer)
       setLoadedSurface(mobile ? 'mobile' : 'desktop')
     }

@@ -6,9 +6,15 @@ export const loadingFeedbackCss = `
 @media(prefers-reduced-motion:reduce){.continuum-loading-track>span{animation:none;transform:translateX(80%);will-change:auto}}
 `
 
-// The parent owns the only visible loader. Keep source controllers and exit timing intact.
+// Public Home only: the parent owns loading; source scenes and raw documents stay intact.
 export function delegateSourceLoading(html: string, mobile = false): string {
   if (html.includes('id="continuum-loading-feedback-style"')) return html
+  if (mobile) {
+    // Retain the native cleanup, but don't run an invisible minimum-duration animation.
+    const start = /raf=requestAnimationFrame\(frame\);(?=\r?\n\}catch\(e\)\{try\{var bad=document.getElementById\('ib-splash'\))/
+    if (!start.test(html)) throw new Error('Mobile splash startup boundary missing')
+    html = html.replace(start, "addEventListener('continuum:home-ready',cleanup,{once:true});clearAll();")
+  }
   const selector = mobile ? '#ib-splash' : '#preloader'
   return html.replace('</head>', `<style id="continuum-loading-feedback-style">${selector}{visibility:hidden!important;pointer-events:none!important}</style></head>`)
 }

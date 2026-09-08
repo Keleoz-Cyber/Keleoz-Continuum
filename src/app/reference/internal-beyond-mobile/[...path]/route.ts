@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { localizeSourceFonts } from '@/modules/source-native/fonts'
 import { delegateSourceLoading } from '@/modules/home/loading-feedback'
+import { publicSourceResponse } from '@/modules/home/response-cache'
 
 const sourceRoot = path.resolve(process.cwd(), 'upstream', 'InternalBeyond-Mobile')
 const types: Record<string, string> = {
@@ -24,12 +25,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
   try {
     const data = await readFile(requested)
     const adapted = relative === 'index.html' && new URL(request.url).searchParams.get('continuum-local') === '1'
-    return new Response(adapted ? delegateSourceLoading(localizeSourceFonts(data.toString('utf8')), true) : new Uint8Array(data), {
-      headers: {
+    // This shell contains no request/user/site configuration; published config is applied by the parent.
+    return publicSourceResponse(adapted ? delegateSourceLoading(localizeSourceFonts(data.toString('utf8')), true) : new Uint8Array(data), request, {
         'content-type': types[path.extname(requested).toLowerCase()] ?? 'application/octet-stream',
-        'cache-control': adapted ? 'no-cache' : 'public, max-age=31536000, immutable',
+        'cache-control': adapted ? 'public, max-age=0, s-maxage=300, must-revalidate' : 'public, max-age=31536000, immutable',
         'x-content-source': 'InternalBeyond-Mobile immutable snapshot',
-      },
     })
   } catch {
     return new Response('Not found', { status: 404 })
