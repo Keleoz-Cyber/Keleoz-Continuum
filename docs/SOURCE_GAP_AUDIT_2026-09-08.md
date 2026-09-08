@@ -1,5 +1,7 @@
 # 原项目功能差异审查（2026-09-08）
 
+后续交付更新：本机存档查看/搜索/导出与站内原播放器持续播放已在 `3bd52a5` 实现并上线，详见 `SOURCE_REUSE_LEDGER.md`。下表保留审查时发现的差异作为历史依据；“恢复游戏回合”、音乐 AI 联动等未随这两项一起实现。
+
 范围：当前代码对照 `upstream/InternalBeyond-Desktop/InternalBeyond.html`、Desktop `game/game_module.js` 与 `upstream/InternalBeyond-Mobile/index.html`。本轮为静态功能链路审查，不修改产品、不调用付费 AI、不声称已逐项完成真机验证。复用台账含历史阶段记录，以下结论以实际路由、适配器和数据读写为准。
 
 ## 已确认未闭环的能力

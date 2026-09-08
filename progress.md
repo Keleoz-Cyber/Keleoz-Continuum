@@ -682,6 +682,9 @@
 - 2026-09-05 Phase 32 final: source-first Studio/Rift, private Owner Chat, Memory/Auto Memory, mobile public-entry cleanup and knowledge export are complete. Final evidence: 73 Vitest files / 267 tests, focused real-Chrome Owner flow including create/delete Memory and draft lifecycle, ESLint, TypeScript, fresh Next standalone build, applied migrations, health 200 on port 3100, exact QA residue 0/0, preserved `admin` count 1, and all four immutable upstream hashes unchanged.
 # Current batch 2026-09-08
 
+- Completed production delivery (code commit 3bd52a5; image continuity-20260908, archive SHA256 e90e0f3a5e89f0cfe047e3f54e982df9f75d0e96ba69c8bb26763a6a75c05ebd). Live desktop/mobile Chrome contexts passed original Home menu→Blog→History→Back with same playing media instance, native player overlay, three-record exports and no private-marker network requests. Health/database ready; only app recreated, rollback image retained.
+- Two exact local guard-test drafts were deleted after verifying their IDs/title/status and absence of publications. No production records or original snapshot bytes changed. Real-device mobile network checks remain user-side, not claimed by browser emulation.
+
 - Native and advanced dirty-editor Back QA passed: intentional 500 retains route/text, restored save persists then returns to Blog fragment, root identity unchanged. Full suite now 101 files / 408 tests passed.
 - Transparent native player overlay required matching iframe color-scheme to the source document; parent inherited dark while source was normal, which made Chromium paint an opaque canvas. Live local CSS probe confirmed the cause and corrected transparency. Final build and live deployment pending.
 

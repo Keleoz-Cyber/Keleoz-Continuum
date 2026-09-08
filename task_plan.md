@@ -515,5 +515,5 @@ Phase 32 complete: source-first Studio, Owner Chat, Memory and Auto Memory recov
 - [x] Source-styled history page and discoverable entry links.
 - [x] Shared scene lifecycle and safe internal navigation + tests.
 - [x] Browser checks: desktop/mobile synthetic local records/audio, back navigation and privacy; real native/advanced editor rejected-save Back guards including fragment history.
-- [ ] Build, deployment, live verification, accurate handoff.
+- [x] Build, deployment, live verification, accurate handoff. Production desktop/mobile fresh-context tests passed for actual source navigation, continuous audio identity/time, local read/export and browser Back.
 - Existing original snapshots, real visitor data, local account and production database remain unchanged.
