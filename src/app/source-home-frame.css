@@ -21,7 +21,9 @@
 .source-loading-caption { margin: 0; font: 400 11px "Noto Sans SC",sans-serif; letter-spacing: .1em; opacity: .8; }
 .source-home-frame-loading button { padding: 6px 15px; color: inherit; background: transparent; border: 1px solid currentColor; border-radius: 20px; font: 400 12px "Noto Sans SC",sans-serif; cursor: pointer; }
 @media(max-width:900px){.source-home-frame-loading{background:#dfe9f6;color:rgba(31,53,82,.92);padding-bottom:6vh;font:italic 600 15px "Noto Sans SC",sans-serif;letter-spacing:.01em}.source-home-frame[data-default-theme="infernal"] .source-home-frame-loading{background:#141a2e;color:rgba(255,255,255,.96)}}
-.continuum-filing { padding: 10px 24px; text-align: right; font-size: 12px; color: #b2c0d8; background: #181e32; }
+.continuum-filing { padding: 14px 24px; text-align: right; font-size: 12px; line-height: 1.9; color: #b2c0d8; background: #181e32; }
+.continuum-filing p { margin: 0; }
 .continuum-filing a { color: inherit; text-decoration: none; }
-.continuum-filing a:hover { text-decoration: underline; }
+.continuum-filing a:hover,.continuum-filing a:focus-visible { text-decoration: underline; }
+@media (max-width: 900px) { .continuum-filing { padding: 14px 16px; font-size: 11px; overflow-wrap: anywhere; } }
 @media (max-width: 900px) { .source-home-frame iframe { min-height: 100svh; } }
